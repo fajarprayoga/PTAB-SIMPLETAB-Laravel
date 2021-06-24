@@ -63,7 +63,9 @@ class TicketsController extends Controller
             $table->editColumn('title', function ($row) {
                 return $row->title ? $row->title : "";
             });
-
+            $table->editColumn('description', function ($row) {
+                return $row->description ? $row->description : "";
+            });
             $table->editColumn('status', function ($row) {
                 return $row->status ? $row->status : "";
             });

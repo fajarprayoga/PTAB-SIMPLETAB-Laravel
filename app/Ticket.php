@@ -17,6 +17,7 @@ class Ticket extends Model
         'status',
         'category_id',
         'customer_id',
+        'description'
     ];
 
     public function customer() { 

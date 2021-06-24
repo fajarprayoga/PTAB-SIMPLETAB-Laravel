@@ -38,7 +38,8 @@ class StoreTicketRequest extends FormRequest
             ],
             'customer_id' => [
                 'required'
-            ]
+            ],
+            'description' => 'required'
         ];
     }
 }

@@ -28,6 +28,15 @@
                     </em>
                 @endif
             </div>
+            <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
+                <label for="description">{{ trans('global.ticket.fields.description') }}*</label>
+                <textarea type="text" id="description" name="description" class="form-control" value=""> {{ old('description', isset($ticket) ? $ticket->description : '') }}</textarea>
+                @if($errors->has('description'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('description') }}
+                    </em>
+                @endif
+            </div>
             <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
                 <label for="customer">{{ trans('global.ticket.fields.customer') }}*</label>
                 <select id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer->id : '') }}">

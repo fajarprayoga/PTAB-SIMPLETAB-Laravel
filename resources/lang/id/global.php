@@ -392,7 +392,8 @@ return [
             'lng' => 'Kordinat Longtitude',
             'status' => 'Status',
             'category' => 'Kategori',
-            'customer' => 'Nama Pelanggan'
+            'customer' => 'Nama Pelanggan',
+            'description' => 'Deskripsi'
         ]
     ],
     'action' => [

@@ -27,6 +27,15 @@
                     </em>
                 @endif
             </div>
+            <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
+                <label for="description">{{ trans('global.ticket.fields.description') }}*</label>
+                <textarea type="text" id="description" name="description" class="form-control" value=""> {{ old('description', isset($ticket) ? $ticket->description : '') }}</textarea>
+                @if($errors->has('description'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('description') }}
+                    </em>
+                @endif
+            </div>
             <div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}">
                 <label for="image">{{ trans('global.ticket.fields.image') }}*</label>
                 <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($ticket) ? $ticket->image : '') }}">

@@ -18,9 +18,11 @@ use Illuminate\Http\Request;
 //     Route::get('customers', 'CustomersController@index');
 // });
 
-// Route::group(['prefix' => 'close', 'namespace' => 'Api\V1\Admin', 'middleware' => 'auth:customersApi'], function () {
-    
-// });
+Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'middleware' => 'auth:apicustomer'], function () {
+
+    Route::post('ticket/store', 'TicketsApiController@store');
+
+});
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
     Route::post('login', 'CustomersApiController@login');
