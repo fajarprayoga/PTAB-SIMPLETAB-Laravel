@@ -40,10 +40,9 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
-        'api' => [
+        'apicustomer' => [
             'driver' => 'passport',
-            'provider' => 'users',
+            'provider' => 'customersApi',
             'hash' => false,
         ],
     ],
@@ -70,10 +69,11 @@ return [
             'driver' => 'eloquent',
             'model' => App\User::class,
         ],
-        // 'customers' => [
-        //     'driver' => 'eloquent',
-        //     'model' => App\CustomerApi::class,
-        // ],
+        // bikin route api login 
+        'customersApi' => [
+            'driver' => 'eloquent',
+            'model' => App\CustomerApi::class,
+        ],
 
         // 'users' => [
         //     'driver' => 'database',

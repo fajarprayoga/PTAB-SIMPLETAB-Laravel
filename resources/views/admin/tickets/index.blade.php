@@ -57,6 +57,9 @@
                             {{ trans('global.ticket.fields.title') }}
                         </th>
                         <th>
+                            {{ trans('global.ticket.fields.description') }}
+                        </th>
+                        <th>
                             {{ trans('global.ticket.fields.status') }}
                         </th>
                         <th>
@@ -139,6 +142,7 @@
         { data: 'DT_RowIndex', name: 'no' },
         { data: 'code', name: 'code' },
         { data: 'title', name: 'title' },
+        { data: 'description', name: 'description' },
         { data: 'status', name: 'status' },
         { data: 'category', name: 'category' },
         { data: 'customer', name: 'customer' },
