@@ -24,4 +24,6 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
     Route::post('login', 'CustomersApiController@login');
+    
+    Route::post('register/public', 'CustomersApiController@register_public');
 });
