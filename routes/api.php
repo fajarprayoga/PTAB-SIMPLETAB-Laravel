@@ -22,10 +22,12 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::post('ticket/store', 'TicketsApiController@store');
 
+    Route::get('categories', 'CategoriesApiController@index');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
     Route::post('login', 'CustomersApiController@login');
-    
     Route::post('register/public', 'CustomersApiController@register_public');
+    
 });
