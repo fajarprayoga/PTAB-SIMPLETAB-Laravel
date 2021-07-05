@@ -17,4 +17,8 @@ class Customer extends Model
         'type',
         'address'
     ];
+
+    public function ticket() { 
+        return $this->belongsTo('App\Ticket'); 
+    }
 }

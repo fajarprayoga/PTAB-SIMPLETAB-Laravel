@@ -24,6 +24,8 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::get('categories', 'CategoriesApiController@index');
 
+    Route::get('tickets/{id}', 'TicketsApiController@index');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
