@@ -41,7 +41,7 @@ class TicketsController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'ticket_show';
                 $editGate = 'ticket_edit';
                 $actionGate = 'action_access';
                 $deleteGate = 'ticket_delete';
@@ -112,11 +112,10 @@ class TicketsController extends Controller
         return redirect()->route('admin.tickets.index');
     }
 
-    public function show($id)
+    public function show(Ticket $ticket)
     {
-        $qry = Ticket::with('customer')
-        ->with('category')
-        ->get();
+        // dd($ticket->customer);
+        return view('admin.tickets.show', compact('ticket'));
     }
 
     public function edit(Ticket $ticket)

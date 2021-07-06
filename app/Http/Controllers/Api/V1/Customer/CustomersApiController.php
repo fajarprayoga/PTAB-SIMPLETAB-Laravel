@@ -58,7 +58,7 @@ class CustomersApiController extends Controller
         $data['code'] = $code;
         
         $data['type'] = 'public';
-
+        $data['password'] =  bcrypt($request->passwordNew);
         $customer = CustomerAPI::create($data);
 
         $token= $customer->createToken('appToken')->accessToken;
