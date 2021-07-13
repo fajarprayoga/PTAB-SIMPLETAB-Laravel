@@ -106,6 +106,9 @@ class TicketsController extends Controller
 
     public function store(StoreTicketRequest $request)
     {
+        // $img_path = "/images/complaint";
+        // $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
+        
         abort_unless(\Gate::allows('ticket_create'), 403);
         $ticket = Ticket::create($request->all());
         
@@ -146,6 +149,7 @@ class TicketsController extends Controller
         // dd($ticket);
         try{
             $ticket->delete();
+            return back();
         }
         catch(QueryException $e) {
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);

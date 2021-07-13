@@ -8,6 +8,7 @@ use App\Http\Requests\StoreDapertementRequest;
 use App\Http\Requests\UpdateDapertementRequest;
 use App\Dapertement;
 use App\Traits\TraitModel;
+use Illuminate\Database\QueryException;
 
 class DapertementsController extends Controller
 {
@@ -69,9 +70,13 @@ class DapertementsController extends Controller
     {
         abort_unless(\Gate::allows('dapertement_delete'), 403);
 
-        $dapertement->delete();
-
-        return back();
+        try{
+            $dapertement->delete();
+            return back();
+        }
+        catch(QueryException $e) {
+            return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
+        }
     }
 
     public function massDestroy()

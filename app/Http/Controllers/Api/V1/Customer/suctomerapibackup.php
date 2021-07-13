@@ -18,15 +18,15 @@ class CustomersApiController extends Controller
     public function login(Request $request)
     {
         try {
-            $customer = CustomerApi::where('phone', request('phone'))->first();
+            $customer = CustomerApi::where('email', request('email'))->first();
 
             $credentials = $request->validate([
-                'phone' => ['required'],
+                'email' => ['required', 'email'],
                 'password' => ['required'],
             ]);
 
             if(Hash::check($request->password, $customer->password)){
-                //  $this->smsApi($customer->phone, $request->OTP);
+                 $this->smsApi($customer->phone, $request->OTP);
                 Auth::login($customer);
                 $token = Auth::user()->createToken('authToken')->accessToken;
 
@@ -72,44 +72,28 @@ class CustomersApiController extends Controller
         $code = acc_code_generate($last_code, 8, 3);
         
         $data = $request->all();
-        // isset($request->email) ? $data['email'] = $request->email : null;
-        if(!isset($request->email)){
-            $data['email'] = null;
-        }else{
-            $request->validate([
-                'email' => 'required|email|unique:customers,email',
-            ]);
-        }
+
         $data['code'] = $code;
         
         $data['type'] = 'public';
         $data['password'] =  bcrypt($request->passwordNew);
+        $customer = CustomerAPI::create($data);
 
-        try {
-            $customer = CustomerAPI::create($data);
+        $token= $customer->createToken('appToken')->accessToken;
 
-            $token= $customer->createToken('appToken')->accessToken;
-    
-            return response()->json([
-                'message' => 'Registrasi Berhasil',
-                'token' => $token,
-                'data' => $customer
-            ]);
-        } catch (QueryException $ex) {
-            return response()->json([
-                // 'message' => 'Registrasi Berhasil',
-                // 'token' => $token,
-                'data' => $request->email
-            ]);
-        }
+        return response()->json([
+            'message' => 'Registrasi Berhasil',
+            'token' => $token,
+            'data' => $customer
+        ]);
     }
 
-    public function smsApi(Request $request)
+    function smsApi($phone, $OTP)
     {
         date_default_timezone_set("Asia/Singapore");
         $date = date("Y-m-d H:i:s");
-        $number = "+62" . ltrim($request->phone, '0');
-        $message = '#plg OTP : ' . $request->OTP;
+        $number = "+62" . ltrim($phone, '0');
+        $message = '#plg OTP : ' . $OTP;
         $md5_str = "1f4a449a85" . $date . $number . $message;
         $md5 = md5($md5_str);
         $data = array(
@@ -135,54 +119,5 @@ class CustomersApiController extends Controller
 
         //close connection
         curl_close($ch);
-    }
-
-    public function scanBarcode(Request $request)
-    {
-        $request->validate([
-            'code' => 'required',
-        ]);
-
-        $code = $request->code;
-
-        try {
-            $customer = CustomerApi::where('code', $code)->first();
-            
-            if(isset($customer)){
-                return response()->json([
-                    'message' => 'Anda terdaftar sebagai pelanggan',
-                    'data' => $customer
-                ]);
-            }else{
-                return response()->json([
-                    'message' => 'data anda tidak ada',
-                ]);
-            }
-        } catch (QueryException $ex) {
-            return response()->json([
-                'message' => $ex
-            ]);
-        }
-
-
-
-    }
-    
-    public function logout(Request $res)
-    {
-        if (Auth::user()) {
-            $user = Auth::user()->token();
-            $user->revoke();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Logout successfully',
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to Logout',
-            ]);
-        }
     }
 }

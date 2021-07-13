@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Requests\StoreCategoriesRequest;
 use App\Category;
 use App\Traits\TraitModel;
 
@@ -30,7 +31,7 @@ class CategoriesController extends Controller
         return view('admin.categories.create', compact('code'));
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoriesRequest $request)
     {
         abort_unless(\Gate::allows('categories_create'), 403);
         $category = Category::create($request->all());

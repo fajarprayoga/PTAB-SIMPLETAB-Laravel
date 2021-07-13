@@ -28,9 +28,9 @@
                     </em>
                 @endif
             </div>
-            <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
+              <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
                 <label for="description">{{ trans('global.dapertement.fields.description') }}*</label>
-                <input type="text" id="description" name="description" class="form-control" value="{{ old('description', isset($dapertement) ? $dapertement->description : '') }}">
+                <textArea id="description" name="description" class="form-control" >{{ old('description', isset($dapertement) ? $dapertement->description : '') }}</textArea>
                 @if($errors->has('description'))
                     <em class="invalid-feedback">
                         {{ $errors->first('description') }}

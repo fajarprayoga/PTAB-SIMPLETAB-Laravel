@@ -45,6 +45,11 @@ return [
             'provider' => 'customersApi',
             'hash' => false,
         ],
+        'apiadmin' => [
+            'driver' => 'passport',
+            'provider' => 'adminApi',
+            'hash' => false,
+        ],
     ],
 
     /*
@@ -73,6 +78,10 @@ return [
         'customersApi' => [
             'driver' => 'eloquent',
             'model' => App\CustomerApi::class,
+        ],
+        'adminApi' => [
+            'driver' => 'eloquent',
+            'model' => App\User::class,
         ],
 
         // 'users' => [

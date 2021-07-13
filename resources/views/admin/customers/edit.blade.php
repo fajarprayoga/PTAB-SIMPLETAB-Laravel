@@ -52,7 +52,7 @@
                     </em>
                 @endif
             </div>
-            <div class="form-group {{ $errors->has('address') ? 'has-error' : '' }}">
+            {{-- <div class="form-group {{ $errors->has('address') ? 'has-error' : '' }}">
                 <label for="address">{{ trans('global.customer.fields.address') }}*</label>
                 <input type="text" id="address" name="address" class="form-control" value="{{ old('address', isset($customer) ? $customer->address : '') }}">
                 @if($errors->has('address'))
@@ -60,7 +60,7 @@
                         {{ $errors->first('address') }}
                     </em>
                 @endif
-            </div>
+            </div> --}}
             <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
                 <label for="email">{{ trans('global.customer.fields.email') }}*</label>
                 <input type="email" id="email" name="email" class="form-control" value="{{ old('email', isset($customer) ? $customer->email : '') }}">
@@ -76,6 +76,15 @@
                 @if($errors->has('phone'))
                     <em class="invalid-feedback">
                         {{ $errors->first('phone') }}
+                    </em>
+                @endif
+            </div>
+             <div class="form-group {{ $errors->has('address') ? 'has-error' : '' }}">
+                <label for="address">{{ trans('global.customer.fields.address') }}*</label>
+                <textArea id="address" name="address" class="form-control"  >{{ old('address', isset($customer) ? $customer->address : '') }}</textArea>
+                @if($errors->has('address'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('address') }}
                     </em>
                 @endif
             </div>

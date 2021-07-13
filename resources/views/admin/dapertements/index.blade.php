@@ -9,6 +9,14 @@
         </div>
     </div>
 @endcan
+
+@if($errors->any())
+<!-- <h4>{{$errors->first()}}</h4> -->
+    <?php 
+        echo "<script> alert('{$errors->first()}')</script>";
+    ?>
+@endif
+
 <div class="card">
     <div class="card-header">
         {{ trans('global.dapertement.title_singular') }} {{ trans('global.list') }}
