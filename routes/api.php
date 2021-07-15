@@ -44,6 +44,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin'], functio
     Route::resource('customers','CustomersApiController' );
     Route::resource('categories', 'CategoriesApiController');
     Route::resource('dapertements', 'DapertementsApiController');
+    Route::resource('staffs', 'StaffsApiController');
 });
 
 
