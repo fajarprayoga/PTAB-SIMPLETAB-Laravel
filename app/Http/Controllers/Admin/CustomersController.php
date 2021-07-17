@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Requests\MassDestroyCustomerRequest;
 use App\Customer;
 use Yajra\DataTables\Facades\DataTables;
@@ -131,7 +132,7 @@ class CustomersController extends Controller
         return view('admin.customers.edit', compact('customer'));
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         abort_unless(\Gate::allows('customer_edit'), 403);
         $customer->update($request->all());

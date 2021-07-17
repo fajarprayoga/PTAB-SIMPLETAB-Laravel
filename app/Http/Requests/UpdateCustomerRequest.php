@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCustomerRequest extends FormRequest
+class UpdateCustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class StoreCustomerRequest extends FormRequest
      */
     public function authorize()
     {
-        return \Gate::allows('customer_create');
+        return \Gate::allows('customer_edit');
     }
 
     /**
@@ -34,9 +34,9 @@ class StoreCustomerRequest extends FormRequest
                 'required'
                 // 'required'
             ],
-            'password' => [
-                'required'
-            ],
+            // 'password' => [
+            //     'required'
+            // ],
             'phone' => 'required|unique:customers,phone',
             'type' => [
                 'required'
@@ -44,7 +44,7 @@ class StoreCustomerRequest extends FormRequest
             'gender' => [
                 'required'
             ],
-            'address' => 'required',
+            'address' => ['required']
         ];
     }
 }

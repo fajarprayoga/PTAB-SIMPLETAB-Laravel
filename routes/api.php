@@ -22,10 +22,32 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::post('ticket/store', 'TicketsApiController@store');
 
+    Route::get('categories', 'CategoriesApiController@index');
+
+    Route::get('tickets/{id}', 'TicketsApiController@index');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
     Route::post('login', 'CustomersApiController@login');
-    
     Route::post('register/public', 'CustomersApiController@register_public');
+    
+    Route::post('OTP', 'CustomersApiController@smsApi');
+
+    Route::get('logout',  'CustomersApiController@logout');
+
+    Route::post('code', 'CustomersApiController@scanBarcode');
+});
+
+Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin'], function () {
+    // Route::get('customers',  'CustomersApiController@index' );
+    Route::resource('customers','CustomersApiController' );
+    Route::resource('categories', 'CategoriesApiController');
+    Route::resource('dapertements', 'DapertementsApiController');
+    Route::resource('staffs', 'StaffsApiController');
+});
+
+
+Route::group(['prefix' => 'open/admin', 'namespace' => 'Api\V1\Admin'], function () {
+    Route::post('login',  'AdminApiController@login' );
 });

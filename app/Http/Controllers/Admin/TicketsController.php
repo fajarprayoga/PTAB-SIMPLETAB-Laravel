@@ -41,7 +41,7 @@ class TicketsController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'ticket_show';
                 $editGate = 'ticket_edit';
                 $actionGate = 'action_access';
                 $deleteGate = 'ticket_delete';
@@ -106,17 +106,19 @@ class TicketsController extends Controller
 
     public function store(StoreTicketRequest $request)
     {
+        // $img_path = "/images/complaint";
+        // $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
+        
         abort_unless(\Gate::allows('ticket_create'), 403);
         $ticket = Ticket::create($request->all());
         
         return redirect()->route('admin.tickets.index');
     }
 
-    public function show($id)
+    public function show(Ticket $ticket)
     {
-        $qry = Ticket::with('customer')
-        ->with('category')
-        ->get();
+        // dd($ticket->customer);
+        return view('admin.tickets.show', compact('ticket'));
     }
 
     public function edit(Ticket $ticket)
@@ -147,6 +149,7 @@ class TicketsController extends Controller
         // dd($ticket);
         try{
             $ticket->delete();
+            return back();
         }
         catch(QueryException $e) {
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);

@@ -36,17 +36,17 @@
                     </em>
                 @endif
             </div>
-            <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
-                <label for="dapertement">{{ trans('global.staff.fields.dapertement') }}*</label>
-                <select id="dapertement" name="dapertement_id" class="form-control" value="{{ old('dapertement', isset($customer) ? $customer->dapertement : '') }}">
+            <div class="form-group {{ $errors->has('dapertement_id') ? 'has-error' : '' }}">
+                <label for="dapertement_id">{{ trans('global.staff.fields.dapertement') }}*</label>
+                <select id="dapertement_id" name="dapertement_id" class="form-control" value="{{ old('dapertement_id', isset($customer) ? $customer->dapertement : '') }}">
                     <option value="">--Pilih Dapertement--</option>
                     @foreach ($dapertements as $key=>$dapertement )
                         <option value="{{$dapertement->id}}">{{$dapertement->name}}</option>
                     @endforeach
                 </select>
-                @if($errors->has('dapertement'))
+                @if($errors->has('dapertement_id'))
                     <em class="invalid-feedback">
-                        {{ $errors->first('dapertement') }}
+                        {{ $errors->first('dapertement_id') }}
                     </em>
                 @endif
             </div>

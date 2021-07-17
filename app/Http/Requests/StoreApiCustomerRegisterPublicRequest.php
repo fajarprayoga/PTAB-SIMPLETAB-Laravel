@@ -36,7 +36,10 @@ class StoreApiCustomerRegisterPublicRequest extends FormRequest
         return [
             'name' => 'required',
             'address' => 'required',
-            'phone' => 'required'
+            'phone' => 'required|unique:customers,phone',
+            'passwordNew' => 'required',
+            // 'email' => 'unique:customers,email',
+            'gender' => 'required'
         ];
     }
 }
