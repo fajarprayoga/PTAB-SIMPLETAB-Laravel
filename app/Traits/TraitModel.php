@@ -25,7 +25,7 @@ trait TraitModel
         }
 
         if ($type == "customer") {
-            $customer = Customer::orderBy('id', 'desc')
+            $customer = Customer::OrderMaps('id', 'desc')
                 ->first();
             if ($customer && (strlen($customer->code) == 8)) {
                 $code = $customer->code;

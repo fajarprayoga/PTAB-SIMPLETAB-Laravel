@@ -37,7 +37,7 @@ class UpdateCustomerRequest extends FormRequest
             // 'password' => [
             //     'required'
             // ],
-            'phone' => 'required|unique:customers,phone',
+            'phone' => 'required',
             'type' => [
                 'required'
             ],

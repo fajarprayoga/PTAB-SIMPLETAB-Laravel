@@ -18,7 +18,7 @@ class CustomersApiController extends Controller
     public function login(Request $request)
     {
         try {
-            $customer = CustomerApi::where('phone', request('phone'))->first();
+            $customer = CustomerApi::WhereMaps('phone', request('phone'))->first();
 
             $credentials = $request->validate([
                 'phone' => ['required'],
@@ -71,22 +71,34 @@ class CustomersApiController extends Controller
 
         $code = acc_code_generate($last_code, 8, 3);
         
-        $data = $request->all();
-        // isset($request->email) ? $data['email'] = $request->email : null;
+        $customer = new CustomerApi;
+        $customer->name = $request->name;
+        $customer->code = $code;       
         if(!isset($request->email)){
-            $data['email'] = null;
+            $customer->email = null;
         }else{
             $request->validate([
-                'email' => 'required|email|unique:customers,email',
+                'email' => 'required|email',
             ]);
+            $customer->email = $request->email;
         }
-        $data['code'] = $code;
+        $customer->email_verified_at = null;
+        $customer->remember_token = null;
+        $customer->password = bcrypt($request->passwordNew);
+        $customer->phone = $request->phone;
+        $customer->type = 'public';
+        $customer->gender = $request->gender;
+        $customer->address = $request->address;
+        $customer->_synced = 0;
+        $customer->save();
         
-        $data['type'] = 'public';
-        $data['password'] =  bcrypt($request->passwordNew);
+        return response()->json([
+            'message' => 'Registrasi Berhasil',
+            'data' => $customer
+        ]);
 
         try {
-            $customer = CustomerAPI::create($data);
+            $customer->save();
 
             $token= $customer->createToken('appToken')->accessToken;
     

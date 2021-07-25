@@ -122,26 +122,25 @@
 
   let dtOverrideGlobals = {
     buttons: dtButtons,
-    processing: true,
     serverSide: true,
-    retrieve: true,
     aaSorting: [],
     ajax: {
-      url: "{{ route('admin.customers.index') }}",
+      url: "{{ route('admin.test-customers.index') }}",
       data: {
         'type': $("#type").val(),
-      }
+      },
+      dataType: "JSON"
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'nomorrekening' },
-        { data: 'code', name: 'nomorrekening' },
-        { data: 'name', name: 'namapelanggan' },
-        { data: 'email', name: '_email' },
-        { data: 'address', name: 'alamat' },
-        { data: 'gender', name: '_gender' },
-        { data: 'type', name: '_type' },
-        { data: 'phone', name: 'telp' },
+        { data: 'DT_RowIndex', name: 'no' },
+        { data: 'code', name: 'code' },
+        { data: 'name', name: 'name' },
+        { data: 'email', name: 'email' },
+        { data: 'address', name: 'address' },
+        { data: 'gender', name: 'gender' },
+        { data: 'type', name: 'type' },
+        { data: 'phone', name: 'phone' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,

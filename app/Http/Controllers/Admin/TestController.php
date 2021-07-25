@@ -7,11 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyCustomerRequest;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use App\TestModel;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
-class CustomersController extends Controller
+class TestController extends Controller
 {
     use TraitModel;
 
@@ -19,9 +20,11 @@ class CustomersController extends Controller
     {
         abort_unless(\Gate::allows('customer_access'), 403);
 
+        $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
+        return $qry;
         if ($request->ajax()) {
             //set query
-            $qry = Customer::FilterMaps($request);
+            $qry = TestModel::Filter($request)->Order('id', 'desc');
 
             $table = Datatables::of($qry);
 
@@ -76,7 +79,7 @@ class CustomersController extends Controller
             return $table->make(true);
         }
         //default view
-        return view('admin.customers.index');
+        return view('admin.tests.index');
 
     }
 
@@ -93,18 +96,19 @@ class CustomersController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         abort_unless(\Gate::allows('customer_create'), 403);
+        // $customer = Customer::create($request->all());
+        $data = [
+            'name' => $request->name,
+            'code' => $request->code,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'phone' => $request->phone,
+            'type' => $request->type,
+            'gender' => $request->gender,
+            'address' => $request->address,
+        ];
 
-        $customer = new Customer;
-        $customer->name = $request->name;
-        $customer->code = $request->code;
-        $customer->email = $request->email;
-        $customer->password = bcrypt($request->password);
-        $customer->phone = $request->phone;
-        $customer->type = $request->type;
-        $customer->gender = $request->gender;
-        $customer->address = $request->address;
-        $customer->_synced = 0;
-        $customer->save();
+        $customer = Customer::create($data);
 
         return redirect()->route('admin.customers.index');
     }
@@ -117,25 +121,14 @@ class CustomersController extends Controller
     public function edit($id)
     {
         abort_unless(\Gate::allows('customer_edit'), 403);
-        $customer = Customer::WhereMaps('id', $id)->first();
+        $customer = Customer::find($id);
         return view('admin.customers.edit', compact('customer'));
     }
 
-    public function update(UpdateCustomerRequest $request)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         abort_unless(\Gate::allows('customer_edit'), 403);
-
-        $customer = Customer::find($request->code);
-        $customer->name = $request->name;
-        $customer->code = $request->code;
-        $customer->email = $request->email;
-        $customer->phone = $request->phone;
-        $customer->type = $request->type;
-        $customer->gender = $request->gender;
-        $customer->address = $request->address;
-        $customer->_synced = 0;
-        $customer->save();
-
+        $customer->update($request->all());
         return redirect()->route('admin.customers.index');
     }
 

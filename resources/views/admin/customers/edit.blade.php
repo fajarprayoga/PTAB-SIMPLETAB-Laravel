@@ -70,6 +70,7 @@
                     </em>
                 @endif
             </div>
+
             <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
                 <label for="phone">{{ trans('global.customer.fields.phone') }}*</label>
                 <input type="number" id="phone" name="phone" class="form-control" value="{{ old('phone', isset($customer) ? $customer->phone : '') }}">

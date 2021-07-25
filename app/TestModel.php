@@ -4,15 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Customer extends Model
+class TestModel extends Model
 {
     protected $connection = 'mysql2';
 
     protected $table = 'tblpelanggan';
-
-    protected $primaryKey = 'nomorrekening';
-
-    public $timestamps = false;
 
     protected $appends = ['id', 'code', 'name', 'phone', 'address', 'email', 'email_verified_at', 'password', 'type', 'remember_token', 'gender'];
 
@@ -91,57 +87,7 @@ class Customer extends Model
         return $this->attributes['_gender'];
     }
 
-    public function setCodeAttribute($value)
-    {
-        $this->attributes['nomorrekening'] = $value;
-    }
-
-    public function setNameAttribute($value)
-    {
-        $this->attributes['namapelanggan'] = $value;
-    }
-
-    public function setPhoneAttribute($value)
-    {
-        $this->attributes['telp'] = $value;
-    }
-
-    public function setAddressAttribute($value)
-    {
-        $this->attributes['alamat'] = $value;
-    }
-
-    public function setEmailAttribute($value)
-    {
-        $this->attributes['_email'] = $value;
-    }
-
-    public function setEmailVerifiedAtAttribute($value)
-    {
-        $this->attributes['_email_verified_at'] = $value;
-    }
-
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['_password'] = $value;
-    }
-
-    public function setTypeAttribute($value)
-    {
-        $this->attributes['_type'] = $value;
-    }
-
-    public function setRememberTokenAttribute($value)
-    {
-        $this->attributes['_remember_token'] = $value;
-    }
-
-    public function setGenderAttribute($value)
-    {
-        $this->attributes['_gender'] = $value;
-    }
-
-    public function scopeFilterMaps($query, $req_obj)
+    public function scopeFilter($query, $req_obj)
     {
         if (!empty($req_obj->code)) {
             $query->where('nomorrekening', $req_obj->code);
@@ -152,7 +98,7 @@ class Customer extends Model
         return $query;
     }
 
-    public function scopeOrderMaps($query, $fld, $sort_type)
+    public function scopeOrder($query, $fld, $sort_type)
     {
         if ($fld != 'id') {
             $fld_db = $this->fldMaps($fld);
@@ -160,17 +106,6 @@ class Customer extends Model
             $fld_db = 'nomorrekening';
         }
         $query->orderBy($fld_db, $sort_type);
-        return $query;
-    }
-
-    public function scopeWhereMaps($query, $fld, $comp, $operator='=')
-    {
-        if ($fld != 'id') {
-            $fld_db = $this->fldMaps($fld);
-        } else {
-            $fld_db = 'nomorrekening';
-        }
-        $query->where($fld_db, $operator, $comp);
         return $query;
     }
 
