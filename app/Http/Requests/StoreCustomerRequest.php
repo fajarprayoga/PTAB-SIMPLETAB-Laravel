@@ -37,7 +37,7 @@ class StoreCustomerRequest extends FormRequest
             'password' => [
                 'required'
             ],
-            'phone' => 'required|unique:customers,phone',
+            'phone' => 'required|unique:mysql2.tblpelanggan,telp',
             'type' => [
                 'required'
             ],

@@ -39,12 +39,7 @@
             </div>
             <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
                 <label for="customer">{{ trans('global.ticket.fields.customer') }}*</label>
-                <select id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer->id : '') }}">
-                    <option value="">--Pilih customer--</option>
-                    @foreach ($customers as $key=>$customer )
-                        <option value="{{$customer->id}}" {{$customer->id == $ticket->customer->id ? 'selected' : ''}} >{{$customer->name}}</option>
-                    @endforeach
-                </select>
+                <input type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer_id : '') }}">
                 @if($errors->has('customer'))
                     <em class="invalid-feedback">
                         {{ $errors->first('customer') }}

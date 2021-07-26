@@ -99,9 +99,9 @@ class TicketsController extends Controller
 
         $categories = Category::all();
 
-        $customers = Customer::all();
+        //$customers = Customer::all();
 
-        return view('admin.tickets.create', compact('categories', 'customers', 'code'));
+        return view('admin.tickets.create', compact('categories', 'code'));
     }
 
     public function store(StoreTicketRequest $request)
@@ -127,9 +127,9 @@ class TicketsController extends Controller
 
         $categories = Category::all();
 
-        $customers = Customer::all();
+        //$customers = Customer::all();
 
-        return view('admin.tickets.edit', compact('ticket', 'categories', 'customers'));
+        return view('admin.tickets.edit', compact('ticket', 'categories'));
     }
 
     public function update(UpdateTicketRequest $request, Ticket $ticket)

@@ -21,7 +21,7 @@ class TicketApi extends Model
     ];
 
     public function customer() { 
-        return $this->belongsTo('App\Customer')->select('id', 'name'); 
+        return $this->belongsTo(CustomerApi::class, 'customer_id', 'nomorrekening'); 
     }
 
     public function category() { 

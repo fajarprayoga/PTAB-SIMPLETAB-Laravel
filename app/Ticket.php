@@ -21,7 +21,7 @@ class Ticket extends Model
     ];
 
     public function customer() { 
-        return $this->belongsTo('App\Customer')->select('id', 'name'); 
+        return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening'); 
     }
 
     public function category() { 
