@@ -69,7 +69,8 @@ class CustomersApiController extends Controller
 
         $last_code = $this->get_last_code('customer');
 
-        $code = acc_code_generate($last_code, 8, 3);
+        //$code = acc_code_generate($last_code, 8, 3);
+        $code = $last_code + 1;
         
         $customer = new CustomerApi;
         $customer->name = $request->name;

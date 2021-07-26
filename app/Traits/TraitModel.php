@@ -27,10 +27,10 @@ trait TraitModel
         if ($type == "customer") {
             $customer = Customer::OrderMaps('id', 'desc')
                 ->first();
-            if ($customer && (strlen($customer->code) == 8)) {
+            if ($customer) {
                 $code = $customer->code;
             } else {
-                $code = acc_codedef_generate('CUS', 8);
+                $code = 0;
             }
         }
 
