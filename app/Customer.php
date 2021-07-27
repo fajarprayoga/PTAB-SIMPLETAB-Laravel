@@ -178,4 +178,15 @@ class Customer extends Model
     {
         return array_search($fld, $this->maps);
     }
+
+    public function scopeOrderRawMaps($query, $fld, $sort_type)
+    {
+        if ($fld != 'id') {
+            $fld_db = $this->fldMaps($fld);
+        } else {
+            $fld_db = 'nomorrekening';
+        }
+        $query->orderByRaw('CAST('.$fld_db.' AS DECIMAL) '.$sort_type);
+        return $query;
+    }
 }

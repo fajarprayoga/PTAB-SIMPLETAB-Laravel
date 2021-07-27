@@ -44,7 +44,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::delete('staffs/destroy', 'StaffsController@massDestroy')->name('staffs.massDestroy');
 
+    // tickets
+
     Route::resource('tickets', 'TicketsController');
+
+    Route::get('tickets/print/{ticket_id}', 'TicketsController@print')->name('tickets.print');
+    
+    Route::get('tickets/print-action/{ticket_id}', 'TicketsController@printAction')->name('tickets.printAction');
 
     Route::delete('tickets/destroy', 'TicketsController@massDestroy')->name('tickets.massDestroy');
 

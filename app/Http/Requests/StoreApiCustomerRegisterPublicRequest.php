@@ -36,7 +36,7 @@ class StoreApiCustomerRegisterPublicRequest extends FormRequest
         return [
             'name' => 'required',
             'address' => 'required',
-            'phone' => 'required|unique:customers,phone',
+            'phone' => 'required|unique:mysql2.tblpelanggan,telp',
             'passwordNew' => 'required',
             // 'email' => 'unique:customers,email',
             'gender' => 'required'

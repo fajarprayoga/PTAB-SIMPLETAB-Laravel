@@ -46,12 +46,14 @@ class TicketsController extends Controller
                 $actionGate = 'action_access';
                 $deleteGate = 'ticket_delete';
                 $crudRoutePart = 'tickets';
+                $print = true;
 
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'editGate',
                     'actionGate',
                     'deleteGate',
+                    'print',
                     'crudRoutePart',
                     'row'
                 ));
@@ -106,13 +108,52 @@ class TicketsController extends Controller
 
     public function store(StoreTicketRequest $request)
     {
-        // $img_path = "/images/complaint";
-        // $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
-        
+
         abort_unless(\Gate::allows('ticket_create'), 403);
-        $ticket = Ticket::create($request->all());
+
+        $img_path = "/images/complaint";
+        $video_path = "/videos/complaint";
+        
+
+        $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
+        
+
+        // upload image 
+        $resourceImage = $request->file('image');
+        $nameImage = strtolower($request->code);
+        $file_extImage = $request->file('image')->extension();
+        $nameImage = str_replace(" ", "-", $nameImage);
+        $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . "." . $file_extImage;
+
+        $resourceImage->move($basepath . $img_path, $img_name);
+
+        // video
+        $video_path = "/videos/complaint";
+        $resource = $request->file('video');
+        // $filename = $resource->getClientOriginalName();
+        // $file_extVideo = $request->file('video')->extension();
+        $video_name = $video_path."/".strtolower($request->code).'-'.$request->customer_id.'.mp4';
+
+        $resource->move($basepath.$video_path,$video_name);
+
+
+
+        // data 
+        $data = array(
+            'code' => $request->code,
+            'title' => $request->title,
+            'category_id' => $request->category_id,
+            'description' => $request->description,
+            'image' =>  $img_name,
+            'video' => $video_name,
+            'customer_id' => $request->customer_id,
+          );
+
+       
+        $ticket = Ticket::create($data);
         
         return redirect()->route('admin.tickets.index');
+    
     }
 
     public function show(Ticket $ticket)
@@ -160,5 +201,27 @@ class TicketsController extends Controller
     public function massDestroy()
     {
         # code...
+    }
+
+    public function print($id)
+    {
+        $ticket = Ticket::findOrFail($id);
+        // $newtime = strtotime($data->created_at);
+        // $data->time = date('M d, Y',$newtime);
+
+        return view('admin.tickets.print', compact('ticket'));
+
+        // dd($ticket);
+    }
+
+    public function printAction($id)
+    {
+        $ticket = Ticket::findOrFail($id);
+        // $newtime = strtotime($data->created_at);
+        // $data->time = date('M d, Y',$newtime);
+
+        return view('admin.tickets.printAction', compact('ticket'));
+
+        // dd($ticket);
     }
 }

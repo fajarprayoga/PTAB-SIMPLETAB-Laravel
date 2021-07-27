@@ -91,17 +91,13 @@ class CustomersApiController extends Controller
         $customer->gender = $request->gender;
         $customer->address = $request->address;
         $customer->_synced = 0;
-        $customer->save();
         
-        return response()->json([
-            'message' => 'Registrasi Berhasil',
-            'data' => $customer
-        ]);
-
         try {
             $customer->save();
 
-            $token= $customer->createToken('appToken')->accessToken;
+            $customer = CustomerApi::WhereMaps('phone', request('phone'))->first();
+            Auth::login($customer);
+            $token = Auth::user()->createToken('authToken')->accessToken;
     
             return response()->json([
                 'message' => 'Registrasi Berhasil',

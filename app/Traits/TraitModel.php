@@ -25,7 +25,7 @@ trait TraitModel
         }
 
         if ($type == "customer") {
-            $customer = Customer::OrderMaps('id', 'desc')
+            $customer = Customer::OrderRawMaps('id', 'desc')
                 ->first();
             if ($customer) {
                 $code = $customer->code;
