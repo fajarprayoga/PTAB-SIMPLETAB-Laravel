@@ -38,12 +38,26 @@
             </div>
             <div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}">
                 <label for="image">{{ trans('global.ticket.fields.image') }}*</label>
-                <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($ticket) ? $ticket->image : '') }}">
+                {{-- <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($ticket) ? $ticket->image : '') }}">
                 @if($errors->has('image'))
                     <em class="invalid-feedback">
                         {{ $errors->first('image') }}
                     </em>
-                @endif
+                @endif --}}
+                <div class="input-group control-group increment" >
+                    <input type="file" name="image[]" class="form-control">
+                    <div class="input-group-btn"> 
+                      <button class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i>Add</button>
+                    </div>
+                  </div>
+                  <div class="clone hide">
+                    <div class="control-group input-group" style="margin-top:10px">
+                      <input type="file" name="image[]" class="form-control">
+                      <div class="input-group-btn"> 
+                        <button class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i> Remove</button>
+                      </div>
+                    </div>
+                  </div>
             </div>
             <div class="form-group {{ $errors->has('video') ? 'has-error' : '' }}">
                 <label for="video">{{ trans('global.ticket.fields.video') }}*</label>
@@ -85,4 +99,16 @@
     </div>
 </div>
 
+@endsection
+@section('scripts')
+    @parent
+    <script>
+            $(".btn-success").click(function(){ 
+                var html = $(".clone").html();
+                $(".increment").after(html);
+            });
+            $("body").on("click",".btn-danger",function(){ 
+                $(this).parents(".control-group").remove();
+            });
+    </script>
 @endsection
