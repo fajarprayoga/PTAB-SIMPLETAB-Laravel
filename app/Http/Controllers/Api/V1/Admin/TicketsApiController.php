@@ -16,7 +16,7 @@ class TicketsApiController extends Controller
     public function index()
     {
         try {
-            $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->get();
+            $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->get();
             return response()->json([
                 'message' => 'Data Ticket',
                 'data' => $ticket
