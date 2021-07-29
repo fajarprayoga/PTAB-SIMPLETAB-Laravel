@@ -10,6 +10,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\TraitModel;
+use App\CustomerMaps;
 
 class CustomersApiController extends Controller
 {
@@ -155,7 +156,8 @@ class CustomersApiController extends Controller
         $code = $request->code;
 
         try {
-            $customer = CustomerApi::where('code', $code)->first();
+            $customerMaps = CustomerMaps::where('qrcode', $code)->first();
+            $customer = CustomerApi::WhereMaps('code', $customerMaps->nomorrekening)->first();
             
             if(isset($customer)){
                 return response()->json([
