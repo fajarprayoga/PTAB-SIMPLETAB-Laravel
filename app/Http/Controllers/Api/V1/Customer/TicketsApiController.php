@@ -68,7 +68,7 @@ class TicketsApiController extends Controller
 
           if($responseImage != ''){
             return response()->json([
-              'image' => $responseImage
+              'message' => $responseImage
             ]);
           }
           // image
