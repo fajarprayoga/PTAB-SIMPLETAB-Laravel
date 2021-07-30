@@ -35,36 +35,18 @@ class CustomersApiController extends Controller
 
         $last_code = $this->get_last_code('customer');
 
-        $code = acc_code_generate($last_code, 8, 3);
+        //$code = acc_code_generate($last_code, 8, 3);
+        $code = $last_code + 1;
         
-        $data = $request->all();
-        // isset($request->email) ? $data['email'] = $request->email : null;
-
         $rules=array(
-            // 'email' => 'email|unique:customers,email',
-            // 'code' => 'unique:customers,code',
             'name' => 'required',
-            'phone' => 'required|unique:customers,phone',
+            'phone' => 'required|unique:mysql2.tblpelanggan,telp',
             'type' => 'required',
             'gender' => 'required',
             'address' => 'required'
         );
 
-        // $rules['email'] = isset($request->email) ? 'required|email|unique:customers,email' : null;
-        // $rules['code'] = isset($request->code) ? 'required|unique:customers,code' : null;
-
-        if(isset($request->email)){
-            $rules['email'] ='required|email|unique:customers,email';
-        }
-
-        if(isset($request->code)){
-            $rules['code'] = 'required|unique:customers,code';
-        }
-        
-        $data['code'] = isset($request->code) ? $request->code : $code;
-        $data['password'] =  bcrypt($request->password);
-
-        $validator=\Validator::make($data,$rules);
+        $validator=\Validator::make($request->all(),$rules);
         if($validator->fails())
         {
             $messages=$validator->messages();
@@ -75,14 +57,46 @@ class CustomersApiController extends Controller
             ]);
         }
 
-        $customer = CustomerApi::create($data);
+        $customer = new CustomerApi;
+        $customer->name = $request->name;
+        if(!isset($request->code)){
+            $customer->code = $code;
+        }else{
+            $request->validate([
+                'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening',
+            ]);
+            $customer->code = $request->code;
+        }       
+        if(!isset($request->email)){
+            $customer->email = null;
+        }else{
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+            $customer->email = $request->email;
+        }
+        $customer->email_verified_at = null;
+        $customer->remember_token = null;
+        $customer->password = bcrypt($request->password);
+        $customer->phone = $request->phone;
+        $customer->type = $request->type;
+        $customer->gender = $request->gender;
+        $customer->address = $request->address;
+        $customer->_synced = 0;
 
-        return response()->json([
-            'message' => 'Data Customer Add Success',
-            'data' => $customer
-        ]);
-
-        // return $rules;
+        try {
+            $customer->save();
+            return response()->json([
+                'message' => 'Registrasi Berhasil',
+                'data' => $customer
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                // 'message' => 'Registrasi Berhasil',
+                // 'token' => $token,
+                'data' => $request->email
+            ]);
+        }
 
     }
 
@@ -96,13 +110,14 @@ class CustomersApiController extends Controller
         //
     }
 
-    public function update(Request $request, CustomerApi $customer)
+    public function update(Request $request)
     {
+        $customer = Customer::find($request->code);
         $rules=array(
-            'email' => 'required|email|unique:customers,email,'.$customer->id,
-            'code' => 'required|unique:customers,code,'.$customer->id,
+            'email' => 'required|email',
+            'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening,'.$request->code,
             'name' => 'required',
-            'phone' => 'required|unique:customers,phone,'.$customer->id,
+            'phone' => 'required|unique:mysql2.tblpelanggan,telp,'.$request->code,
             'type' => 'required',
             'gender' => 'required',
             'address' => 'required'
@@ -117,9 +132,16 @@ class CustomersApiController extends Controller
                 'data' => $customer
             ]);
         }
-
         
-        $customer->update($request->all());
+        $customer->name = $request->name;
+        $customer->code = $request->code;
+        $customer->email = $request->email;
+        $customer->phone = $request->phone;
+        $customer->type = $request->type;
+        $customer->gender = $request->gender;
+        $customer->address = $request->address;
+        $customer->_synced = 0;
+        $customer->save();
 
         return response()->json([
             'message' => 'Data Customer Update Success',

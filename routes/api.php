@@ -26,6 +26,8 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::get('tickets/{id}', 'TicketsApiController@index');
 
+    Route::get('ctm/prev', 'CtmApiController@ctmPrev');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
@@ -45,6 +47,14 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin'], functio
     Route::resource('categories', 'CategoriesApiController');
     Route::resource('dapertements', 'DapertementsApiController');
     Route::resource('staffs', 'StaffsApiController');
+    Route::resource('tickets', 'TicketsApiController');
+    Route::resource('actions', 'ActionsApiController');
+    Route::get('actionlists/{ticket_id}', 'ActionsApiController@list');
+    Route::get('actionStaffs/{action_id}', 'ActionsApiController@actionStaffs');
+    Route::get('actionStaffLists/{action_id}', 'ActionsApiController@actionStaffLists');
+    Route::post('actionStaffStore', 'ActionsApiController@actionStaffStore');
+    Route::put('actionStaffUpdate', 'ActionsApiController@actionStaffUpdate');
+    Route::delete('actionStaffDestroy/{action}/{staff}', 'ActionsApiController@actionStaffDestroy');
 });
 
 
