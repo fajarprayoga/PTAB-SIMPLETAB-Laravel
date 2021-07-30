@@ -31,4 +31,8 @@ class TicketApi extends Model
     public function action() { 
         return $this->belongsTo('App\Action')->select('id'); 
     }
+    public function ticket_image()
+    {
+        return $this->hasMany('App\Ticket_Image', 'ticket_id', 'id');
+    }
 }

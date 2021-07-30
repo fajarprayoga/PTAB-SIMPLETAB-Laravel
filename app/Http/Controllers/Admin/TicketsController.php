@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 use App\Category;
 use App\Customer;
 use App\Ticket;
+use App\Ticket_Image;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
+
 
 class TicketsController extends Controller
 {
@@ -119,19 +121,23 @@ class TicketsController extends Controller
         
 
         // upload image 
-        $resourceImage = $request->file('image');
-        $nameImage = strtolower($request->code);
-        $file_extImage = $request->file('image')->extension();
-        $nameImage = str_replace(" ", "-", $nameImage);
-        $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . "." . $file_extImage;
+        if($request->file('image')){
 
-        $resourceImage->move($basepath . $img_path, $img_name);
+            foreach ($request->file('image') as $key => $image) {
+                    $resourceImage = $image;
+                    $nameImage = strtolower($request->code);
+                    $file_extImage =$image->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
+                    $img_name = $img_path . "/" . $nameImage . "-"  . $request->customer_id . $key. "." . $file_extImage;
+            
+                    $resourceImage->move($basepath . $img_path, $img_name);
+                    $dataImageName[] = $img_name;
+            }
+        }
 
         // video
         $video_path = "/videos/complaint";
         $resource = $request->file('video');
-        // $filename = $resource->getClientOriginalName();
-        // $file_extVideo = $request->file('video')->extension();
         $video_name = $video_path."/".strtolower($request->code).'-'.$request->customer_id.'.mp4';
 
         $resource->move($basepath.$video_path,$video_name);
@@ -144,16 +150,30 @@ class TicketsController extends Controller
             'title' => $request->title,
             'category_id' => $request->category_id,
             'description' => $request->description,
-            'image' =>  $img_name,
+            'image' =>  '',
             'video' => $video_name,
             'customer_id' => $request->customer_id,
           );
 
        
-        $ticket = Ticket::create($data);
-        
-        return redirect()->route('admin.tickets.index');
-    
+
+
+        try {
+            $ticket = Ticket::create($data);
+            if($ticket){
+                $upload_image = new Ticket_Image;
+                $upload_image->image = str_replace("\/", "/", json_encode($dataImageName));
+                $upload_image->ticket_id = $ticket->id;
+                $upload_image->save();
+            }
+
+            return redirect()->route('admin.tickets.index');
+        } catch (QueryException $ex) {
+            return back()->withErrors($ex);
+        }
+
+        // dd(json_encode($dataImageName));
+
     }
 
     public function show(Ticket $ticket)

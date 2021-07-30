@@ -34,7 +34,16 @@
         <div style="border-bottom: 1px solid" class="mt-3 pb-3 row" >
             <div class="col-md-6">
                 <h5 style="font-weight:bold">{{ trans('global.ticket.fields.image') }}</h5>
-                <img  height="200px" width="300px"  src={{"https://simpletabadmin.ptab-vps.com/$ticket->image"}} alt="">
+             
+                {{-- @foreach (json_decode($ticket->image->image) as $image)
+                    <img  height="200px" width="300px"  src={{"https://simpletabadmin.ptab-vps.com/$image"}} alt="">
+                @endforeach --}}
+
+                @foreach ($ticket->ticket_image as $image)
+                    @foreach (json_decode($image->image) as $item)
+                        <img  height="200px" width="300px"  src={{"https://simpletabadmin.ptab-vps.com/$item"}} alt="">
+                    @endforeach
+                @endforeach
             </div>
             <div class="col-md-6">
                 <h5 style="font-weight:bold">{{ trans('global.ticket.fields.video') }}</h5>

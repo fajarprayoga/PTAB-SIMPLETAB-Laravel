@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\TicketApi;
 use App\Customer;
+use App\CustomerApi;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
+use App\Ticket_Image;
 use Illuminate\Support\Facades\Validator;
 class TicketsApiController extends Controller
 {
@@ -16,7 +18,7 @@ class TicketsApiController extends Controller
     public function index()
     {
         try {
-            $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->get();
+            $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->get();
             return response()->json([
                 'message' => 'Data Ticket',
                 'data' => $ticket
@@ -52,66 +54,83 @@ class TicketsApiController extends Controller
         $img_path = "/images/complaint";
         $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
         $dataForm = json_decode($request->form);
+        $responseImage = '';
 
 
+        $customer_code = CustomerApi::WhereMaps('id', $dataForm->customer_id)->first();
 
-        if($request->file('image') && $request->file('video')){
+        if(!$customer_code){
+          return response()->json([
+            'message' => 'Code Pelanggan tidak ditemukan'
+          ]);
+        }
 
-
-          // image
-            $resourceImage = $request->file('image');
+        $dataQtyImage = json_decode($request->qtyImage);
+        for ($i=1; $i <= $dataQtyImage ; $i++) { 
+          if($request->file('image'.$i)){
+            $resourceImage = $request->file('image'.$i);
             $nameImage = strtolower($code);
-            $file_extImage = $request->file('image')->extension();
+            $file_extImage = $request->file('image'.$i)->extension();
             $nameImage = str_replace(" ", "-", $nameImage);
 
 
-            $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->customer_id . "." . $file_extImage;
+            $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->customer_id . $i. "." . $file_extImage;
 
             $resourceImage->move($basepath . $img_path, $img_name);
 
+            $dataImageName[] = $img_name;
+          }else{
+            $responseImage ='Image tidak di dukung';
+            break;
+          }
+        }
 
-            // video 
-
-            $video_path = "/videos/complaint";
-            $resource = $request->file('video');
-            // $filename = $resource->getClientOriginalName();
-            // $file_extVideo = $request->file('video')->extension();
-            $video_name = $video_path."/".strtolower($code).'-'.$dataForm->customer_id.'.mp4';
-
-            $resource->move($basepath.$video_path,$video_name);
-
-
-
-            $data = array(
-              'code' => $code,
-              'title' => $dataForm->title,
-              'category_id' => $dataForm->category_id,
-              'description' => $dataForm->description,
-              'image' =>  $img_name,
-              'video' => $video_name,
-              'customer_id' => $dataForm->customer_id,
-              'lat' => $dataForm->lat,
-              'lng' => $dataForm->lng
-            );
-
-
-              try {
-        
-                $ticket = TicketApi::create($data);
-
-                return response()->json([
-                  'message' => "Keluhan diterima",
-                  'data' => $data
-                ]);
-
-              } catch (QueryException $ex) {
-                return response()->json([
-                  'message' => $ex
-                ]);
-              }
-        }else{
+        if($responseImage != ''){
           return response()->json([
-            'message' => 'Image atau Videdo tidak didukung'
+            'message' => $responseImage
+          ]);
+        }
+
+        $video_name = '';
+        if($request->file('video')){
+          
+          $video_path = "/videos/complaint";
+          $resource = $request->file('video');
+          // $filename = $resource->getClientOriginalName();
+          // $file_extVideo = $request->file('video')->extension();
+          $video_name = $video_path."/".strtolower($code).'-'.$dataForm->customer_id.'.mp4';
+
+          $resource->move($basepath.$video_path,$video_name);
+          
+        }
+
+        $data = array(
+          'code' => $code,
+          'title' => $dataForm->title,
+          'category_id' => $dataForm->category_id,
+          'description' => $dataForm->description,
+          'image' =>  '',
+          'video' => $video_name,
+          'customer_id' => $dataForm->customer_id,
+          'lat' => $dataForm->lat,
+          'lng' => $dataForm->lng
+        );
+
+        try {
+          $ticket = TicketApi::create($data);
+          if($ticket){
+              $upload_image = new Ticket_Image;
+              $upload_image->image = str_replace("\/", "/", json_encode($dataImageName));
+              $upload_image->ticket_id = $ticket->id;
+              $upload_image->save();
+          }
+          return response()->json([
+            'message' => 'Keluhan Diterima'
+          ]);
+
+        } catch (QueryException $ex) {
+          return response()->json([
+            'message' => 'gagal'
           ]);
         }
     }

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApiTicketRequest;
 use Illuminate\Http\Request;
 use App\TicketApi;
-use App\Ticket_Image;
 use App\Customer;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
@@ -20,15 +19,14 @@ class TicketsApiController extends Controller
     public function index($id)
     {
         try {
-          $ticket = TicketApi::where('customer_id', $id)->with('ticket_image')->orderBy('id', 'DESC')->get();
+          $ticket = TicketApi::where('customer_id', $id)->get();
           return response()->json([
             'message' => 'Data Ticket',
             'data' => $ticket
           ]);
         } catch (QueryException $ex) {
           return response()->json([
-            'message' => 'Gagal Mengambil data',
-            'err' => $ex
+            'message' => 'Gagal Mengambil data'
           ]);
         }
      
@@ -45,6 +43,7 @@ class TicketsApiController extends Controller
         $basepath=str_replace("laravel-simpletab","public_html/simpletabadmin/",\base_path());
         $dataForm = json_decode($request->form);
         $responseImage = '';
+
 
           $dataQtyImage = json_decode($request->qtyImage);
           for ($i=1; $i <= $dataQtyImage ; $i++) { 
@@ -68,7 +67,7 @@ class TicketsApiController extends Controller
 
           if($responseImage != ''){
             return response()->json([
-              'message' => $responseImage
+              'image' => $responseImage
             ]);
           }
           // image
@@ -84,7 +83,6 @@ class TicketsApiController extends Controller
 
 
             // video 
-            $video_name = '';
             if($request->file('video')){
               
               $video_path = "/videos/complaint";
@@ -95,6 +93,10 @@ class TicketsApiController extends Controller
 
               $resource->move($basepath.$video_path,$video_name);
               
+            }else{
+              return response()->json([
+                'message' => 'Video tidak didukung'
+              ]);
             }
 
 
@@ -121,13 +123,10 @@ class TicketsApiController extends Controller
                     $upload_image->ticket_id = $ticket->id;
                     $upload_image->save();
                 }
-                return response()->json([
-                  'message' => 'Keluhan Diterima'
-                ]);
 
               } catch (QueryException $ex) {
                 return response()->json([
-                  'message' => 'gagal'
+                  'message' => $ex
                 ]);
               }
     }
