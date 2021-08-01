@@ -10,7 +10,7 @@ class Action extends Model
     protected $fillable =[
         'description',
         'status',
-        'dapertement_id',
+        'dapertement_id', 
         'ticket_id',
         'start',
         'end'
