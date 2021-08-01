@@ -41,7 +41,7 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     Route::post('code', 'CustomersApiController@scanBarcode');
 });
 
-Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin'], function () {
+Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middleware' => 'auth:apiadmin'], function () {
     // Route::get('customers',  'CustomersApiController@index' );
     Route::resource('customers','CustomersApiController' );
     Route::resource('categories', 'CategoriesApiController');
@@ -60,4 +60,11 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin'], functio
 
 Route::group(['prefix' => 'open/admin', 'namespace' => 'Api\V1\Admin'], function () {
     Route::post('login',  'AdminApiController@login' );
+});
+
+Route::group(['prefix' => 'close/dapertement', 'namespace' => 'Api\V1\Dapertement'], function () {
+    Route::get('actions/list/{dapertement_id}', 'ActionsApiController@list');
+    Route::get('actions/listStaff/{ticket_id}', 'ActionsApiController@liststaff');
+    Route::put('actions/edit', 'ActionsApiController@edit');
+    Route::get('actions/ticket/{ticket_id}', 'ActionsApiController@ticket');
 });
