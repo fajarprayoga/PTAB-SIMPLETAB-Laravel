@@ -14,7 +14,7 @@ class UpdateTableUseraddDapetementId extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->bigInteger('dapertement_id')->default(0)->unsigned();
+            $table->bigInteger('dapertement_id')->default(1)->unsigned();
             $table->foreign('dapertement_id')->references('id')->on('dapertements')->onUpdate('RESTRICT')->onDelete('RESTRICT');
         });
     }

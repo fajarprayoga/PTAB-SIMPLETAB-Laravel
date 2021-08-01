@@ -14,7 +14,7 @@ class UpdateTableUserrAddSubDapertement extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->bigInteger('subdapertement_id')->default(0)->unsigned();
+            $table->bigInteger('subdapertement_id')->default(1)->unsigned();
             $table->foreign('subdapertement_id')->references('id')->on('subdapertements')->onUpdate('RESTRICT')->onDelete('RESTRICT');
         });
     }

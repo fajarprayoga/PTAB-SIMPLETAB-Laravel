@@ -10,6 +10,10 @@ use App\Staff;
 use App\TblPemakaianAir;
 use App\TblStatussmPelanggan;
 use App\Ticket;
+use App\Gambarmeter;
+use App\Gambarmetersms;
+use App\MapKunjungan;
+use App\Pemakaianair;
 use Illuminate\Database\QueryException;
 
 trait TraitModel
@@ -53,7 +57,7 @@ trait TraitModel
         $var['filegambar1'] = $path_img1 . $new_image_name;
 
         //get meterawal
-        $getCtmMeterPrev = $fn->getCtmMeterPrev($model, $var['norek'], $var['bulanrekening'], $var['tahunrekening']);
+        $getCtmMeterPrev = $this->getCtmMeterPrev($var['norek'], $var['bulanrekening'], $var['tahunrekening']);
         $meterawal = $var['pencatatanmeterprev'];
 
         if ((int) $var['namastatus'] == 111) {
@@ -64,18 +68,18 @@ trait TraitModel
         $var['pemakaianair'] = max(0, ($var['pencatatanmeter'] - $meterawal));
         $var['meterawal'] = $meterawal;
         //insert data into gambarmeter
-        $var['idgambar'] = $fn->pdam_gambarmeter_ins_upd($model, $var);
-        $fn->pdam_gambarmetersms_ins_upd($model, $var);
-        $fn->pdam_map_kunjungan_ins_upd($model, $var);
-        $fn->pdam_tblpemakaianair_ins_upd($model, $var);
-        $fn->pdam_tblstatussmpelanggan_ins_upd($model, $var);
-        $fn->pdam_tblstatusonoff_ins_upd($model, $var);
+        $var['idgambar'] = $this->insupdCtmGambarmeter($var);
+        $this->insupdCtmGambarmetersms($var);
+        $this->insupdCtmMapKunjungan($var);
+        $this->insupdCtmPemakaianair($var);
+        $this->pdam_tblstatussmpelanggan_ins_upd($var);
+        $this->pdam_tblstatusonoff_ins_upd($var);
         //insert into tblpembayaran
-        $fn->pdam_tblpembayaran_ins_upd($model, $var);
+        $this->pdam_tblpembayaran_ins_upd($var);
 
         //test insert to logg
         //*
-        $pdam_tblpembayaran_test = $fn->pdam_tblpembayaran_test($model, $var);
+        $pdam_tblpembayaran_test = $this->pdam_tblpembayaran_test($var);
         $date_now = date("Y-m-d H:i:s");
         $colarr = array("date", "value");
         $valarr = array("'" . $date_now . "'", "'" . $pdam_tblpembayaran_test . "'");
@@ -94,7 +98,7 @@ trait TraitModel
         $return_obj['pencatatanmeter'] = 0;
         $return_obj['pemakaianair'] = 0;
 
-        $tblpemakaianair_fetch = TblPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair','pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
+        $tblpemakaianair_fetch = TblPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair', 'pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
             ->where('tahunrekening', $year_prev)
             ->where('nomorrekening', $nomorrekening)
             ->get();
@@ -102,131 +106,120 @@ trait TraitModel
         $return_out = "";
 
         foreach ($tblpemakaianair_fetch as $key => $value) {
-            $return_obj['pencatatanmeter'] = $value->pemakaianair;
-            $return_obj['pemakaianair'] = $value->pencatatanmeter;
+            $return_obj['pencatatanmeter'] = $value->pencatatanmeter;
+            $return_obj['pemakaianair'] = $value->pemakaianair;
         }
         return $return_obj;
     }
 
-    public function pdam_gambarmeter_ins_upd($model, $var)
+    public function insupdCtmGambarmeter($var)
     {
         $arrCol = array("nomorpengirim", "bulanrekening", "tahunrekening", "tanggal", "filegambar", "operator", "infowaktu", "filegambar1", "_synced");
-        $arrVal = array("'" . $var['nomorpengirim'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['datecatatf1'] . "'", "'" . $var['filegambar'] . "'", "'" . $var['operator'] . "'", "'" . $var['datecatatf2'] . "'", "'" . $var['filegambar1'] . "'", "'0'");
-        //if exist
-        $bulanrekening = $model->select_db_info("gambarmeter", "where bulanrekening='" . $var['bulanrekening'] . "' and tahunrekening='" . $var['tahunrekening'] . "' and filegambar='" . $var['filegambar'] . "'", "bulanrekening");
-        if ($bulanrekening > 0) {
-            $arrgab = array("nomorpengirim = '" . $var['nomorpengirim'] . "'", "bulanrekening = '" . $var['bulanrekening'] . "'", "tahunrekening = '" . $var['tahunrekening'] . "'", "tanggal = '" . $var['datecatatf1'] . "'", "filegambar = '" . $var['filegambar'] . "'", "operator = '" . $var['operator'] . "'", "infowaktu = '" . $var['datecatatf2'] . "'", "filegambar1 = '" . $var['filegambar1'] . "'", "_synced = '0'");
-            $where = "bulanrekening = '" . $var['bulanrekening'] . "' AND tahunrekening = '" . $var['tahunrekening'] . "' AND filegambar = '" . $var['filegambar'] . "'";
-            if ($model->update_db("gambarmeter", $arrgab, $where)) {
-                $idgambar = $model->select_db_info("gambarmeter", "where bulanrekening='" . $var['bulanrekening'] . "' and tahunrekening='" . $var['tahunrekening'] . "' and filegambar='" . $var['filegambar'] . "'", "idgambar");
-                return $idgambar;
-            } else {
-                return 0;
-            }
+        $arrVal = array($var['nomorpengirim'], $var['bulanrekening'], $var['tahunrekening'], $var['datecatatf1'], $var['filegambar'], $var['operator'], $var['datecatatf2'], $var['filegambar1'], "0");
+
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
+        }
+        $arrUnique = array();
+        $arrUnique['bulanrekening'] = $var['bulanrekening'];
+        $arrUnique['tahunrekening'] = $var['tahunrekening'];
+        $arrUnique['filegambar'] = $var['filegambar'];
+
+        if ($gambarmeter = Gambarmeter::updateOrCreate($arrUnique,$arrQry)) {
+            $idgambar = $gambarmeter->idgambar;
+            return $idgambar;
         } else {
-            if ($model->insert_db("gambarmeter", $arrCol, $arrVal)) {
-                $idgambar = $model->select_db_info("gambarmeter", "where bulanrekening='" . $var['bulanrekening'] . "' and tahunrekening='" . $var['tahunrekening'] . "' and filegambar='" . $var['filegambar'] . "'", "idgambar");
-                return $idgambar;
-            } else {
-                return 0;
-            }
+            return 0;
         }
 
     }
 
-    public function pdam_gambarmetersms_ins_upd($model, $var)
+    public function insupdCtmGambarmetersms($var)
     {
         $arrCol = array("nomorpengirim", "bulanrekening", "tahunrekening", "tanggal", "nomorrekening", "pencatatanmeter", "idgambar", "_synced");
-        $arrVal = array("'" . $var['nomorpengirim'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['datecatatf1'] . "'", "'" . $var['nomorrekening'] . "'", "'" . $var['pencatatanmeter'] . "'", "'" . $var['idgambar'] . "'", "'0'");
-        //if exist
-        $bulanrekening = $model->select_db_info("gambarmetersms", "where bulanrekening='" . $var['bulanrekening'] . "' and tahunrekening='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "bulanrekening");
-        if ($bulanrekening > 0) {
-            $arrgab = array("nomorpengirim = '" . $var['nomorpengirim'] . "'", "bulanrekening = '" . $var['bulanrekening'] . "'", "tahunrekening = '" . $var['tahunrekening'] . "'", "tanggal = '" . $var['datecatatf1'] . "'", "nomorrekening = '" . $var['nomorrekening'] . "'", "pencatatanmeter = '" . $var['pencatatanmeter'] . "'", "idgambar = '" . $var['idgambar'] . "'", "_synced = '0'");
-            $where = "bulanrekening = '" . $var['bulanrekening'] . "' AND tahunrekening = '" . $var['tahunrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("gambarmetersms", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("gambarmetersms", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
+        $arrVal = array($var['nomorpengirim'], $var['bulanrekening'], $var['tahunrekening'], $var['datecatatf1'], $var['nomorrekening'], $var['pencatatanmeter'], $var['idgambar'], "0");
+
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
         }
+        $arrUnique = array();
+        $arrUnique['bulanrekening'] = $var['bulanrekening'];
+        $arrUnique['tahunrekening'] = $var['tahunrekening'];
+        $arrUnique['nomorrekening'] = $var['nomorrekening'];
+
+        if ($gambarmetersms = Gambarmetersms::updateOrCreate($arrUnique,$arrQry)) {
+            return true;
+        } else {
+            return false;
+        }       
 
     }
 
-    public function pdam_map_kunjungan_ins_upd($model, $var)
+    public function insupdCtmMapKunjungan($var)
     {
         $arrCol = array("bulan", "tahun", "nomorrekening", "lat", "lng", "time", "accuracy", "statuskunjungan", "_synced");
-        $arrVal = array("'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['nomorrekening'] . "'", "'" . $var['lat'] . "'", "'" . $var['lng'] . "'", "'" . $var['datecatatf3'] . "'", "'" . $var['accuracy'] . "'", "'1'", "'0'");
-        //if exist
-        $bulan = $model->select_db_info("map_kunjungan", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "bulan");
-        if ($bulan > 0) {
-            $arrgab = array("bulan = '" . $var['bulanrekening'] . "'", "tahun = '" . $var['tahunrekening'] . "'", "nomorrekening = '" . $var['nomorrekening'] . "'", "lat = '" . $var['lat'] . "'", "lng = '" . $var['lng'] . "'", "time = '" . $var['datecatatf3'] . "'", "accuracy = '" . $var['accuracy'] . "'", "statuskunjungan = '1'", "_synced = '0'");
-            $where = "bulan = '" . $var['bulanrekening'] . "' AND tahun = '" . $var['tahunrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("map_kunjungan", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("map_kunjungan", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
+        $arrVal = array($var['bulanrekening'], $var['tahunrekening'], $var['nomorrekening'], $var['lat'], $var['lng'], $var['datecatatf3'], $var['accuracy'], "1", "0");
+
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
         }
+        $arrUnique = array();
+        $arrUnique['bulan'] = $var['bulanrekening'];
+        $arrUnique['tahun'] = $var['tahunrekening'];
+        $arrUnique['nomorrekening'] = $var['nomorrekening'];
+
+        if ($map_kunjungan = MapKunjungan::updateOrCreate($arrUnique,$arrQry)) {
+            return true;
+        } else {
+            return false;
+        }  
 
     }
 
-    public function pdam_tblpemakaianair_ins_upd($model, $var)
+    public function insupdCtmPemakaianair($var)
     {
         $arrCol = array("pencatatanmeter" . $var['bulanrekening'], "pemakaianair" . $var['bulanrekening'], "nomorrekening", "tahunrekening", "tglupdate", "operator", "_synced");
         $arrVal = array("'" . $var['pencatatanmeter'] . "'", "'" . $var['pemakaianair'] . "'", "'" . $var['nomorrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['datecatatf1'] . "'", "'" . $var['operator'] . "'", "'0'");
-        //if exist
-        $tahunrekening = $model->select_db_info("tblpemakaianair", "where tahunrekening='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "tahunrekening");
-        if ($tahunrekening > 0) {
-            $arrgab = array("pencatatanmeter" . $var['bulanrekening'] . " = '" . $var['pencatatanmeter'] . "'", "pemakaianair" . $var['bulanrekening'] . " = '" . $var['pemakaianair'] . "'", "nomorrekening = '" . $var['nomorrekening'] . "'", "tahunrekening = '" . $var['tahunrekening'] . "'", "tglupdate = '" . $var['datecatatf1'] . "'", "operator = '" . $var['operator'] . "'", "_synced = '0'");
-            $where = "tahunrekening = '" . $var['tahunrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("tblpemakaianair", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("tblpemakaianair", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
+
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
         }
+        $arrUnique = array();
+        $arrUnique['bulan'] = $var['bulanrekening'];
+        $arrUnique['tahun'] = $var['tahunrekening'];
+        $arrUnique['nomorrekening'] = $var['nomorrekening'];
+
+        if ($pemakaianair = Pemakaianair::updateOrCreate($arrUnique,$arrQry)) {
+            return true;
+        } else {
+            return false;
+        }  
 
     }
 
-    public function pdam_tblpsm_ins_upd($model, $var)
+    public function insupdCtmPsm($var)
     {
         $arrCol = array("nomorrekening", "bulan", "tahun", "alasan", "tanggalsm", "operator");
         $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'PSM baru'", "'" . $var['datecatatf3'] . "'", "'" . $var['operator'] . "'");
-        //if exist
-        $tahun = $model->select_db_info("tblpsm", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "tahun");
-        if ($tahun > 0) {
-            $arrgab = array("nomorrekening" . " = '" . $var['nomorrekening'] . "'", "bulan" . " = '" . $var['bulanrekening'] . "'", "tahun = '" . $var['tahunrekening'] . "'", "alasan = 'PSM baru'", "tanggalsm = '" . $var['datecatatf3'] . "'", "operator = '" . $var['operator'] . "'");
-            $where = "tahun = '" . $var['tahunrekening'] . "' AND bulan = '" . $var['bulanrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("tblpsm", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("tblpsm", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
+        
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
         }
+        $arrUnique = array();
+        $arrUnique['bulan'] = $var['bulanrekening'];
+        $arrUnique['tahun'] = $var['tahunrekening'];
+        $arrUnique['nomorrekening'] = $var['nomorrekening'];
+
+        if ($pemakaianair = Pemakaianair::updateOrCreate($arrUnique,$arrQry)) {
+            return true;
+        } else {
+            return false;
+        }  
 
     }
 
@@ -248,7 +241,7 @@ trait TraitModel
                 }
                 //insert on tblpsm when statussm ==106
                 if ($var['namastatus'] == '106') {
-                    $this->pdam_tblpsm_ins_upd($model, $var);
+                    $this->insupdCtmPsm($model, $var);
                 }
                 return true;
             } else {
@@ -258,7 +251,7 @@ trait TraitModel
             if ($model->insert_db("tblstatussmpelanggan", $arrCol, $arrVal)) {
                 //insert on tblpsm when statussm ==106
                 if ($var['namastatus'] == '106') {
-                    $this->pdam_tblpsm_ins_upd($model, $var);
+                    $this->insupdCtmPsm($model, $var);
                 }
                 return true;
             } else {
