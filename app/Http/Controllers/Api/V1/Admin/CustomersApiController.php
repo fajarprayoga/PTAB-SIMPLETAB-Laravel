@@ -16,7 +16,7 @@ class CustomersApiController extends Controller
 
     public function index()
     {
-        $customer = CustomerApi::all();
+        $customer = CustomerApi::skip(0)->take(100)->get();
 
         return response()->json([
             'message' => 'Sucess',

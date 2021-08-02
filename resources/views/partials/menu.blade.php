@@ -42,6 +42,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('admin.subdapertements.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class=" nav-icon far fa-building"></i>
+                            {{ trans('global.subdapertement.title') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('admin.staffs.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
                         <i class=" nav-icon fas fa-people-carry"></i>

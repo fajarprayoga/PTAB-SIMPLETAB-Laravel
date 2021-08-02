@@ -82,5 +82,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     //test
     Route::resource('test-customers', 'TestController');
+
+    Route::resource('subdapertements', 'SubdapertementsController');
+
+    Route::delete('subdapertements/destroy', 'SubdapertementsController@massDestroy')->name('subdapertements.massDestroy');
     
 });
