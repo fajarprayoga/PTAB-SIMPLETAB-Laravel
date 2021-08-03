@@ -369,6 +369,15 @@ return [
             'description' => 'Deskripsi'
         ]
     ],
+    'subdapertement' => [
+        'title' => 'Sub Departemen',
+        'title_singular' => 'Sub Departemen',
+        'fields' => [
+            'code' => 'Kode',
+            'name' => 'Nama Sub Departemen',
+            'description' => 'Deskripsi'
+        ]
+    ],
     'staff' => [
         'title' => 'Staff',
         'title_singular' => 'Staff',

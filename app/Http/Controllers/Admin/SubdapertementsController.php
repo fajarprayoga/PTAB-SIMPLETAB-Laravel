@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreSubdapertementRequest;
 use App\Http\Requests\UpdateSubdapertementRequest;
 use App\Subdapertement;
+use App\Dapertement;
 use App\Traits\TraitModel;
 use Illuminate\Database\QueryException;
 
@@ -30,8 +31,9 @@ class SubdapertementsController extends Controller
         $code = acc_code_generate($last_code, 8, 3);
 
         abort_unless(\Gate::allows('subdapertement_create'), 403);
+        $dapertements = Dapertement::all();
 
-        return view('admin.subdapertements.create', compact('code'));
+        return view('admin.subdapertements.create', compact('code','dapertements'));
     }
 
     public function store(StoreSubdapertementRequest $request)
@@ -53,8 +55,9 @@ class SubdapertementsController extends Controller
         abort_unless(\Gate::allows('subdapertement_edit'), 403);
 
         $subdapertement = Subdapertement::findOrFail($id);
+        $dapertements = Dapertement::all();
 
-        return view('admin.subdapertements.edit', compact('subdapertement'));
+        return view('admin.subdapertements.edit', compact('subdapertement','dapertements'));
     }
 
     public function update(UpdateSubdapertementRequest $request, Subdapertement $subdapertement)

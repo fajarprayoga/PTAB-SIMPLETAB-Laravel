@@ -14,6 +14,7 @@ use App\Gambarmeter;
 use App\Gambarmetersms;
 use App\MapKunjungan;
 use App\Pemakaianair;
+use App\Subdapertement;
 use Illuminate\Database\QueryException;
 
 trait TraitModel
@@ -506,6 +507,16 @@ trait TraitModel
                 $code = $dapertement->code;
             } else {
                 $code = acc_codedef_generate('DAP', 8);
+            }
+        }
+
+        if ($type == "subdapertement") {
+            $dapertement = Subdapertement::orderBy('id', 'desc')
+                ->first();
+            if ($dapertement && (strlen($dapertement->code) == 8)) {
+                $code = $dapertement->code;
+            } else {
+                $code = acc_codedef_generate('SDP', 8);
             }
         }
 
