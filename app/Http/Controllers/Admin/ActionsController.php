@@ -246,6 +246,31 @@ class ActionsController extends Controller
             ]);
         }
 
+        $statusTicket = 'close';
+        if($action){
+            $actionStatusAll = Action::where('ticket_id', $action->ticket_id)->get();
+
+            for($i = 0; $i < count($actionStatusAll); $i++){
+                if($actionStatusAll[$i]->status == 'pending'){
+                    $statusTicket = 'pending';
+                    break;
+                }else if($actionStatusAll[$i]->status == 'active'){
+                    $statusTicket = 'active';
+                }
+            }
+
+            $ticket = Ticket::findOrFail($action->ticket_id);
+
+            $ticket->update([
+                'status' => $statusTicket
+            ]);
+            // $actionStatusAll->update([
+            //     'status' => $statusTicket,
+            // ]);
+
+            // dd($statusTicket);
+        }
+
         return redirect()->route('admin.actions.actionStaff', $action->id);
 
     }

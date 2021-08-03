@@ -8,7 +8,7 @@
         <link href="{{ asset('css/print.css') }}" rel="stylesheet" />
         <title>Document</title>
         </head>
-        <body  onload="onload()" >
+        <body>
             <div class="v12_146">
                 <div class="v12_149"></div>
                 <div class="v12_150">
@@ -195,11 +195,5 @@
                    </div>
                 </div> --}}
             </div>
-
-            <script>
-                onload = function (){
-                    window.print();
-                }
-            </script>
         </body>
 </html>

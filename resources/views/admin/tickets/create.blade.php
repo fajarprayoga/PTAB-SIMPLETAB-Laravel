@@ -2,6 +2,12 @@
 @section('content')
 
 <div class="card">
+    @if($errors->any())
+    <!-- <h4>{{$errors->first()}}</h4> -->
+        <?php 
+            echo "<script> alert('{$errors->first()}')</script>";
+        ?>
+    @endif
     <div class="card-header">
         {{ trans('global.create') }} {{ trans('global.ticket.title_singular') }}
     </div>
