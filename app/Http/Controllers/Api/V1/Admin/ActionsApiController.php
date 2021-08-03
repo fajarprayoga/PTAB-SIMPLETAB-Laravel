@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\ActionApi;
 use App\StaffApi;
+use App\TicketApi;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
 use DB;
@@ -350,6 +351,33 @@ class ActionsApiController extends Controller
                     'status' => $statusAction,
                     'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
                 ]);
+
+                // update ticket
+                $statusTicket = 'close';
+                if($action){
+                    $actionStatusAll = ActionApi::where('ticket_id', $action->ticket_id)->get();
+        
+                    for($i = 0; $i < count($actionStatusAll); $i++){
+                        if($actionStatusAll[$i]->status == 'pending'){
+                            $statusTicket = 'pending';
+                            break;
+                        }else if($actionStatusAll[$i]->status == 'active'){
+                            $statusTicket = 'active';
+                        }
+                    }
+        
+                    $ticket = TicketApi::findOrFail($action->ticket_id);
+        
+                    $ticket->update([
+                        'status' => $statusTicket
+                    ]);
+                    // $actionStatusAll->update([
+                    //     'status' => $statusTicket,
+                    // ]);
+        
+                    // dd($statusTicket);
+                }
+        
 
                 return response()->json([
                     'message' => 'Status di ubah ',

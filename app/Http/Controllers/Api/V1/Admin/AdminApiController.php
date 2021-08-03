@@ -14,7 +14,7 @@ class AdminApiController extends Controller
     public function login(Request $request)
     {
         try {
-            $admin = User::where('email', request('email'))->first();
+            $admin = User::where('email', request('email'))->with('roles')->first();
 
             $credentials = $request->validate([
                 'email' => ['required'],
@@ -41,7 +41,7 @@ class AdminApiController extends Controller
             }else{
                 return response()->json([
                     'success' =>  false,
-                    'failed' => 'Email Atau Password Yang Di masukkan Salah',
+                    'message' => 'Email Atau Password Yang Di masukkan Salah',
                 ]);
                 // $data =[
                 //     'message' => 'Email Atau Password Yang Di masukkan Salah',
