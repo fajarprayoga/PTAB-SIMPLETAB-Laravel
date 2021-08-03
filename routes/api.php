@@ -67,4 +67,6 @@ Route::group(['prefix' => 'close/dapertement', 'namespace' => 'Api\V1\Dapertemen
     Route::get('actions/listStaff/{ticket_id}', 'ActionsApiController@liststaff');
     Route::put('actions/edit', 'ActionsApiController@edit');
     Route::get('actions/ticket/{ticket_id}', 'ActionsApiController@ticket');
+    Route::post('actionStaffUpdate', 'SubDapertementsApiController@edit');
+    Route::get('actions/list/subdapertement/{action_id}}', 'SubDapertementsApiController@actionListSubDapertement');
 });
