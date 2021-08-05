@@ -42,12 +42,27 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
 });
 
 Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middleware' => 'auth:apiadmin'], function () {
-    // Route::get('customers',  'CustomersApiController@index' );
+
+    // custmomer
     Route::resource('customers','CustomersApiController' );
+    Route::post('customer/list','CustomersApiController@customers' );
+
+    // categori
     Route::resource('categories', 'CategoriesApiController');
+    Route::get('categories/list/{page}', 'CategoriesApiController@categories');
+
+    // dapettement
     Route::resource('dapertements', 'DapertementsApiController');
+    Route::get('dapertements/list/{page}', 'DapertementsApiController@dapertements');
+
+    // staffs
     Route::resource('staffs', 'StaffsApiController');
+
+    // ticket
     Route::resource('tickets', 'TicketsApiController');
+    Route::post('ticket/list','TicketsApiController@tickets' );
+
+    // action
     Route::resource('actions', 'ActionsApiController');
     Route::get('actionlists/{ticket_id}', 'ActionsApiController@list');
     Route::get('actionStaffs/{action_id}', 'ActionsApiController@actionStaffs');

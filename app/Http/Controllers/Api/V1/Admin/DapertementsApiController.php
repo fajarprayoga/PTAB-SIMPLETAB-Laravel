@@ -16,6 +16,16 @@ class DapertementsApiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function dapertements($page)
+    {
+        $dapertements = DapertementApi::paginate(10, ['*'], 'page', $page);
+        return response()->json([
+            'message' => 'success',
+            'data' => $dapertements
+        ]);
+    }
+
     public function index()
     {
         $dapertements = DapertementApi::all();

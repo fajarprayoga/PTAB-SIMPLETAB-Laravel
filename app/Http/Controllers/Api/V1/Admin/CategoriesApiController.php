@@ -16,6 +16,16 @@ class CategoriesApiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function categories($page)
+    {
+        $categories = CategoryApi::paginate(10, ['*'], 'page', $page);
+        return response()->json([
+            'message' => 'success',
+            'data' => $categories
+        ]);
+    }
+
     public function index()
     {
         $categories = CategoryApi::all();
