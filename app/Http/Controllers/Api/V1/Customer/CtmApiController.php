@@ -14,16 +14,46 @@ class CtmApiController extends Controller
 
     public function ctmPrev(Request $request)
     {
-        $var['bulanrekening']='9';
-        $var['tahunrekening']='2021';
-        $var['nomorrekening']='38563';
-        $var['lat']='-8.5570138';
-        $var['lng']='115.10578';
-        $var['datecatatf3']='2021-08-19 10:54:19';
-        $var['accuracy']='2001';
-        $var['_synced']='0';
+        $data = $this->getCtmJenispelanggan(7913);
+        
+        // $var['nomorrekening']='60892';
+        // $var['bulanrekening']='9';
+        // $var['tahunrekening']='2021';
+        // $var['statusonoff']='off';
+        // $var['_synced']='0';
 
-        $data = $this->insupdCtmMapKunjungan($var);
+        // $data = $this->insupdCtmStatusonoff($var);
+        
+        // $var['bulanrekening']='9';
+        // $var['tahunrekening']='2021';
+        // $var['nomorrekening']='9997';
+        // $var['namastatus']='114';
+        // $var['operator']='EKA';
+        // $var['_synced']='0';
+
+        // $data = $this->insupdCtmStatussmpelanggan($var);
+       
+        // $var['bulanrekening']='8';
+        // $var['pencatatanmeter']='6917';
+        // $var['pemakaianair']='30';
+        // $var['nomorrekening']='1';
+        // $var['tahunrekening']='2022';
+        // $var['datecatatf1']='2021-08-06';
+        // $var['operator']='Sumardhana';
+        // $var['_synced']='0';
+
+        // $data = $this->insupdCtmPemakaianair($var);
+        
+        // $var['bulanrekening']='9';
+        // $var['tahunrekening']='2021';
+        // $var['nomorrekening']='38563';
+        // $var['lat']='-8.5570138';
+        // $var['lng']='115.10578';
+        // $var['datecatatf3']='2021-08-19 10:54:19';
+        // $var['accuracy']='2001';
+        // $var['_synced']='0';
+
+        // $data = $this->insupdCtmMapKunjungan($var);
         
         // $var['nomorpengirim']='+6282235454214';
         // $var['bulanrekening']='9';

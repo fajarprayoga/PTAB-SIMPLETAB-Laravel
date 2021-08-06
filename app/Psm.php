@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Pemakaianair extends Model
+class Psm extends Model
 {
     protected $connection = 'mysql2';
 
