@@ -15,6 +15,15 @@ class StaffsApiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function staffs($page)
+    {
+        $staffs = StaffApi::with('dapertement')->paginate(10, ['*'], 'page', $page);
+        return response()->json([
+            'message' => 'success',
+            'data' => $staffs
+        ]);
+    }
+
     public function index()
     {
         $staffs = StaffApi::with('dapertement')->get();

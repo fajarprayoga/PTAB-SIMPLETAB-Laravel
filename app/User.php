@@ -36,6 +36,7 @@ class User extends Authenticatable
         'deleted_at',
         'remember_token',
         'email_verified_at',
+        '_id_onesignal'
     ];
 
     public function getEmailVerifiedAtAttribute($value)

@@ -13,6 +13,29 @@ class CustomersApiController extends Controller
 {
     
     use TraitModel;
+    public function customers(Request $request)
+    {
+        try {
+            $search = $request->search;
+            if($search !=''){
+                $customer = CustomerApi::WhereMaps('name',"%$search%", 'LIKE')->paginate(10, ['*'], 'page', $request->page);
+            }else{
+                $customer = CustomerApi::paginate(10, ['*'], 'page', $request->page);
+            }
+
+             return response()->json([
+                'message' => 'success',
+                'data' => $customer,
+                'page' => $request->page,
+                'seacrh' => $request->search
+             ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'failed',
+                'data' => $ex
+            ]);
+        }
+    }
 
     public function customers(Request $request)
     {
@@ -193,4 +216,6 @@ class CustomersApiController extends Controller
         }
 
     }
+
+    
 }

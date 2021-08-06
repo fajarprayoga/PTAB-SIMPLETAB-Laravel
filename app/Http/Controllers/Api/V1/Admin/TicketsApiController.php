@@ -15,6 +15,29 @@ class TicketsApiController extends Controller
 {
     use TraitModel;
 
+    public function tickets(Request $request)
+    {
+      try {
+          $status = $request->status;
+          if($status !=''){
+              $ticket = TicketApi::WhereMaps('status',"$status", '=')->orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
+          }else{
+              $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
+          }
+
+          return response()->json([
+              'message' => 'success',
+              'data' => $ticket,
+              'page' => $request->page,
+              'seacrh' => $request->search
+          ]);
+      } catch (QueryException $ex) {
+          return response()->json([
+              'message' => 'failed',
+              'data' => $ex
+          ]);
+      }
+    }
     public function index()
     {
         try {
@@ -204,9 +227,11 @@ class TicketsApiController extends Controller
     public function destroy(TicketApi $ticket)
     {
       try{
+        $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
         $ticket->delete();
         return response()->json([
-          'message' => 'Data Berhasil Di Hapus'
+          'message' => 'Data Berhasil Di Hapus',
+          'data' => $ticket_image
         ]);
       }
       catch(QueryException $e) {
