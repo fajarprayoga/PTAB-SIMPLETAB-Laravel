@@ -57,7 +57,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
 
     // staffs
     Route::resource('staffs', 'StaffsApiController');
-
+    Route::get('staffs/list/{page}', 'StaffsApiController@staffs');
     // ticket
     Route::resource('tickets', 'TicketsApiController');
     Route::post('ticket/list','TicketsApiController@tickets' );

@@ -17,35 +17,26 @@ class TicketsApiController extends Controller
 
     public function tickets(Request $request)
     {
-        try {
+      try {
           $status = $request->status;
-          $end = $request->end;
-          $start = $request->start;
-          $success = true;
           if($status !=''){
-              $ticket = TicketApi::WhereMaps('status', $status )->skip($start)->take($end)->orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->get();
+              $ticket = TicketApi::WhereMaps('status',"$status", '=')->orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
           }else{
-              $ticket = TicketApi::skip($start)->take($end)->orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->get();
+              $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
           }
 
-          if(count($ticket) <1){
-            $success = false;
-          }
           return response()->json([
               'message' => 'success',
               'data' => $ticket,
-              'start' => $start,
-              'end' => $end,
-              'status' =>$status,
-              'success' => $success ,
-              'count' => count($ticket)
+              'page' => $request->page,
+              'seacrh' => $request->search
           ]);
-          } catch (QueryException $ex) {
-              return response()->json([
-                  'message' => 'failed',
-                  'data' => $ex
-            ]);
-        }
+      } catch (QueryException $ex) {
+          return response()->json([
+              'message' => 'failed',
+              'data' => $ex
+          ]);
+      }
     }
     public function index()
     {
@@ -236,7 +227,7 @@ class TicketsApiController extends Controller
     public function destroy(TicketApi $ticket)
     {
       try{
-        // $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->get();
+        $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
         $ticket->delete();
         return response()->json([
           'message' => 'Data Berhasil Di Hapus',

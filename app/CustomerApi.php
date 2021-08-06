@@ -33,6 +33,7 @@ class CustomerApi extends Authenticatable
         '_password',
         '_gender',
         '_type',
+        '_id_onesignal',
     ];
 
     protected $maps = array('nomorrekening' => 'code',

@@ -28,12 +28,19 @@ class DapertementsApiController extends Controller
 
     public function index()
     {
-        $dapertements = DapertementApi::all();
-
-        return response()->json([
-            'message' => 'Sucess',
-            'data' => $dapertements
-        ]);
+        
+        try {
+            $dapertements = DapertementApi::all();
+            return response()->json([
+                'message' => 'Sucess',
+                'data' => $dapertements
+            ]);
+       } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Sucess',
+                'data' => $th
+            ]);
+       }
     }
 
     /**
