@@ -6,15 +6,17 @@ use App\Action;
 use App\Category;
 use App\Customer;
 use App\Dapertement;
-use App\Staff;
-use App\TblPemakaianAir;
-use App\TblStatussmPelanggan;
-use App\Ticket;
 use App\Gambarmeter;
 use App\Gambarmetersms;
 use App\MapKunjungan;
 use App\Pemakaianair;
+use App\Staff;
+use App\Statusonoff;
 use App\Subdapertement;
+use App\TblPemakaianAir;
+use App\TblStatussmPelanggan;
+use App\Ticket;
+use DB;
 use Illuminate\Database\QueryException;
 
 trait TraitModel
@@ -73,8 +75,8 @@ trait TraitModel
         $this->insupdCtmGambarmetersms($var);
         $this->insupdCtmMapKunjungan($var);
         $this->insupdCtmPemakaianair($var);
-        $this->pdam_tblstatussmpelanggan_ins_upd($var);
-        $this->pdam_tblstatusonoff_ins_upd($var);
+        $this->insupdCtmStatussmpelanggan($var);
+        $this->insupdCtmStatusonoff($var);
         //insert into tblpembayaran
         $this->pdam_tblpembayaran_ins_upd($var);
 
@@ -127,7 +129,7 @@ trait TraitModel
         $arrUnique['tahunrekening'] = $var['tahunrekening'];
         $arrUnique['filegambar'] = $var['filegambar'];
 
-        if ($gambarmeter = Gambarmeter::updateOrCreate($arrUnique,$arrQry)) {
+        if ($gambarmeter = Gambarmeter::updateOrCreate($arrUnique, $arrQry)) {
             $idgambar = $gambarmeter->idgambar;
             return $idgambar;
         } else {
@@ -150,11 +152,11 @@ trait TraitModel
         $arrUnique['tahunrekening'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($gambarmetersms = Gambarmetersms::updateOrCreate($arrUnique,$arrQry)) {
+        if ($gambarmetersms = Gambarmetersms::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
-        }       
+        }
 
     }
 
@@ -172,41 +174,100 @@ trait TraitModel
         $arrUnique['tahun'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($map_kunjungan = MapKunjungan::updateOrCreate($arrUnique,$arrQry)) {
+        if ($map_kunjungan = MapKunjungan::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
-        }  
+        }
 
     }
 
     public function insupdCtmPemakaianair($var)
     {
-        $arrCol = array("pencatatanmeter" . $var['bulanrekening'], "pemakaianair" . $var['bulanrekening'], "nomorrekening", "tahunrekening", "tglupdate", "operator", "_synced");
-        $arrVal = array("'" . $var['pencatatanmeter'] . "'", "'" . $var['pemakaianair'] . "'", "'" . $var['nomorrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['datecatatf1'] . "'", "'" . $var['operator'] . "'", "'0'");
-
-        $arrQry = array();
-        foreach ($arrCol as $key => $value) {
-            $arrQry[$value] = $arrVal[$key];
-        }
-        $arrUnique = array();
-        $arrUnique['bulan'] = $var['bulanrekening'];
-        $arrUnique['tahun'] = $var['tahunrekening'];
-        $arrUnique['nomorrekening'] = $var['nomorrekening'];
-
-        if ($pemakaianair = Pemakaianair::updateOrCreate($arrUnique,$arrQry)) {
-            return true;
+        $pemakaianair = Pemakaianair::where('tahunrekening', '=', $var['tahunrekening'])
+            ->where('nomorrekening', '=', $var['nomorrekening'])
+            ->first();
+        if ($pemakaianair === null) {
+            $result = DB::connection('mysql2')->table('tblpemakaianair')->insert([
+                'pencatatanmeter' . $var['bulanrekening'] => $var['pencatatanmeter'],
+                'pemakaianair' . $var['bulanrekening'] => $var['pemakaianair'],
+                'nomorrekening' => $var['nomorrekening'],
+                'tahunrekening' => $var['tahunrekening'],
+                'tglupdate' => $var['datecatatf1'],
+                'operator' => $var['operator'],
+                '_synced' => 0,
+            ]);
         } else {
-            return false;
-        }  
-
+            $result = DB::connection('mysql2')->table('tblpemakaianair')
+                ->where('tahunrekening', '=', $var['tahunrekening'])
+                ->where('nomorrekening', '=', $var['nomorrekening'])
+                ->update([
+                    'pencatatanmeter' . $var['bulanrekening'] => $var['pencatatanmeter'],
+                    'pemakaianair' . $var['bulanrekening'] => $var['pemakaianair'],
+                    'tglupdate' => $var['datecatatf1'],
+                    'operator' => $var['operator'],
+                    '_synced' => 0,
+                ]);
+        }
+        return true;
     }
 
     public function insupdCtmPsm($var)
     {
-        $arrCol = array("nomorrekening", "bulan", "tahun", "alasan", "tanggalsm", "operator");
-        $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'PSM baru'", "'" . $var['datecatatf3'] . "'", "'" . $var['operator'] . "'");
-        
+        // $arrCol = array("nomorrekening", "bulan", "tahun", "alasan", "tanggalsm", "operator");
+        // $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'PSM baru'", "'" . $var['datecatatf3'] . "'", "'" . $var['operator'] . "'");
+
+        // $arrQry = array();
+        // foreach ($arrCol as $key => $value) {
+        //     $arrQry[$value] = $arrVal[$key];
+        // }
+        // $arrUnique = array();
+        // $arrUnique['bulan'] = $var['bulanrekening'];
+        // $arrUnique['tahun'] = $var['tahunrekening'];
+        // $arrUnique['nomorrekening'] = $var['nomorrekening'];
+
+        // if ($pemakaianair = Psm::updateOrCreate($arrUnique, $arrQry)) {
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        return false;
+    }
+
+    public function insupdCtmStatussmpelanggan($var)
+    {
+        $tblstatussmpelanggan = TblStatussmPelanggan::where('bulan', '=', $var['bulanrekening'])
+            ->where('tahun', '=', $var['tahunrekening'])
+            ->where('nomorrekening', '=', $var['nomorrekening'])
+            ->first();
+        if ($tblstatussmpelanggan === null) {
+            $result = DB::connection('mysql2')->table('tblstatussmpelanggan')->insert([
+                'bulan' => $var['bulanrekening'],
+                'tahun' => $var['tahunrekening'],
+                'nomorrekening' => $var['nomorrekening'],
+                'statussm' => $var['namastatus'],
+                'operator' => $var['operator'],
+                '_synced' => 0,
+            ]);
+        } else {
+            $result = DB::connection('mysql2')->table('tblstatussmpelanggan')
+                ->where('bulan', '=', $var['bulanrekening'])
+                ->where('tahun', '=', $var['tahunrekening'])
+                ->where('nomorrekening', '=', $var['nomorrekening'])
+                ->update([
+                    'statussm' => $var['namastatus'],
+                    'operator' => $var['operator'],
+                    '_synced' => 0,
+                ]);
+        }
+        return true;
+    }
+
+    public function insupdCtmStatusonoff($var)
+    {
+        $arrCol = array("nomorrekening", "bulan", "tahun", "status", "_synced");
+        $arrVal = array($var['nomorrekening'], $var['bulanrekening'], $var['tahunrekening'], $var['statusonoff'], "0");
+
         $arrQry = array();
         foreach ($arrCol as $key => $value) {
             $arrQry[$value] = $arrVal[$key];
@@ -216,101 +277,42 @@ trait TraitModel
         $arrUnique['tahun'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($pemakaianair = Pemakaianair::updateOrCreate($arrUnique,$arrQry)) {
+        if ($map_kunjungan = Statusonoff::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
-        }  
-
-    }
-
-    public function pdam_tblstatussmpelanggan_ins_upd($model, $var)
-    {
-        $arrCol = array("nomorrekening", "bulan", "tahun", "statussm", "operator", "_synced");
-        $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['namastatus'] . "'", "'" . $var['operator'] . "'", "'0'");
-        //if exist
-        $tahun = $model->select_db_info("tblstatussmpelanggan", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "tahun");
-        $statussm = $model->select_db_info("tblstatussmpelanggan", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "statussm");
-        if ($tahun > 0) {
-            $arrgab = array("nomorrekening" . " = '" . $var['nomorrekening'] . "'", "bulan" . " = '" . $var['bulanrekening'] . "'", "tahun = '" . $var['tahunrekening'] . "'", "statussm = '" . $var['namastatus'] . "'", "operator = '" . $var['operator'] . "'", "_synced = '0'");
-            $where = "tahun = '" . $var['tahunrekening'] . "' AND bulan = '" . $var['bulanrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("tblstatussmpelanggan", $arrgab, $where)) {
-                //delete on tblpsm when old statussm ==106
-                if ($statussm == '106') {
-                    $where2 = "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'";
-                    $model->delete_db("tblpsm", $where2);
-                }
-                //insert on tblpsm when statussm ==106
-                if ($var['namastatus'] == '106') {
-                    $this->insupdCtmPsm($model, $var);
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("tblstatussmpelanggan", $arrCol, $arrVal)) {
-                //insert on tblpsm when statussm ==106
-                if ($var['namastatus'] == '106') {
-                    $this->insupdCtmPsm($model, $var);
-                }
-                return true;
-            } else {
-                return false;
-            }
         }
 
     }
 
-    public function pdam_tblstatusonoff_ins_upd($model, $var)
-    {
-        $arrCol = array("nomorrekening", "bulan", "tahun", "status", "_synced");
-        $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanrekening'] . "'", "'" . $var['tahunrekening'] . "'", "'" . $var['statusonoff'] . "'", "'0'");
-        //if exist
-        $tahun = $model->select_db_info("tblstatusonoff", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "tahun");
-        $status = $model->select_db_info("tblstatusonoff", "where bulan='" . $var['bulanrekening'] . "' and tahun='" . $var['tahunrekening'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "status");
-        if ($tahun > 0) {
-            $arrgab = array("nomorrekening" . " = '" . $var['nomorrekening'] . "'", "bulan" . " = '" . $var['bulanrekening'] . "'", "tahun = '" . $var['tahunrekening'] . "'", "status = '" . $var['statusonoff'] . "'", "_synced = '0'");
-            $where = "tahun = '" . $var['tahunrekening'] . "' AND bulan = '" . $var['bulanrekening'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("tblstatusonoff", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("tblstatusonoff", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-    }
-
-    public function pdam_tblpelanggan_tbljenispelanggan_get($model, $nomorrekening)
+    public function getCtmJenispelanggan($nomorrekening)
     {
         $return_obj = array();
-        $tblpelanggan_fetch = $model->select_db_join("tblpelanggan,tbljenispelanggan", "where tblpelanggan.idgol = tbljenispelanggan.id and tblpelanggan.nomorrekening='$nomorrekening'", "", "tbljenispelanggan.*,tblpelanggan.idgol,tblpelanggan.idareal,tblpelanggan.idbiro", "");
+        $tblpelanggan_fetch = DB::connection('mysql2')->table('tblpelanggan')
+            ->join('tbljenispelanggan', 'tblpelanggan.idgol', '=', 'tbljenispelanggan.id')
+            ->where('nomorrekening', $nomorrekening)
+            ->select('tbljenispelanggan.*', 'tblpelanggan.idgol', 'tblpelanggan.idareal', 'tblpelanggan.idbiro')
+            ->get();
         foreach ($tblpelanggan_fetch as $tblpelanggan_array) {
-            $return_obj['idgol'] = $tblpelanggan_array['idgol'];
-            $return_obj['idareal'] = $tblpelanggan_array['idareal'];
-            $return_obj['tarif01'] = $tblpelanggan_array['tarif01'];
-            $return_obj['tarif02'] = $tblpelanggan_array['tarif02'];
-            $return_obj['tarif03'] = $tblpelanggan_array['tarif03'];
-            $return_obj['tarif04'] = $tblpelanggan_array['tarif04'];
-            $return_obj['tarif05'] = $tblpelanggan_array['tarif05'];
-            $return_obj['tarif06'] = $tblpelanggan_array['tarif06'];
-            $return_obj['danameter'] = $tblpelanggan_array['danameter'];
-            $return_obj['adm'] = $tblpelanggan_array['danaadministrasi'];
-            $return_obj['beban'] = $tblpelanggan_array['beban'];
-            $return_obj['denda'] = $tblpelanggan_array['denda'];
-            $return_obj['batas1'] = $tblpelanggan_array['batastarif1'];
-            $return_obj['batas2'] = $tblpelanggan_array['batastarif2'];
-            $return_obj['batas3'] = $tblpelanggan_array['batastarif3'];
-            $return_obj['batas4'] = $tblpelanggan_array['batastarif4'];
-            $return_obj['batas5'] = $tblpelanggan_array['batastarif5'];
-            $return_obj['batas6'] = $tblpelanggan_array['batastarif6'];
-            $return_obj['idbiro'] = $tblpelanggan_array['idbiro'];
+            $return_obj['idgol'] = $tblpelanggan_array->idgol;
+            $return_obj['idareal'] = $tblpelanggan_array->idareal;
+            $return_obj['tarif01'] = $tblpelanggan_array->tarif01;
+            $return_obj['tarif02'] = $tblpelanggan_array->tarif02;
+            $return_obj['tarif03'] = $tblpelanggan_array->tarif03;
+            $return_obj['tarif04'] = $tblpelanggan_array->tarif04;
+            $return_obj['tarif05'] = $tblpelanggan_array->tarif05;
+            $return_obj['tarif06'] = $tblpelanggan_array->tarif06;
+            $return_obj['danameter'] = $tblpelanggan_array->danameter;
+            $return_obj['adm'] = $tblpelanggan_array->danaadministrasi;
+            $return_obj['beban'] = $tblpelanggan_array->beban;
+            $return_obj['denda'] = 0;
+            $return_obj['batas1'] = $tblpelanggan_array->batastarif1;
+            $return_obj['batas2'] = $tblpelanggan_array->batastarif2;
+            $return_obj['batas3'] = $tblpelanggan_array->batastarif3;
+            $return_obj['batas4'] = $tblpelanggan_array->batastarif4;
+            $return_obj['batas5'] = $tblpelanggan_array->batastarif5;
+            $return_obj['batas6'] = $tblpelanggan_array->batastarif6;
+            $return_obj['idbiro'] = $tblpelanggan_array->idbiro;
         }
 
         return $return_obj;
@@ -362,7 +364,7 @@ trait TraitModel
 
     public function pdam_tblpembayaran_ins_upd($model, $var)
     {
-        $tblpelanggan_arr = $this->pdam_tblpelanggan_tbljenispelanggan_get($model, $var['nomorrekening']);
+        $tblpelanggan_arr = $this->getCtmJenispelanggan($model, $var['nomorrekening']);
         //hitung rp-tagihan
         $tblpelanggan_arr['pemakaianair'] = $var['pemakaianair'];
         $pdam_tagihan_arr = $this->pdam_tagihan_get($model, $tblpelanggan_arr);
