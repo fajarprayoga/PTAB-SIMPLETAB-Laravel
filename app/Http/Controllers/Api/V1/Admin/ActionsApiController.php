@@ -173,7 +173,7 @@ class ActionsApiController extends Controller
     {
 
         try {
-            $action = ActionApi::where('id', $action_id)->with('staff')->first();
+            $action = ActionApi::where('id', $action_id)->with('staff')->with('dapertement')->first();
             return response()->json([
                 'message' => 'sucssess',
                 'data' => $action

@@ -29,6 +29,7 @@ class CustomersApiController extends Controller
             if(Hash::check($request->password, $customer->password)){
                 //  $this->smsApi($customer->phone, $request->OTP);
                 Auth::login($customer);
+                $customer->update(['_id_onesignal' => $request->_id_onesignal]);
                 $token = Auth::user()->createToken('authToken')->accessToken;
 
                 // $data = [
@@ -42,6 +43,7 @@ class CustomersApiController extends Controller
                     'message' => 'success login',
                     'token' => $token,
                     'data' => $customer,
+                    'sugnal' => $request->_id_onesignal
                 ]);
             }else{
                 return response()->json([
@@ -103,7 +105,7 @@ class CustomersApiController extends Controller
             return response()->json([
                 'message' => 'Registrasi Berhasil',
                 'token' => $token,
-                'data' => $customer
+                'data' => $customer,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
