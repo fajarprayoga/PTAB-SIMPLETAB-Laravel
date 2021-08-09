@@ -16,10 +16,15 @@ class TicketApi extends Model
         'lng',
         'status',
         'category_id',
+        'dapertement_id',
         'customer_id',
         'description'
     ];
 
+    public function department() { 
+        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
+    }
+    
     public function customer() { 
         return $this->belongsTo(CustomerApi::class, 'customer_id', 'nomorrekening'); 
     }
@@ -34,5 +39,37 @@ class TicketApi extends Model
     public function ticket_image()
     {
         return $this->hasMany('App\Ticket_Image', 'ticket_id', 'id');
+    }
+
+    public function scopeFilterStatus($query, $status)
+    {
+        if($status !=''){
+        $query->where('status', $status);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterDepartment($query, $department)
+    {
+        if($department !=''){
+        $query->where('dapertement_id', $department);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterJoinStatus($query, $status)
+    {
+        if($status !=''){
+        $query->where('tickets.status', $status);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterJoinDepartment($query, $department)
+    {
+        if($department !=''){
+        $query->where('actions.dapertement_id', $department);        
+        }
+        return $query;
     }
 }

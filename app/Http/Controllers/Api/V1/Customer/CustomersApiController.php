@@ -130,7 +130,7 @@ class CustomersApiController extends Controller
             'md5' => $md5,
         );
 
-        $url = 'https://tab-jdol.com/gs-gateway-sms-v3/api.php';
+        $url = 'https://ptab-vps.com/gs-gateway-sms-v3/api.php';
 
         //open connection
         $ch = curl_init();
