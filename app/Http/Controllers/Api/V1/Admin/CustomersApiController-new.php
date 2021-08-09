@@ -13,7 +13,6 @@ class CustomersApiController extends Controller
 {
     
     use TraitModel;
-
     public function customers(Request $request)
     {
         try {
@@ -137,35 +136,35 @@ class CustomersApiController extends Controller
     public function update(Request $request)
     {
         $customer = CustomerApi::find($request->code);
-        $rules=array(
-            'email' => 'required|email',
-            'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening,'.$request->code.',nomorrekening',
-            'name' => 'required',
-            'phone' => 'required|unique:mysql2.tblpelanggan,telp,'.$request->code.',nomorrekening',
-            'type' => 'required',
-            'gender' => 'required',
-            'address' => 'required'
-        );
-        $validator=\Validator::make($request->all(),$rules);
-        if($validator->fails())
-        {
-            $messages=$validator->messages();
-            $errors=$messages->all();
-            return response()->json([
-                'message' => $errors,
-                'data' => $customer
-            ]);
-        }
+        // $rules=array(
+        //     'email' => 'required|email',
+        //     'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening,'.$request->code,
+        //     'name' => 'required',
+        //     'phone' => 'required|unique:mysql2.tblpelanggan,telp,'.$request->code,
+        //     'type' => 'required',
+        //     'gender' => 'required',
+        //     'address' => 'required'
+        // );
+        // $validator=\Validator::make($request->all(),$rules);
+        // if($validator->fails())
+        // {
+        //     $messages=$validator->messages();
+        //     $errors=$messages->all();
+        //     return response()->json([
+        //         'message' => $errors,
+        //         'data' => $customer
+        //     ]);
+        // }
         
-        $customer->name = $request->name;
-        $customer->code = $request->code;
-        $customer->email = $request->email;
-        $customer->phone = $request->phone;
-        $customer->type = $request->type;
-        $customer->gender = $request->gender;
-        $customer->address = $request->address;
-        $customer->_synced = 0;
-        $customer->save();
+        // $customer->name = $request->name;
+        // $customer->code = $request->code;
+        // $customer->email = $request->email;
+        // $customer->phone = $request->phone;
+        // $customer->type = $request->type;
+        // $customer->gender = $request->gender;
+        // $customer->address = $request->address;
+        // $customer->_synced = 0;
+        // $customer->save();
 
         return response()->json([
             'message' => 'Data Customer Update Success',

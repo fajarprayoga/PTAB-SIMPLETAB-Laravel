@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\ActionApi;
 use Illuminate\Database\QueryException;
+use App\TicketApi;
 class SubDapertementsApiController extends Controller
 {
     public function actionListSubDapertement($action_id)
@@ -108,6 +109,10 @@ class SubDapertementsApiController extends Controller
                     );
 
                     $action->update($dataNewAction);
+                    //update ticket status
+                    $ticket = TicketApi::find($action->ticket_id);
+                    $ticket->status = $statusAction;
+                    $ticket->save();
     
                     return response()->json([
                         'message' => 'Status di ubah ',

@@ -163,7 +163,7 @@ class Customer extends Model
         return $query;
     }
 
-    public function scopeWhereMaps($query, $fld, $comp, $operator='=')
+    public function scopeWhereMaps($query, $fld, $comp, $operator = '=')
     {
         if ($fld != 'id') {
             $fld_db = $this->fldMaps($fld);
@@ -186,7 +186,11 @@ class Customer extends Model
         } else {
             $fld_db = 'nomorrekening';
         }
-        $query->orderByRaw('CAST('.$fld_db.' AS DECIMAL) '.$sort_type);
+        $query->orderByRaw('CAST(' . $fld_db . ' AS DECIMAL) ' . $sort_type);
         return $query;
+    }
+
+    public function jenispelanggan() { 
+        return $this->belongsTo(Jenispelanggan::class, 'idgol', 'id'); 
     }
 }
