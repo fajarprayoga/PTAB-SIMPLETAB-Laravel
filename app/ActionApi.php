@@ -14,6 +14,7 @@ class ActionApi extends Model
         'ticket_id',
         'start',
         'end',
+        'memo',
         'image'
     ];
 

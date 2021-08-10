@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\api\v1\admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\ActionApi;
+use App\Http\Controllers\Controller;
 use App\StaffApi;
 use App\TicketApi;
-use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
+use App\User;
 use DB;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Berkayk\OneSignal\OneSignalClient;
+use OneSignal;
 
 class ActionsApiController extends Controller
 {
@@ -21,24 +24,23 @@ class ActionsApiController extends Controller
      */
     public function index()
     {
-        
+
     }
 
-    public function list($ticket_id)
-    {
+    function list($ticket_id) {
         try {
             $actions = ActionApi::with('staff')->with('dapertement')->with('ticket')->where('ticket_id', $ticket_id)->orderBy('start', 'desc')->get();
             return response()->json([
-              'message' => 'Data Ticket',
-              'data' => $actions
+                'message' => 'Data Ticket',
+                'data' => $actions,
             ]);
-          }catch (QueryException $ex) {
+        } catch (QueryException $ex) {
             return response()->json([
-              'message' => 'Gagal Mengambil data',
-              'data' => $ex
+                'message' => 'Gagal Mengambil data',
+                'data' => $ex,
             ]);
-          }
-        
+        }
+
     }
 
     /**
@@ -62,21 +64,20 @@ class ActionsApiController extends Controller
         $dateNow = date('Y-m-d H:i:s');
 
         $data = $request->all();
-     
-        $rules=array(
+
+        $rules = array(
             'description' => 'required',
             'ticket_id' => 'required',
             'dapertement_id' => 'required',
         );
 
-        $validator=\Validator::make($data,$rules);
-        if($validator->fails())
-        {
-            $messages=$validator->messages();
-            $errors=$messages->all();
+        $validator = \Validator::make($data, $rules);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $request->all()
+                'data' => $request->all(),
             ]);
         }
 
@@ -85,9 +86,38 @@ class ActionsApiController extends Controller
 
         $action = ActionApi::create($data);
 
+        //send notif to humas
+        $admin = User::where('dapertement_id', 1)->first();
+        $id_onesignal = $admin->_id_onesignal;
+        $message = 'Tindakan Baru Dibuat : '.$request->description;
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );}
+
+        //send notif to departement terkait
+        $admin_arr = User::where('dapertement_id', $request->dapertement_id)->get();
+        foreach ($admin_arr as $key => $admin) {
+            $id_onesignal = $admin->_id_onesignal;
+            $message = 'Tindakan Baru Dibuat : ' . $request->description;
+            if (!empty($id_onesignal)) {
+                OneSignal::sendNotificationToUser(
+                    $message,
+                    $id_onesignal,
+                    $url = null,
+                    $data = null,
+                    $buttons = null,
+                    $schedule = null
+                );}}
+
         return response()->json([
             'message' => 'Data Dapertement Add Success',
-            'data' => $action
+            'data' => $action,
         ]);
     }
 
@@ -122,26 +152,54 @@ class ActionsApiController extends Controller
      */
     public function update(Request $request, ActionApi $action)
     {
-        $rules=array(
+        $rules = array(
             'description' => 'required',
             'dapertement_id' => 'required',
         );
 
-        $validator=\Validator::make($request->all(),$rules);
-        if($validator->fails())
-        {
-            $messages=$validator->messages();
-            $errors=$messages->all();
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $request->all()
+                'data' => $request->all(),
             ]);
         }
+
+        //send notif to humas
+        $admin = User::where('dapertement_id', 1)->first();
+        $id_onesignal = $admin->_id_onesignal;
+        $message = 'Tindakan Baru Diupdate : '.$request->description;
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );}
+        
+        //send notif to departement terkait
+        $admin_arr = User::where('dapertement_id', $request->dapertement_id)->get();
+        foreach ($admin_arr as $key => $admin) {
+            $id_onesignal = $admin->_id_onesignal;
+            $message = 'Tindakan Baru Diupdate : ' . $request->description;
+            if (!empty($id_onesignal)) {
+                OneSignal::sendNotificationToUser(
+                    $message,
+                    $id_onesignal,
+                    $url = null,
+                    $data = null,
+                    $buttons = null,
+                    $schedule = null
+                );}}
 
         $action->update($request->all());
         return response()->json([
             'message' => 'Data Dapertement Edit Success',
-            'data' => $action
+            'data' => $action,
         ]);
 
     }
@@ -152,20 +210,19 @@ class ActionsApiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ActionApi  $action)
+    public function destroy(ActionApi $action)
     {
-        try{
-            
+        try {
+
             $action->delete();
             return response()->json([
                 'message' => 'Staff berhasil di hapus',
             ]);
-        }
-        catch(QueryException $e) {
-           return response()->json([
-               'message' => 'data masih ada dalam daftar keluhan',
-               'data' => $e
-           ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'message' => 'data masih ada dalam daftar keluhan',
+                'data' => $e,
+            ]);
         }
     }
 
@@ -176,13 +233,13 @@ class ActionsApiController extends Controller
             $action = ActionApi::where('id', $action_id)->with('staff')->with('dapertement')->first();
             return response()->json([
                 'message' => 'sucssess',
-                'data' => $action
+                'data' => $action,
             ]);
-            
+
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'sucssess',
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
 
@@ -192,204 +249,247 @@ class ActionsApiController extends Controller
 
     public function actionStaffLists($action_id)
     {
-       try {
+        try {
             $action = ActionApi::findOrFail($action_id);
 
             $action_staffs = ActionApi::where('id', $action_id)->with('staff')->first();
 
             $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->get();
-            
+
             // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
             $action_staff_lists = DB::table('staffs')
-            ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
-            ->get();
+                ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
+                ->get();
 
             $data = [
                 'action' => $action,
                 'action_staffs' => $action_staffs,
                 'staffs' => $staffs,
-                'action_staff_lists' => $action_staff_lists
+                'action_staff_lists' => $action_staff_lists,
             ];
 
             return response()->json([
                 'message' => 'success',
-                'data' => $data
+                'data' => $data,
             ]);
-       } catch (QueryException $ex) {
+        } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal ambil data',
-                'data' => $ex
+                'data' => $ex,
             ]);
-       }
+        }
     }
-
 
     public function actionStaffStore(Request $request)
     {
 
         try {
-            $rules=array(
+            $rules = array(
                 'action_id' => 'required',
-                'staff_id' => 'required'
+                'staff_id' => 'required',
             );
 
-
-    
-            $validator=\Validator::make($request->all(),$rules);
-            if($validator->fails())
-            {
-                $messages=$validator->messages();
-                $errors=$messages->all();
+            $validator = \Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                $messages = $validator->messages();
+                $errors = $messages->all();
                 return response()->json([
                     'message' => $errors,
-                    'data' => $request->all()
+                    'data' => $request->all(),
                 ]);
             }
-    
-            $action = ActionApi::findOrFail($request->action_id);
-    
 
+            $action = ActionApi::with('ticket')->find($request->action_id);
 
-            if($action){
-                $cek =  $action->staff()->attach($request->staff_id, [ 'status' => 'pending' ]);
-    
-                if($cek){
-                    $action = Action::where('id',$request->action_id)->with('staff')->first();
-        
+            if ($action) {
+                $cek = $action->staff()->attach($request->staff_id, ['status' => 'pending']);
+
+                if ($cek) {
+                    $action = Action::where('id', $request->action_id)->with('staff')->first();
+
                     // dd($action->staff[0]->pivot->status);
                     $cekAllStatus = false;
                     $statusAction = 'close';
-                    for ($status=0;  $status < count($action->staff) ; $status++) { 
+                    for ($status = 0; $status < count($action->staff); $status++) {
                         // dd($action->staff[$status]->pivot->status);
-                        if($action->staff[$status]->pivot->status =='pending' ){
+                        if ($action->staff[$status]->pivot->status == 'pending') {
                             $statusAction = 'pending';
                             break;
-                        }else if($action->staff[$status]->pivot->status =='active' ){
-                          
+                        } else if ($action->staff[$status]->pivot->status == 'active') {
+
                             $statusAction = 'active';
                         }
                     }
-                    
+
                     $dateNow = date('Y-m-d H:i:s');
-        
+
                     $action->update([
                         'status' => $statusAction,
-                        'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                        'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                     ]);
                 }
 
+                //send notif to humas
+        $admin = User::where('dapertement_id', 1)->first();
+        $id_onesignal = $admin->_id_onesignal;
+        $message = 'Petugas Baru Dipilih : '.$action->ticket->description;
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );}
+                
+                //send notif to departement terkait
+                $admin_arr = User::where('dapertement_id', $action->dapertement_id)->get();
+                foreach ($admin_arr as $key => $admin) {
+                    $id_onesignal = $admin->_id_onesignal;
+                    $message = 'Petugas Baru Dipilih : ' . $action->ticket->description;
+                    if (!empty($id_onesignal)) {
+                        OneSignal::sendNotificationToUser(
+                            $message,
+                            $id_onesignal,
+                            $url = null,
+                            $data = null,
+                            $buttons = null,
+                            $schedule = null
+                        );}}
+
                 return response()->json([
                     'message' => 'staff Berhasil di tambahkan ',
-                    'data' => $action
+                    'data' => $action,
                 ]);
             }
-
 
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal tambah staff ',
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
 
-       
     }
-
 
     public function actionStaffUpdate(Request $request)
     {
         try {
 
-            $rules=array(
+            $rules = array(
                 'action_id' => 'required',
                 'staff_id' => 'required',
-                'status' => 'required'
+                'status' => 'required',
             );
 
-
-    
-            $validator=\Validator::make($request->all(),$rules);
-            if($validator->fails())
-            {
-                $messages=$validator->messages();
-                $errors=$messages->all();
+            $validator = \Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                $messages = $validator->messages();
+                $errors = $messages->all();
                 return response()->json([
                     'message' => $errors,
-                    'data' => $request->all()
+                    'data' => $request->all(),
                 ]);
             }
-    
 
-            $action = ActionApi::where('id',$request->action_id)->with('staff')->first();
+            $action = ActionApi::where('id', $request->action_id)->with('ticket')->with('staff')->first();
             $idStaff = $request->staff_id;
-            if($action){
-                $cek = $action->staff()->updateExistingPivot($request->staff_id, [ 'status' => $request->status ]);
-            //    $cek =  $action->staff()->sync([$idStaff => [ 'status' => $request->status] ], false);
+            if ($action) {
+                $cek = $action->staff()->updateExistingPivot($request->staff_id, ['status' => $request->status]);
+                //    $cek =  $action->staff()->sync([$idStaff => [ 'status' => $request->status] ], false);
             }
-    
-            if($cek){
-                $action = ActionApi::where('id',$request->action_id)->with('staff')->first();
-    
-            //     // dd($action->staff[0]->pivot->status);
+
+            if ($cek) {
+                $action = ActionApi::where('id', $request->action_id)->with('ticket')->with('staff')->first();
+
+                //     // dd($action->staff[0]->pivot->status);
                 $cekAllStatus = false;
                 $statusAction = 'close';
-                for ($status=0;  $status < count($action->staff) ; $status++) { 
+                for ($status = 0; $status < count($action->staff); $status++) {
                     // dd($action->staff[$status]->pivot->status);
-                    if($action->staff[$status]->pivot->status =='pending' ){
+                    if ($action->staff[$status]->pivot->status == 'pending') {
                         $statusAction = 'pending';
                         break;
-                    }else if($action->staff[$status]->pivot->status =='active' ){
-                      
+                    } else if ($action->staff[$status]->pivot->status == 'active') {
+
                         $statusAction = 'active';
                     }
                 }
-                
+
                 $dateNow = date('Y-m-d H:i:s');
-    
+
                 $action->update([
                     'status' => $statusAction,
-                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 ]);
 
                 // update ticket
                 $statusTicket = 'close';
-                if($action){
-                    $actionStatusAll = ActionApi::where('ticket_id', $action->ticket_id)->get();
-        
-                    for($i = 0; $i < count($actionStatusAll); $i++){
-                        if($actionStatusAll[$i]->status == 'pending'){
+                if ($action) {
+                    $actionStatusAll = ActionApi::where('ticket_id', $action->ticket_id)->with('ticket')->get();
+
+                    for ($i = 0; $i < count($actionStatusAll); $i++) {
+                        if ($actionStatusAll[$i]->status == 'pending') {
                             $statusTicket = 'pending';
                             break;
-                        }else if($actionStatusAll[$i]->status == 'active'){
+                        } else if ($actionStatusAll[$i]->status == 'active') {
                             $statusTicket = 'active';
                         }
                     }
-        
+
                     $ticket = TicketApi::findOrFail($action->ticket_id);
-        
+
                     $ticket->update([
-                        'status' => $statusTicket
+                        'status' => $statusTicket,
                     ]);
                     // $actionStatusAll->update([
                     //     'status' => $statusTicket,
                     // ]);
-        
+
                     // dd($statusTicket);
                 }
-        
+
+                $admin = User::where('dapertement_id', 1)->first();
+        $id_onesignal = $admin->_id_onesignal;
+        $message = 'Petugas Diupdate : '.$action->ticket->description;
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );}
+                
+                //send notif to departement terkait
+                $admin_arr = User::where('dapertement_id', $action->dapertement_id)->get();
+                foreach ($admin_arr as $key => $admin) {
+                    $id_onesignal = $admin->_id_onesignal;
+                    $message = 'Petugas Diupdate : ' . $action->ticket->description;
+                    if (!empty($id_onesignal)) {
+                        OneSignal::sendNotificationToUser(
+                            $message,
+                            $id_onesignal,
+                            $url = null,
+                            $data = null,
+                            $buttons = null,
+                            $schedule = null
+                        );}}
 
                 return response()->json([
                     'message' => 'Status di ubah ',
-                    'data' => $action
+                    'data' => $action,
                 ]);
-            }else{
+            } else {
                 return $request->all();
             }
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal tambah staff ',
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
     }
@@ -397,47 +497,47 @@ class ActionsApiController extends Controller
     public function actionStaffDestroy($action_id, $staff_id)
     {
         // abort_unless(\Gate::allows('action_staff_delete'), 403);
-    
-       try {
-        $action = ActionApi::findOrFail($action_id);
 
-            if($action){
+        try {
+            $action = ActionApi::findOrFail($action_id);
+
+            if ($action) {
                 $cek = $action->staff()->detach($staff_id);
 
-                if($cek){
-                    $action = ActionApi::where('id',$action_id)->with('staff')->first();
-        
+                if ($cek) {
+                    $action = ActionApi::where('id', $action_id)->with('staff')->first();
+
                     // dd($action->staff[0]->pivot->status);
                     $cekAllStatus = false;
                     $statusAction = 'close';
-                    for ($status=0;  $status < count($action->staff) ; $status++) { 
+                    for ($status = 0; $status < count($action->staff); $status++) {
                         // dd($action->staff[$status]->pivot->status);
-                        if($action->staff[$status]->pivot->status =='pending' ){
+                        if ($action->staff[$status]->pivot->status == 'pending') {
                             $statusAction = 'pending';
                             break;
-                        }else if($action->staff[$status]->pivot->status =='active' ){
-                        
+                        } else if ($action->staff[$status]->pivot->status == 'active') {
+
                             $statusAction = 'active';
                         }
                     }
-                    
+
                     $dateNow = date('Y-m-d H:i:s');
-        
+
                     $action->update([
                         'status' => $statusAction,
-                        'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                        'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                     ]);
 
                     return response()->json([
                         'message' => 'Berhasil di hapus ',
-                        'data' => $action
+                        'data' => $action,
                     ]);
                 }
             }
         } catch (QueryException $th) {
             return response()->json([
                 'message' => 'gagal tambah staff ',
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
     }
