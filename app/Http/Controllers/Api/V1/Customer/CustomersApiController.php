@@ -94,6 +94,7 @@ class CustomersApiController extends Controller
         $customer->gender = $request->gender;
         $customer->address = $request->address;
         $customer->_synced = 0;
+        $customer->_id_onesignal = $request->_id_onesignal;
         
         try {
             $customer->save();

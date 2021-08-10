@@ -36,7 +36,10 @@ class AdminApiController extends Controller
                 Auth::login($admin);
                 $token = Auth::user()->createToken('authToken')->accessToken;
 
-                $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                if(!empty($request->_id_onesignal)){
+
+                    $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                }
                 return response()->json([
                     'success' =>  true,
                     'message' => 'success login',
