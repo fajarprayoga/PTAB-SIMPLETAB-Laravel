@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Subdapertement extends Model
+class SubdapertementApi extends Model
 {
     protected $table = 'subdapertements';
     protected $fillable = [
@@ -15,6 +15,6 @@ class Subdapertement extends Model
     ];
 
     public function dapertement() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
     }
 }

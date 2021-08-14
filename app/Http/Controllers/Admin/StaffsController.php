@@ -11,11 +11,20 @@ use App\Staff;
 use Yajra\DataTables\Facades\DataTables;
 use App\Traits\TraitModel;
 use Illuminate\Database\QueryException;
+use App\Subdapertement;
 
 class StaffsController extends Controller
 {
     use TraitModel;
 
+    public function getSubdapertement(Request $request)
+    {
+        $subdapertements = Subdapertement::where('dapertement_id', $request->dapertement_id)
+            ->pluck('name', 'id');
+    
+        return response()->json($subdapertements);
+    }
+    
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -23,9 +32,9 @@ class StaffsController extends Controller
             if(request()->input('dapertement_id')!=""){
                 $dapertement_id = request()->input('dapertement_id'); 
     
-                $qry = Staff::where('dapertement_id', $dapertement_id);
+                $qry = Staff::where('dapertement_id', $dapertement_id)->with('dapertement')->with('subdapertement');
             }else{
-                $qry = Staff::get();
+                $qry = Staff::with('dapertement')->with('subdapertement')->get();
             }  
 
             $table = Datatables::of($qry);
@@ -57,6 +66,10 @@ class StaffsController extends Controller
 
             $table->editColumn('dapertement', function ($row) {
                 return $row->dapertement ? $row->dapertement->name : "";
+            });
+
+            $table->editColumn('subdapertement', function ($row) {
+                return $row->subdapertement ? $row->subdapertement->name : "";
             });
             
             $table->editColumn('phone', function ($row) {
@@ -106,8 +119,9 @@ class StaffsController extends Controller
         $staff = Staff::findOrFail($id);
 
         $dapertements = Dapertement::all();
+        $subdapertements = Subdapertement::all();
 
-        return view('admin.staffs.edit', compact('staff', 'dapertements'));
+        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements'));
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)

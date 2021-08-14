@@ -57,7 +57,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
 
     // staffs
     Route::resource('staffs', 'StaffsApiController');
-    Route::get('staffs/list/{page}', 'StaffsApiController@staffs');
+    Route::post('staffs/list', 'StaffsApiController@staffs');
     // ticket
     Route::resource('tickets', 'TicketsApiController');
     Route::post('ticket/list','TicketsApiController@tickets' );
@@ -70,6 +70,10 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('actionStaffStore', 'ActionsApiController@actionStaffStore');
     Route::put('actionStaffUpdate', 'ActionsApiController@actionStaffUpdate');
     Route::delete('actionStaffDestroy/{action}/{staff}', 'ActionsApiController@actionStaffDestroy');
+
+    // sub dapettement
+    Route::resource('subdapertements', 'SubdapertementsApiController');
+    Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');
 });
 
 

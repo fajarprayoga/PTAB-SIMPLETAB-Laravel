@@ -8,6 +8,8 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Role;
 use App\User;
+use App\Dapertement;
+use App\Subdapertement;
 
 class UsersController extends Controller
 {
@@ -15,7 +17,7 @@ class UsersController extends Controller
     {
         abort_unless(\Gate::allows('user_access'), 403);
 
-        $users = User::all();
+        $users = User::with('dapertement')->with('subdapertement')->get();
 
         return view('admin.users.index', compact('users'));
     }
@@ -25,8 +27,9 @@ class UsersController extends Controller
         abort_unless(\Gate::allows('user_create'), 403);
 
         $roles = Role::all()->pluck('title', 'id');
+        $dapertements = Dapertement::all();
 
-        return view('admin.users.create', compact('roles'));
+        return view('admin.users.create', compact('roles','dapertements'));
     }
 
     public function store(StoreUserRequest $request)
@@ -46,8 +49,10 @@ class UsersController extends Controller
         $roles = Role::all()->pluck('title', 'id');
 
         $user->load('roles');
+        $dapertements = Dapertement::all();
+        $subdapertements = Subdapertement::all();
 
-        return view('admin.users.edit', compact('roles', 'user'));
+        return view('admin.users.edit', compact('roles', 'user', 'dapertements', 'subdapertements'));
     }
 
     public function update(UpdateUserRequest $request, User $user)

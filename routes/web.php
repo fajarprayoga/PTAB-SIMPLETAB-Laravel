@@ -86,5 +86,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('subdapertements', 'SubdapertementsController');
 
     Route::delete('subdapertements/destroy', 'SubdapertementsController@massDestroy')->name('subdapertements.massDestroy');
+
+    Route::get('get-subdapertement', 'StaffsController@getSubdapertement')->name('staffs.subdepartment');
     
 });

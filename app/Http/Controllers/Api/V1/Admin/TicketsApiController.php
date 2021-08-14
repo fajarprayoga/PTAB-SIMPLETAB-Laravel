@@ -179,6 +179,10 @@ class TicketsApiController extends Controller
 
         }
 
+        if(!isset($dataForm->dapertement_id) && $dataForm->dapertement_id == ''){
+            $dataForm->dapertement_id = 1;
+        }
+
         $data = array(
             'code' => $code,
             'title' => $dataForm->title,
@@ -189,6 +193,7 @@ class TicketsApiController extends Controller
             'customer_id' => $dataForm->customer_id,
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
+            'dapertement_id' => $dataForm->dapertement_id,
         );
 
         try {

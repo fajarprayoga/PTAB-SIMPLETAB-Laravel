@@ -375,7 +375,8 @@ return [
         'fields' => [
             'code' => 'Kode',
             'name' => 'Nama Sub Departemen',
-            'description' => 'Deskripsi'
+            'description' => 'Deskripsi',
+            'dapertement' => 'Deskripsi'
         ]
     ],
     'staff' => [
@@ -387,6 +388,7 @@ return [
             'description' => 'Deskripsi',
             'phone' => 'No Ponsel',
             'dapertement' => "Dapertemen",
+            'subdapertement' => "Sub Dapertemen",
         ]
     ],
     'ticket' => [

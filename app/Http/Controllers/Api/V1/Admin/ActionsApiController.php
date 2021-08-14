@@ -254,7 +254,7 @@ class ActionsApiController extends Controller
 
             $action_staffs = ActionApi::where('id', $action_id)->with('staff')->first();
 
-            $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->get();
+            $staffs = StaffApi::where('subdapertement_id', $action->subdapertement_id)->get();
 
             // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 

@@ -11,11 +11,16 @@ class Staff extends Model
         'code',
         'name',
         'phone',
-        'dapertement_id'
+        'dapertement_id',
+        'subdapertement_id'
     ];
 
     public function dapertement() { 
-        return $this->belongsTo('App\Dapertement')->select('id', 'name'); 
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    }
+
+    public function subdapertement() { 
+        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id'); 
     }
 
     public function action()

@@ -20,11 +20,11 @@
                 @endif
             </div>
             <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
-                <label for="dapertement">{{ trans('global.ticket.fields.dapertement') }}*</label>
+                <label for="dapertement">{{ trans('global.subdapertement.fields.dapertement') }}*</label>
                 <select id="dapertement" name="dapertement_id" class="form-control" value="{{ old('dapertement', isset($subdapertement) ? $subdapertement->dapertement : '') }}">
                     <option value="">--Pilih dapertement--</option>
                     @foreach ($dapertements as $key=>$dapertement )
-                        <option value="{{$dapertement->id}}" {{$dapertement->id == $subdapertement->dapertement->id ? 'selected' : ''}} >{{$dapertement->name}}</option>
+                        <option value="{{$dapertement->id}}" {{$dapertement->id == $subdapertement->dapertement_id ? 'selected' : ''}} >{{$dapertement->name}}</option>
                     @endforeach
                 </select>
                 @if($errors->has('dapertement'))

@@ -59,6 +59,9 @@
                             {{ trans('global.staff.fields.dapertement') }}
                         </th>
                         <th>
+                            {{ trans('global.staff.fields.subdapertement') }}
+                        </th>
+                        <th>
                             {{ trans('global.staff.fields.phone') }}
                         </th>
                         <th>
@@ -136,6 +139,7 @@
         { data: 'code', name: 'code' },
         { data: 'name', name: 'name' },
         { data: 'dapertement', name: 'dapertement' },
+        { data: 'subdapertement', name: 'subdapertement' },
         { data: 'phone', name: 'phone' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],

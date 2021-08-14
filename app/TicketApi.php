@@ -18,7 +18,8 @@ class TicketApi extends Model
         'category_id',
         'dapertement_id',
         'customer_id',
-        'description'
+        'description',
+        'area'
     ];
 
     public function department() { 

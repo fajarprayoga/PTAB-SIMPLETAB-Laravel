@@ -34,6 +34,9 @@
                             {{ trans('global.subdapertement.fields.code') }}
                         </th>
                         <th>
+                            {{ trans('global.dapertement.fields.name') }}
+                        </th>
+                        <th>
                             {{ trans('global.subdapertement.fields.name') }}
                         </th>
                         <th>
@@ -52,6 +55,9 @@
                             </td>
                             <td>
                             {{ $subdapertement->code ?? '' }}
+                            </td>
+                            <td>
+                            {{ $subdapertement->dapertement->name ?? '' }}
                             </td>
                             <td>
                             {{ $subdapertement->name ?? '' }}

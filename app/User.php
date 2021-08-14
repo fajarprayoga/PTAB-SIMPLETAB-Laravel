@@ -36,8 +36,18 @@ class User extends Authenticatable
         'deleted_at',
         'remember_token',
         'email_verified_at',
-        '_id_onesignal'
+        '_id_onesignal',
+        'dapertement_id',
+        'subdapertement_id'
     ];
+
+    public function dapertement() { 
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    }
+
+    public function subdapertement() { 
+        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id'); 
+    }
 
     public function getEmailVerifiedAtAttribute($value)
     {

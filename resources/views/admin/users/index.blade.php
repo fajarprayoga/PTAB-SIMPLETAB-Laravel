@@ -26,6 +26,12 @@
                             {{ trans('global.user.fields.name') }}
                         </th>
                         <th>
+                            {{ trans('global.dapertement.fields.name') }}
+                        </th>
+                        <th>
+                            {{ trans('global.subdapertement.fields.name') }}
+                        </th>
+                        <th>
                             {{ trans('global.user.fields.email') }}
                         </th>
                         <th>
@@ -47,6 +53,12 @@
                             </td>
                             <td>
                                 {{ $user->name ?? '' }}
+                            </td>
+                            <td>
+                            {{ $user->dapertement->name ?? '' }}
+                            </td>
+                            <td>
+                            {{ $user->subdapertement->name ?? '' }}
                             </td>
                             <td>
                                 {{ $user->email ?? '' }}

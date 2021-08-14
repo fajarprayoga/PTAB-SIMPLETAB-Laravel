@@ -11,11 +11,16 @@ class StaffApi extends Model
         'code',
         'name',
         'phone',
-        'dapertement_id'
+        'dapertement_id',
+        'subdapertement_id'
     ];
 
     public function dapertement() { 
         return $this->belongsTo('App\Dapertement')->select('id', 'name'); 
+    }
+
+    public function subdapertement() { 
+        return $this->belongsTo('App\Subdapertement')->select('id', 'name'); 
     }
 
     public function action()
@@ -24,5 +29,13 @@ class StaffApi extends Model
             ->withPivot([
                 'status'
             ]);
+    }
+
+    public function scopeFilterDapertement($query, $dapertement)
+    {
+        if($dapertement !=''){
+        $query->where('dapertement_id', $dapertement);        
+        }
+        return $query;
     }
 }

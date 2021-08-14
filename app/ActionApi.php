@@ -15,7 +15,9 @@ class ActionApi extends Model
         'start',
         'end',
         'memo',
-        'image'
+        'image',
+        'subdapertement_id',
+        'todo',
     ];
 
     public function staff()

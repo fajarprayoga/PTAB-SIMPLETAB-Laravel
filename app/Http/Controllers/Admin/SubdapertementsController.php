@@ -19,7 +19,7 @@ class SubdapertementsController extends Controller
     {
         abort_unless(\Gate::allows('subdapertement_access'), 403);
 
-        $subdapertements = Subdapertement::all();
+        $subdapertements = Subdapertement::with('dapertement')->get();
 
         return view('admin.subdapertements.index', compact('subdapertements'));
     }

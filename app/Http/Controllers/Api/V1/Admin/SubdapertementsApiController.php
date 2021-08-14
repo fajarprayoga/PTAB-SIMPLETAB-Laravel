@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\api\v1\admin;
 
-use App\DapertementApi;
 use App\Http\Controllers\Controller;
-use App\Traits\TraitModel;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use App\SubdapertementApi;
+use Illuminate\Database\QueryException;
+use App\Traits\TraitModel;
 use App\User;
 
-class DapertementsApiController extends Controller
+class SubdapertementsApiController extends Controller
 {
-
+        
     use TraitModel;
     /**
      * Display a listing of the resource.
@@ -19,18 +19,8 @@ class DapertementsApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function dapertements($page)
+    public function subdapertements(Request $request)
     {
-        $dapertements = DapertementApi::paginate(10, ['*'], 'page', $page);
-        return response()->json([
-            'message' => 'success',
-            'data' => $dapertements,
-        ]);
-    }
-
-    public function index(Request $request)
-    {
-
         $department = '';
         if (isset($request->userid) && $request->userid != '') {
             $admin = User::with('roles')->find($request->userid);
@@ -42,22 +32,42 @@ class DapertementsApiController extends Controller
             }
         }
 
-        try {
+        if (isset($request->page) && $request->page != '') {
             if ($department != '') {
-                $dapertements = DapertementApi::where('id',$department)->get();
+                $subdapertements = SubdapertementApi::where('dapertement_id',$department)->with('dapertement')->paginate(10, ['*'], 'page', $request->page);
             } else {
-                $dapertements = DapertementApi::all();
+                $subdapertements = SubdapertementApi::with('dapertement')->paginate(10, ['*'], 'page', $request->page);
             }
-            return response()->json([
-                'message' => 'Sucess',
-                'data' => $dapertements,
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Sucess',
-                'data' => $th,
-            ]);
+        }else{
+            if ($department != '') {
+                $subdapertements = SubdapertementApi::where('dapertement_id',$department)->with('dapertement')->get();
+            } else {
+                $subdapertements = SubdapertementApi::with('dapertement')->get();
+            }
         }
+
+        
+        return response()->json([
+            'message' => 'success',
+            'data' => $subdapertements
+        ]);
+    }
+
+    public function index()
+    {
+        
+        try {
+            $subdapertements = SubdapertementApi::with('dapertement')->all();         
+            return response()->json([
+                'message' => 'Sucess',
+                'data' => $subdapertements
+            ]);
+       } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Sucess',
+                'data' => $th
+            ]);
+       }
     }
 
     /**
@@ -78,41 +88,42 @@ class DapertementsApiController extends Controller
      */
     public function store(Request $request)
     {
-        $last_code = $this->get_last_code('dapertement');
+        $last_code = $this->get_last_code('subdapertement');
 
         $code = acc_code_generate($last_code, 8, 3);
-
+        
         $data = $request->all();
         // isset($request->email) ? $data['email'] = $request->email : null;
 
-        $rules = array(
+        $rules=array(
             // 'email' => 'email|unique:customers,email',
             // 'code' => 'unique:customers,code',
-            'name' => 'required|unique:dapertements,name',
+            'name' => 'required|unique:subdapertements,name',
             'description' => 'required',
         );
 
-        if (isset($request->code)) {
-            $rules['code'] = 'required|unique:dapertements,code';
+        if(isset($request->code)){
+            $rules['code'] = 'required|unique:subdapertements,code';
         }
-
+        
         $data['code'] = isset($request->code) ? $request->code : $code;
 
-        $validator = \Validator::make($data, $rules);
-        if ($validator->fails()) {
-            $messages = $validator->messages();
-            $errors = $messages->all();
+        $validator=\Validator::make($data,$rules);
+        if($validator->fails())
+        {
+            $messages=$validator->messages();
+            $errors=$messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $request->all(),
+                'data' => $request->all()
             ]);
         }
 
-        $dapertement = DapertementApi::create($data);
+        $subdapertement = SubdapertementApi::create($data);
 
         return response()->json([
             'message' => 'Data Dapertement Add Success',
-            'data' => $dapertement,
+            'data' => $subdapertement
         ]);
 
     }
@@ -146,29 +157,31 @@ class DapertementsApiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, DapertementApi $dapertement)
+    public function update(Request $request, SubdapertementApi $subdapertement)
     {
-        $rules = array(
-            'code' => 'required|unique:dapertements,code,' . $dapertement->id,
-            'name' => 'required|unique:dapertements,name,' . $dapertement->id,
+        $rules=array(
+            'code' => 'required|unique:subdapertements,code,'.$subdapertement->id,
+            'name' => 'required|unique:subdapertements,name,'.$subdapertement->id,
             'description' => 'required',
         );
 
-        $validator = \Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            $messages = $validator->messages();
-            $errors = $messages->all();
+        $validator=\Validator::make($request->all(),$rules);
+        if($validator->fails())
+        {
+            $messages=$validator->messages();
+            $errors=$messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $request->all(),
+                'data' => $request->all()
             ]);
         }
 
-        $dapertement->update($request->all());
+        
+        $subdapertement->update($request->all());
 
         return response()->json([
             'message' => 'Data Dapertement Update Success',
-            'data' => $dapertement,
+            'data' => $subdapertement
         ]);
 
     }
@@ -179,19 +192,20 @@ class DapertementsApiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(DapertementApi $dapertement)
+    public function destroy( SubdapertementApi $subdapertement)
     {
-        try {
-
-            $dapertement->delete();
+        try{
+            
+            $subdapertement->delete();
             return response()->json([
                 'message' => 'Dapertement berhasil di hapus',
             ]);
-        } catch (QueryException $e) {
-            return response()->json([
-                'message' => 'data masih ada dalam daftar keluhan',
-                'data' => $e,
-            ]);
+        }
+        catch(QueryException $e) {
+           return response()->json([
+               'message' => 'data masih ada dalam daftar keluhan',
+               'data' => $e
+           ]);
         }
     }
 }

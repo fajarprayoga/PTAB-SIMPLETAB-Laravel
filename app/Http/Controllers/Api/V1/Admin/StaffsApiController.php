@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\StaffApi;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
+use App\User;
 class StaffsApiController extends Controller
 {
     use TraitModel;
@@ -15,9 +16,20 @@ class StaffsApiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function staffs($page)
+    public function staffs(Request $request)
     {
-        $staffs = StaffApi::with('dapertement')->paginate(10, ['*'], 'page', $page);
+        $department = '';
+        if (isset($request->userid) && $request->userid != '') {
+            $admin = User::with('roles')->find($request->userid);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+            }
+        }
+        
+        $staffs = StaffApi::with('dapertement')->with('subdapertement')->FilterDapertement($department)->paginate(10, ['*'], 'page', $request->page);
         return response()->json([
             'message' => 'success',
             'data' => $staffs
@@ -26,7 +38,7 @@ class StaffsApiController extends Controller
 
     public function index()
     {
-        $staffs = StaffApi::with('dapertement')->get();
+        $staffs = StaffApi::with('dapertement')->with('subdapertement')->get();
         return response()->json([
             'message' => 'Sucess',
             'data' => $staffs
