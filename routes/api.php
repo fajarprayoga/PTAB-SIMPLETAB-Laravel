@@ -26,7 +26,7 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::get('tickets/{id}', 'TicketsApiController@index');
 
-    Route::get('ctm/prev', 'CtmApiController@ctmPrev');
+    Route::post('ctm/prev', 'CtmApiController@ctmPrev');
 
 });
 

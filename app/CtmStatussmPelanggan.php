@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TblStatussmPelanggan extends Model
+class CtmStatussmPelanggan extends Model
 {
     protected $connection = 'mysql2';
 

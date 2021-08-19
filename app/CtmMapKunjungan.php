@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MapKunjungan extends Model
+class CtmMapKunjungan extends Model
 {
     protected $connection = 'mysql2';
 

@@ -6,92 +6,21 @@ use App\Action;
 use App\Category;
 use App\Customer;
 use App\Dapertement;
-use App\Gambarmeter;
-use App\Gambarmetersms;
-use App\MapKunjungan;
-use App\Pemakaianair;
+use App\CtmGambarmeter;
+use App\CtmGambarmetersms;
+use App\CtmMapKunjungan;
 use App\Staff;
-use App\Statusonoff;
+use App\CtmStatusonoff;
 use App\Subdapertement;
-use App\TblPemakaianAir;
-use App\TblStatussmPelanggan;
+use App\CtmPemakaianAir;
+use App\CtmStatussmPelanggan;
+use App\CtmPembayaran;
 use App\Ticket;
 use DB;
 use Illuminate\Database\QueryException;
 
 trait TraitModel
 {
-    public function getCtmStore($request)
-    {
-        $var = [];
-        $str = "";
-        foreach ($request as $key => $dat) {
-            $var[$key] = mysqli_real_escape_string($con, $dat);
-            $str .= $key . "=>" . $dat . ";";
-        }
-
-        //get month year rekening
-        $datecatatf1_arr = explode("-", $var['datecatatf1']);
-        $month_catat = $datecatatf1_arr[1];
-        $year_catat = $datecatatf1_arr[0];
-        $month_bayar = date('m', strtotime($datecatatf1_arr[0] . '-' . $datecatatf1_arr[1] . ' + 1 month'));
-        $year_bayar = date('Y', strtotime($datecatatf1_arr[0] . '-' . $datecatatf1_arr[1] . ' + 1 month'));
-        //additional var
-        $var['nomorrekening'] = $var['norek'];
-        $var['pencatatanmeter'] = $var['wmmeteran'];
-        $var['bulanrekening'] = (int) $month_catat;
-        $var['tahunrekening'] = $year_catat;
-        $var['bulanbayar'] = (int) $month_bayar;
-        $var['tahunbayar'] = $year_bayar;
-        $var['namastatus'] = $var['namastatus'];
-        $var['bulanini'] = $var['wmmeteran'];
-        $var['bulanlalu'] = $var['pencatatanmeterprev'];
-        $var['statusonoff'] = $var['statusonoff'];
-        //img path
-        $path = "../gambar/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
-        if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-        }
-        $new_image_name = $var['norek'] . "_" . $var['tahunrekening'] . "_" . $month_catat . ".jpg"; //nama image dibuat sendiri
-        move_uploaded_file($_FILES['file']['tmp_name'], $path . $new_image_name);
-        $path_img = "/" . "gambar/" . $year_catat . $month_catat . "/";
-        $path_img1 = "D:/MyAMP/www/" . "gambar/" . $year_catat . $month_catat . "/";
-        $var['filegambar'] = $path_img . $new_image_name;
-        $var['filegambar1'] = $path_img1 . $new_image_name;
-
-        //get meterawal
-        $getCtmMeterPrev = $this->getCtmMeterPrev($var['norek'], $var['bulanrekening'], $var['tahunrekening']);
-        $meterawal = $var['pencatatanmeterprev'];
-
-        if ((int) $var['namastatus'] == 111) {
-            $meterawal = $getCtmMeterPrev['pencatatanmeter'];
-        }
-
-        //set pemakaianair
-        $var['pemakaianair'] = max(0, ($var['pencatatanmeter'] - $meterawal));
-        $var['meterawal'] = $meterawal;
-        //insert data into gambarmeter
-        $var['idgambar'] = $this->insupdCtmGambarmeter($var);
-        $this->insupdCtmGambarmetersms($var);
-        $this->insupdCtmMapKunjungan($var);
-        $this->insupdCtmPemakaianair($var);
-        $this->insupdCtmStatussmpelanggan($var);
-        $this->insupdCtmStatusonoff($var);
-        //insert into tblpembayaran
-        $this->pdam_tblpembayaran_ins_upd($var);
-
-        //test insert to logg
-        //*
-        $pdam_tblpembayaran_test = $this->pdam_tblpembayaran_test($var);
-        $date_now = date("Y-m-d H:i:s");
-        $colarr = array("date", "value");
-        $valarr = array("'" . $date_now . "'", "'" . $pdam_tblpembayaran_test . "'");
-
-        if ($model->insert_db("log", $colarr, $valarr)) {
-
-        }
-    }
-
     public function getCtmMeterPrev($nomorrekening, $month, $year)
     {
         $month = (int) $month;
@@ -101,7 +30,7 @@ trait TraitModel
         $return_obj['pencatatanmeter'] = 0;
         $return_obj['pemakaianair'] = 0;
 
-        $tblpemakaianair_fetch = TblPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair', 'pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
+        $tblpemakaianair_fetch = CtmPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair', 'pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
             ->where('tahunrekening', $year_prev)
             ->where('nomorrekening', $nomorrekening)
             ->get();
@@ -129,7 +58,7 @@ trait TraitModel
         $arrUnique['tahunrekening'] = $var['tahunrekening'];
         $arrUnique['filegambar'] = $var['filegambar'];
 
-        if ($gambarmeter = Gambarmeter::updateOrCreate($arrUnique, $arrQry)) {
+        if ($gambarmeter = CtmGambarmeter::updateOrCreate($arrUnique, $arrQry)) {
             $idgambar = $gambarmeter->idgambar;
             return $idgambar;
         } else {
@@ -152,7 +81,7 @@ trait TraitModel
         $arrUnique['tahunrekening'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($gambarmetersms = Gambarmetersms::updateOrCreate($arrUnique, $arrQry)) {
+        if ($gambarmetersms = CtmGambarmetersms::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
@@ -174,7 +103,7 @@ trait TraitModel
         $arrUnique['tahun'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($map_kunjungan = MapKunjungan::updateOrCreate($arrUnique, $arrQry)) {
+        if ($map_kunjungan = CtmMapKunjungan::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
@@ -184,7 +113,7 @@ trait TraitModel
 
     public function insupdCtmPemakaianair($var)
     {
-        $pemakaianair = Pemakaianair::where('tahunrekening', '=', $var['tahunrekening'])
+        $pemakaianair = CtmPemakaianair::where('tahunrekening', '=', $var['tahunrekening'])
             ->where('nomorrekening', '=', $var['nomorrekening'])
             ->first();
         if ($pemakaianair === null) {
@@ -236,7 +165,7 @@ trait TraitModel
 
     public function insupdCtmStatussmpelanggan($var)
     {
-        $tblstatussmpelanggan = TblStatussmPelanggan::where('bulan', '=', $var['bulanrekening'])
+        $tblstatussmpelanggan = CtmStatussmPelanggan::where('bulan', '=', $var['bulanrekening'])
             ->where('tahun', '=', $var['tahunrekening'])
             ->where('nomorrekening', '=', $var['nomorrekening'])
             ->first();
@@ -277,7 +206,7 @@ trait TraitModel
         $arrUnique['tahun'] = $var['tahunrekening'];
         $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
-        if ($map_kunjungan = Statusonoff::updateOrCreate($arrUnique, $arrQry)) {
+        if ($map_kunjungan = CtmStatusonoff::updateOrCreate($arrUnique, $arrQry)) {
             return true;
         } else {
             return false;
@@ -318,7 +247,7 @@ trait TraitModel
         return $return_obj;
     }
 
-    public function pdam_tagihan_get($model, $tblpelanggan_arr)
+    public function getCtmTagihan($tblpelanggan_arr)
     {
         $tblpelanggan_arr['batas6'] = 2147483647;
         $return_obj = array();
@@ -362,33 +291,30 @@ trait TraitModel
         return $return_obj;
     }
 
-    public function pdam_tblpembayaran_ins_upd($model, $var)
+    public function insupdCtmPembayaran($var)
     {
-        $tblpelanggan_arr = $this->getCtmJenispelanggan($model, $var['nomorrekening']);
+        $tblpelanggan_arr = $this->getCtmJenispelanggan($var['nomorrekening']);
         //hitung rp-tagihan
         $tblpelanggan_arr['pemakaianair'] = $var['pemakaianair'];
-        $pdam_tagihan_arr = $this->pdam_tagihan_get($model, $tblpelanggan_arr);
+        $pdam_tagihan_arr = $this->getCtmTagihan($tblpelanggan_arr);
         //insert
         $arrCol = array("nomorrekening", "bulanrekening", "tahunrekening", "idgol", "idareal", "tarif01", "tarif02", "tarif03", "tarif04", "tarif05", "tarif06", "danameter", "adm", "beban", "denda", "batas1", "batas2", "batas3", "batas4", "batas5", "pajak", "pemakaianair", "pemakaianair01", "pemakaianair02", "pemakaianair03", "pemakaianair04", "pemakaianair05", "pemakaianair06", "bulanini", "bulanlalu", "wajibdibayar", "idbiro", "tglbayarterakhir", "operator", "operator1", "_synced");
-        $arrVal = array("'" . $var['nomorrekening'] . "'", "'" . $var['bulanbayar'] . "'", "'" . $var['tahunbayar'] . "'", "'" . $tblpelanggan_arr['idgol'] . "'", "'" . $tblpelanggan_arr['idareal'] . "'", "'" . $tblpelanggan_arr['tarif01'] . "'", "'" . $tblpelanggan_arr['tarif02'] . "'", "'" . $tblpelanggan_arr['tarif03'] . "'", "'" . $tblpelanggan_arr['tarif04'] . "'", "'" . $tblpelanggan_arr['tarif05'] . "'", "'" . $tblpelanggan_arr['tarif06'] . "'", "'" . $tblpelanggan_arr['danameter'] . "'", "'" . $tblpelanggan_arr['adm'] . "'", "'" . $tblpelanggan_arr['beban'] . "'", "'0'", "'" . $tblpelanggan_arr['batas1'] . "'", "'" . $tblpelanggan_arr['batas2'] . "'", "'" . $tblpelanggan_arr['batas3'] . "'", "'" . $tblpelanggan_arr['batas4'] . "'", "'" . $tblpelanggan_arr['batas5'] . "'", "'" . $pdam_tagihan_arr['pajak'] . "'", "'" . $pdam_tagihan_arr['pemakaianair'] . "'", "'" . $pdam_tagihan_arr['pemakaianair01'] . "'", "'" . $pdam_tagihan_arr['pemakaianair02'] . "'", "'" . $pdam_tagihan_arr['pemakaianair03'] . "'", "'" . $pdam_tagihan_arr['pemakaianair04'] . "'", "'" . $pdam_tagihan_arr['pemakaianair05'] . "'", "'" . $pdam_tagihan_arr['pemakaianair06'] . "'", "'" . $var['pencatatanmeter'] . "'", "'" . $var['meterawal'] . "'", "'" . $pdam_tagihan_arr['rp_tagihan'] . "'", "'" . $tblpelanggan_arr['idbiro'] . "'", "'" . $var['datecatatf3'] . "'", "'" . $var['operator'] . "'", "'" . $var['operator'] . "'", "'0'");
-        //if exist
-        $tahunrekening = $model->select_db_info("tblpembayaran", "where tahunrekening='" . $var['tahunbayar'] . "' and bulanrekening='" . $var['bulanbayar'] . "' and nomorrekening='" . $var['nomorrekening'] . "'", "tahunrekening");
-        if ($tahunrekening > 0) {
-            $arrgab = array("nomorrekening = '" . $var['nomorrekening'] . "'", "bulanrekening = '" . $var['bulanbayar'] . "'", "tahunrekening = '" . $var['tahunbayar'] . "'", "idgol = '" . $tblpelanggan_arr['idgol'] . "'", "idareal = '" . $tblpelanggan_arr['idareal'] . "'", "tarif01 = '" . $tblpelanggan_arr['tarif01'] . "'", "tarif02 = '" . $tblpelanggan_arr['tarif02'] . "'", "tarif03 = '" . $tblpelanggan_arr['tarif03'] . "'", "tarif04 = '" . $tblpelanggan_arr['tarif04'] . "'", "tarif05 = '" . $tblpelanggan_arr['tarif05'] . "'", "tarif06 = '" . $tblpelanggan_arr['tarif06'] . "'", "danameter = '" . $tblpelanggan_arr['danameter'] . "'", "adm = '" . $tblpelanggan_arr['adm'] . "'", "beban = '" . $tblpelanggan_arr['beban'] . "'", "denda = '0'", "batas1 = '" . $tblpelanggan_arr['batas1'] . "'", "batas2 = '" . $tblpelanggan_arr['batas2'] . "'", "batas3 = '" . $tblpelanggan_arr['batas3'] . "'", "batas4 = '" . $tblpelanggan_arr['batas4'] . "'", "batas5 = '" . $tblpelanggan_arr['batas5'] . "'", "pajak = '" . $pdam_tagihan_arr['pajak'] . "'", "pemakaianair = '" . $pdam_tagihan_arr['pemakaianair'] . "'", "pemakaianair01 = '" . $pdam_tagihan_arr['pemakaianair01'] . "'", "pemakaianair02 = '" . $pdam_tagihan_arr['pemakaianair02'] . "'", "pemakaianair03 = '" . $pdam_tagihan_arr['pemakaianair03'] . "'", "pemakaianair04 = '" . $pdam_tagihan_arr['pemakaianair04'] . "'", "pemakaianair05 = '" . $pdam_tagihan_arr['pemakaianair05'] . "'", "pemakaianair06 = '" . $pdam_tagihan_arr['pemakaianair06'] . "'", "bulanini = '" . $var['pencatatanmeter'] . "'", "bulanlalu = '" . $var['meterawal'] . "'", "wajibdibayar = '" . $pdam_tagihan_arr['rp_tagihan'] . "'", "idbiro = '" . $tblpelanggan_arr['idbiro'] . "'", "tglbayarterakhir = '" . $var['datecatatf3'] . "'", "operator = '" . $var['operator'] . "'", "operator1 = '" . $var['operator'] . "'", "_synced = '0'");
-            $where = "tahunrekening = '" . $var['tahunbayar'] . "' AND bulanrekening = '" . $var['bulanbayar'] . "' AND nomorrekening = '" . $var['nomorrekening'] . "'";
-            if ($model->update_db("tblpembayaran", $arrgab, $where)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if ($model->insert_db("tblpembayaran", $arrCol, $arrVal)) {
-                return true;
-            } else {
-                return false;
-            }
+        $arrVal = array($var['nomorrekening'], $var['bulanbayar'], $var['tahunbayar'], $tblpelanggan_arr['idgol'], $tblpelanggan_arr['idareal'], $tblpelanggan_arr['tarif01'], $tblpelanggan_arr['tarif02'], $tblpelanggan_arr['tarif03'], $tblpelanggan_arr['tarif04'], $tblpelanggan_arr['tarif05'], $tblpelanggan_arr['tarif06'], $tblpelanggan_arr['danameter'], $tblpelanggan_arr['adm'], $tblpelanggan_arr['beban'], "'0'", $tblpelanggan_arr['batas1'], $tblpelanggan_arr['batas2'], $tblpelanggan_arr['batas3'], $tblpelanggan_arr['batas4'], $tblpelanggan_arr['batas5'], $pdam_tagihan_arr['pajak'], $pdam_tagihan_arr['pemakaianair'], $pdam_tagihan_arr['pemakaianair01'], $pdam_tagihan_arr['pemakaianair02'], $pdam_tagihan_arr['pemakaianair03'], $pdam_tagihan_arr['pemakaianair04'], $pdam_tagihan_arr['pemakaianair05'], $pdam_tagihan_arr['pemakaianair06'], $var['pencatatanmeter'], $var['meterawal'], $pdam_tagihan_arr['rp_tagihan'], $tblpelanggan_arr['idbiro'], $var['datecatatf3'], $var['operator'], $var['operator'], "0");
+        
+        $arrQry = array();
+        foreach ($arrCol as $key => $value) {
+            $arrQry[$value] = $arrVal[$key];
         }
+        $arrUnique = array();
+        $arrUnique['tahunrekening'] = $var['tahunbayar'];
+        $arrUnique['bulanrekening'] = $var['bulanbayar'];
+        $arrUnique['nomorrekening'] = $var['nomorrekening'];
 
+        if ($map_kunjungan = CtmPembayaran::updateOrCreate($arrUnique, $arrQry)) {
+            return true;
+        } else {
+            return false;
+        }    
     }
 
     public function getCtmAvg($nomorrekening, $month, $year)
@@ -403,7 +329,7 @@ trait TraitModel
             $month_prev = (int) date('m', strtotime($year . '-' . $month . ' -' . $i . ' month', time()));
             $year_prev = (int) date('Y', strtotime($year . '-' . $month . ' -' . $i . ' month', time()));
 
-            $pemakain_bln_row = TblPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair')
+            $pemakain_bln_row = CtmPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair')
                 ->where('tahunrekening', $year_prev)
                 ->where('nomorrekening', $nomorrekening)
                 ->get();
@@ -415,7 +341,7 @@ trait TraitModel
             }
 
             if ($i == 1) {
-                $pencatatanmeter_last_row = TblPemakaianAir::select('pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
+                $pencatatanmeter_last_row = CtmPemakaianAir::select('pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
                     ->where('tahunrekening', $year_prev)
                     ->where('nomorrekening', $nomorrekening)
                     ->get();
@@ -443,7 +369,7 @@ trait TraitModel
         $pencatatanmeter_bln = 0;
         $month_prev = (int) date('m', strtotime($year . '-' . $month . ' -1 month', time()));
         $year_prev = (int) date('Y', strtotime($year . '-' . $month . ' -1 month', time()));
-        $pemakaianair_bln_row = TblPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair', 'pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
+        $pemakaianair_bln_row = CtmPemakaianAir::select('pemakaianair' . $month_prev . ' AS pemakaianair', 'pencatatanmeter' . $month_prev . ' AS pencatatanmeter')
             ->where('tahunrekening', $year_prev)
             ->where('nomorrekening', $nomorrekening)
             ->get();
@@ -454,7 +380,7 @@ trait TraitModel
             $pemakaianair_bln = $pemakaianair_bln_row[0]->pemakaianair;
             $pencatatanmeter_bln = $pemakaianair_bln_row[0]->pencatatanmeter;
         }
-        $statussm_bln_row = TblStatussmPelanggan::select('statussm')
+        $statussm_bln_row = CtmStatussmPelanggan::select('statussm')
             ->where('tahun', $year_prev)
             ->where('bulan', $month_prev)
             ->where('nomorrekening', $nomorrekening)

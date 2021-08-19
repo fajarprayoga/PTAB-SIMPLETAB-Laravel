@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Statusonoff extends Model
+class CtmStatusonoff extends Model
 {
     protected $connection = 'mysql2';
 

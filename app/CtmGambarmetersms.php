@@ -4,13 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Gambarmeter extends Model
+class CtmGambarmetersms extends Model
 {
     protected $connection = 'mysql2';
 
-    protected $table = 'gambarmeter';
+    protected $table = 'gambarmetersms';
 
-    protected $primaryKey = 'idgambar';
+    protected $primaryKey = 'idurutan';
 
     public $timestamps = false;
 
@@ -19,10 +19,9 @@ class Gambarmeter extends Model
         'bulanrekening',
         'tahunrekening',
         'tanggal',
-        'filegambar',
-        'operator',
-        'infowaktu',
-        'filegambar1',
+        'nomorrekening',
+        'pencatatanmeter',
+        'idgambar',
         '_synced'
     ];
 }
