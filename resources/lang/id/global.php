@@ -408,6 +408,9 @@ return [
         ]
     ],
     'action' => [
+        'print_service' => 'Print Permintaan Service',
+        'print_SPK' => 'Print SPK',
+        'print_Report' => 'Print Laporan Service',
         'title' => 'Tindakan',
         'title_singular' => 'Tindakan',
         'fields' => [

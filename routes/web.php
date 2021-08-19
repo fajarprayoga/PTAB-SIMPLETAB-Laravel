@@ -56,6 +56,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
 
     // action & action staff
+    // start surya buat
+    Route::get('actions/printservice','ActionsController@printservice')->name('actions.printservice');
+
+    Route::get('actions/printspk','ActionsController@printspk')->name('actions.printspk');
+
+    Route::get('actions/printreport','ActionsController@printreport')->name('actions.printreport');
+    // end surya buat
+
     Route::resource('actions', 'ActionsController', ['only' => ['index', 'store', 'edit', 'update', 'destroy']]);
 
     Route::get('actions/create/{ticket_id}', 'ActionsController@create')->name('actions.create');
