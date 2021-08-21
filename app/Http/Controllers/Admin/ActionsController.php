@@ -315,4 +315,19 @@ class ActionsController extends Controller
 
         return redirect()->route('admin.actions.actionStaff', $action_id);
     }
+    //start surya buat
+    public function printservice(){
+        return view('admin.actions.printservice');
+    }
+
+    public function printspk(){
+        return view('admin.actions.printspk');
+    }
+
+    public function printReport(){
+        return view ('admin.actions.printreport');
+    }
+
+    
+    //end surya buat
 }

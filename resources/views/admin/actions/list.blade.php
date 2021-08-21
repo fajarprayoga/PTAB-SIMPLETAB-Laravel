@@ -96,16 +96,51 @@
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan -->
+
                                 @can('action_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.actions.edit', $action->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
+                                
+                           
                                 @can('action_staff_access')
-                                    <a class="btn btn-xs btn-success" href="{{ route('admin.actions.actionStaff', $action->id) }}">
+                                    <a class="btn btn-xs btn-success"  href="{{ route('admin.actions.actionStaff', $action->id) }}">
                                         {{ trans('global.staff.title') }}
                                     </a>
                                 @endcan
+                                
+                              
+                                <!-- start surya buat -->
+                                
+                        
+
+                                @if ($action->status == "pending")
+                                    @can('action_print_service')
+                                        <a class="btn btn-xs btn-primary"  href="{{ route('admin.actions.printservice') }}">
+                                            {{ trans('global.action.print_service') }}
+                                        </a>
+                                    @endcan
+                                @endif
+
+                                @if ($action->status == "pending")
+                                @can('action_print_spk')
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.actions.printspk') }}">
+                                        {{ trans('global.action.print_SPK') }}
+                                    </a>
+                                @endcan
+                                @endif
+
+                                @if ($action->status == "close")
+                                @can('action_print_report')
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.actions.printreport') }}">
+                                        {{ trans('global.action.print_Report') }}
+                                    </a>
+                                @endcan
+                                @endif
+
+                                <!-- end surya buat -->
+
                                 @can('action_delete')
                                     <form action="{{ route('admin.actions.destroy', $action->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
