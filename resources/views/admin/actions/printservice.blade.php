@@ -6,6 +6,7 @@
 <link href="{{ asset('css/print.css') }}" rel="stylesheet" />
 <title>Document</title>
 </head>
+<!-- biar mau masuk -->
 <body onload="onload()" >
 <div class="v73_1337" >
 		<div class="v73_1338">
