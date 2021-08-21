@@ -4,17 +4,17 @@ namespace App\Traits;
 
 use App\Action;
 use App\Category;
-use App\Customer;
-use App\Dapertement;
 use App\CtmGambarmeter;
 use App\CtmGambarmetersms;
 use App\CtmMapKunjungan;
-use App\Staff;
-use App\CtmStatusonoff;
-use App\Subdapertement;
 use App\CtmPemakaianAir;
-use App\CtmStatussmPelanggan;
 use App\CtmPembayaran;
+use App\CtmStatusonoff;
+use App\CtmStatussmPelanggan;
+use App\Customer;
+use App\Dapertement;
+use App\Staff;
+use App\Subdapertement;
 use App\Ticket;
 use DB;
 use Illuminate\Database\QueryException;
@@ -297,24 +297,30 @@ trait TraitModel
         //hitung rp-tagihan
         $tblpelanggan_arr['pemakaianair'] = $var['pemakaianair'];
         $pdam_tagihan_arr = $this->getCtmTagihan($tblpelanggan_arr);
-        //insert
+
+        $tblpembayaran = CtmPembayaran::where('tahunrekening', '=', $var['tahunbayar'])
+            ->where('bulanrekening', '=', $var['bulanbayar'])
+            ->where('nomorrekening', '=', $var['nomorrekening'])
+            ->first();
+
         $arrCol = array("nomorrekening", "bulanrekening", "tahunrekening", "idgol", "idareal", "tarif01", "tarif02", "tarif03", "tarif04", "tarif05", "tarif06", "danameter", "adm", "beban", "denda", "batas1", "batas2", "batas3", "batas4", "batas5", "pajak", "pemakaianair", "pemakaianair01", "pemakaianair02", "pemakaianair03", "pemakaianair04", "pemakaianair05", "pemakaianair06", "bulanini", "bulanlalu", "wajibdibayar", "idbiro", "tglbayarterakhir", "operator", "operator1", "_synced");
         $arrVal = array($var['nomorrekening'], $var['bulanbayar'], $var['tahunbayar'], $tblpelanggan_arr['idgol'], $tblpelanggan_arr['idareal'], $tblpelanggan_arr['tarif01'], $tblpelanggan_arr['tarif02'], $tblpelanggan_arr['tarif03'], $tblpelanggan_arr['tarif04'], $tblpelanggan_arr['tarif05'], $tblpelanggan_arr['tarif06'], $tblpelanggan_arr['danameter'], $tblpelanggan_arr['adm'], $tblpelanggan_arr['beban'], "'0'", $tblpelanggan_arr['batas1'], $tblpelanggan_arr['batas2'], $tblpelanggan_arr['batas3'], $tblpelanggan_arr['batas4'], $tblpelanggan_arr['batas5'], $pdam_tagihan_arr['pajak'], $pdam_tagihan_arr['pemakaianair'], $pdam_tagihan_arr['pemakaianair01'], $pdam_tagihan_arr['pemakaianair02'], $pdam_tagihan_arr['pemakaianair03'], $pdam_tagihan_arr['pemakaianair04'], $pdam_tagihan_arr['pemakaianair05'], $pdam_tagihan_arr['pemakaianair06'], $var['pencatatanmeter'], $var['meterawal'], $pdam_tagihan_arr['rp_tagihan'], $tblpelanggan_arr['idbiro'], $var['datecatatf3'], $var['operator'], $var['operator'], "0");
-        
+
         $arrQry = array();
         foreach ($arrCol as $key => $value) {
             $arrQry[$value] = $arrVal[$key];
         }
-        $arrUnique = array();
-        $arrUnique['tahunrekening'] = $var['tahunbayar'];
-        $arrUnique['bulanrekening'] = $var['bulanbayar'];
-        $arrUnique['nomorrekening'] = $var['nomorrekening'];
-
-        if ($map_kunjungan = CtmPembayaran::updateOrCreate($arrUnique, $arrQry)) {
-            return true;
+        
+        if ($tblpembayaran === null) {
+            $result = DB::connection('mysql2')->table('tblpembayaran')->insert($arrQry);
         } else {
-            return false;
-        }    
+            $result = DB::connection('mysql2')->table('tblpembayaran')
+                ->where('tahunrekening', '=', $var['tahunbayar'])
+                ->where('bulanrekening', '=', $var['bulanbayar'])
+                ->where('nomorrekening', '=', $var['nomorrekening'])
+                ->update($arrQry);
+        }
+        return true;
     }
 
     public function getCtmAvg($nomorrekening, $month, $year)

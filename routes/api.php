@@ -28,6 +28,12 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::post('ctm/prev', 'CtmApiController@ctmPrev');
 
+    Route::get('ctm/list/{id}', 'CtmApiController@ctmList');
+
+    Route::get('ctm/pay/{id}', 'CtmApiController@ctmPay');
+
+    Route::get('ctm/customer/{id}', 'CtmApiController@ctmCustomer');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {

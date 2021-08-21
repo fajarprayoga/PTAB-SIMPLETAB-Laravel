@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\api\v1\customer;
 
+use App\CtmGambarmetersms;
+use App\CtmPembayaran;
+use App\Customer;
 use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
@@ -9,6 +12,114 @@ use Illuminate\Http\Request;
 class CtmApiController extends Controller
 {
     use TraitModel;
+
+    public function ctmCustomer($id)
+    {
+        try {
+            $ctm = Customer::where('nomorrekening', $id)
+                ->first();
+            $ctm->year = date('Y');
+            return response()->json([
+                'message' => 'Data CTM',
+                'data' => $ctm,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
+
+    }
+
+    public function ctmPay($id)
+    {
+        try {
+            $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
+                ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                ->where('tblpembayaran.nomorrekening', $id)
+                ->where('tblpembayaran.tahunrekening', date('Y'))
+                ->orderBy('tblpembayaran.bulanrekening', 'ASC')
+                ->get();
+            return response()->json([
+                'message' => 'Data CTM',
+                'data' => $ctm,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
+
+    }
+
+    public function ctmList($id)
+    {
+        try {
+            $ctm = CtmGambarmetersms::selectRaw("gambarmetersms.*,gambarmeter.filegambar as filegambar")
+                ->leftjoin('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+                ->where('gambarmetersms.nomorrekening', $id)
+                ->where('gambarmetersms.tahunrekening', date('Y'))
+                ->orderBy('gambarmetersms.bulanrekening', 'DESC')
+                ->get();
+            return response()->json([
+                'message' => 'Data CTM',
+                'data' => $ctm,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
+
+    }
+
+    public function ctmListBAK($id)
+    {
+        try {
+            // $ctm = CtmPembayaran::selectRaw("DISTINCT tblpembayaran.*,gambarmeter.filegambar")
+            //     ->leftjoin('gambarmetersms', 'gambarmetersms.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+            //     ->leftjoin('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+            //     ->where('tblpembayaran.nomorrekening', $id)
+            //     ->where('tblpembayaran.tahunrekening', date('Y'))
+            //     ->orderBy('tblpembayaran.bulanrekening', 'DESC')
+            //     ->get();
+            $ctm = CtmPembayaran::selectRaw("DISTINCT tblpembayaran.*")
+                ->where('tblpembayaran.nomorrekening', $id)
+                ->where('tblpembayaran.tahunrekening', date('Y'))
+                ->orderBy('tblpembayaran.bulanrekening', 'DESC')
+                ->get();
+            foreach ($ctm as $key => $ctm_row) {
+                $year = (int) $ctm[$key]['tahunrekening'];
+                $month = (int) $ctm[$key]['bulanrekening'];
+                $month_prev = (int) date('m', strtotime($year . '-' . $month . ' -1 month', time()));
+                $year_prev = date('Y', strtotime($year . '-' . $month . ' -1 month', time()));
+                $gambarmeter = CtmGambarmetersms::selectRaw("gambarmeter.filegambar as filegambar")
+                    ->leftjoin('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+                    ->where('gambarmetersms.nomorrekening', $id)
+                    ->where('gambarmetersms.bulanrekening', $month_prev)
+                    ->where('gambarmetersms.tahunrekening', $year_prev)
+                    ->first();
+                if (!empty($gambarmeter)) {
+                    $ctm[$key]['filegambar'] = $gambarmeter->filegambar;
+                } else {
+                    $ctm[$key]['filegambar'] = '';
+                }
+            }
+            return response()->json([
+                'message' => 'Data CTM',
+                'data' => $ctm,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
+
+    }
 
     public function ctmPrev(Request $request)
     {
@@ -18,9 +129,15 @@ class CtmApiController extends Controller
         foreach ($data as $key => $dat) {
             $var[$key] = $dat;
         }
-        $var['datecatatf1']=date("Y-m-d");//2021-08-16
-        $var['datecatatf2']=date("F d, Y, G:i:s a");//August 16, 2021, 15:23:37 pm
-        $var['datecatatf3']=date("Y-m-d G:i:s");//2021-08-16 15:23:37
+        $var['datecatatf1'] = date("Y-m-d"); //2021-08-16
+        $var['datecatatf2'] = date("F d, Y, G:i:s a"); //August 16, 2021, 15:23:37 pm
+        $var['datecatatf3'] = date("Y-m-d G:i:s"); //2021-08-16 15:23:37
+        //get prev
+        $year = date("Y");
+        $month = date("m");
+        $ctm_prev = $this->getCtmPrev($var['norek'], $month, $year);
+        $var['pencatatanmeterprev'] = $ctm_prev['pencatatanmeter'];
+        $var['statussmprev'] = $ctm_prev['statussm'];
 
         //get month year rekening
         $datecatatf1_arr = explode("-", $var['datecatatf1']);

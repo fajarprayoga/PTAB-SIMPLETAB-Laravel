@@ -10,6 +10,8 @@ class CtmPembayaran extends Model
 
     protected $table = 'tblpembayaran';
 
+    protected $primaryKey = null;
+
     public $timestamps = false;
 
     protected $fillable = [
