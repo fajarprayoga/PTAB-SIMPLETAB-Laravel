@@ -76,6 +76,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('actionStaffStore', 'ActionsApiController@actionStaffStore');
     Route::put('actionStaffUpdate', 'ActionsApiController@actionStaffUpdate');
     Route::delete('actionStaffDestroy/{action}/{staff}', 'ActionsApiController@actionStaffDestroy');
+    Route::post('actionStatusUpdate', 'ActionsApiController@actionStatusUpdate');
 
     // sub dapettement
     Route::resource('subdapertements', 'SubdapertementsApiController');

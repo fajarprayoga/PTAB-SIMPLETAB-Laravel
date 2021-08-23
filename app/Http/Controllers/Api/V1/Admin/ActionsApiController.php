@@ -11,7 +11,6 @@ use App\User;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Berkayk\OneSignal\OneSignalClient;
 use OneSignal;
 
 class ActionsApiController extends Controller
@@ -25,6 +24,112 @@ class ActionsApiController extends Controller
     public function index()
     {
 
+    }
+
+    public function actionStatusUpdate(Request $request)
+    {
+        try {
+            // ambil data dari request simpan di dataForm
+
+            $dataForm = json_decode($request->form);
+            // data action
+            $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+
+            // image yang lama disimpan
+            $actionImage = json_decode($action->image);
+            $img_path = "/images/action";
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+
+            // cek status dan upload gambar
+            for ($i = 1; $i <= 2; $i++) {
+                if ($request->file('image' . $i)) {
+                    $resourceImage = $request->file('image' . $i);
+                    $nameImage = strtolower($action->id);
+                    $file_extImage = $request->file('image' . $i)->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
+
+                    $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+
+                    $resourceImage->move($basepath . $img_path, $img_name);
+
+                    $dataImageName[] = $img_name;
+                } else {
+                    $responseImage = 'Image tidak di dukung';
+                    break;
+                }
+            }
+
+            // $dataForm['image'] =  str_replace("\/", "/", json_encode($dataImageName));
+
+            if ($resourceImage) {
+                $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+                $cekAllStatus = false;
+                $statusAction = $dataForm->status;
+
+                $dateNow = date('Y-m-d H:i:s');
+
+                $dataNewAction = array(
+                    'status' => $statusAction,
+                    'image' => str_replace("\/", "/", json_encode($dataImageName)),
+                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                    'memo' => $dataForm->memo,
+                );
+
+                $action->update($dataNewAction);
+                //update staff
+                $ids = $action->staff()->allRelatedIds();
+                foreach ($ids as $sid) {
+                    $action->staff()->updateExistingPivot($sid, ['status' => $dataForm->status]);
+                }
+                //update ticket status
+                $ticket = TicketApi::find($action->ticket_id);
+                $ticket->status = $statusAction;
+                $ticket->save();
+
+                $admin = User::where('dapertement_id', 1)->first();
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Status Diupdate : ' . $action->ticket->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}
+
+                //send notif to departement terkait
+                $admin_arr = User::where('dapertement_id', $action->dapertement_id)->get();
+                foreach ($admin_arr as $key => $admin) {
+                    $id_onesignal = $admin->_id_onesignal;
+                    $message = 'Status Diupdate : ' . $action->ticket->description;
+                    if (!empty($id_onesignal)) {
+                        OneSignal::sendNotificationToUser(
+                            $message,
+                            $id_onesignal,
+                            $url = null,
+                            $data = null,
+                            $buttons = null,
+                            $schedule = null
+                        );}}
+
+                return response()->json([
+                    'message' => 'Status di ubah ',
+                    'data' => $action,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Image Tidak Di Simpan',
+                ]);
+            }
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal update status ',
+                'data' => $ex,
+            ]);
+        }
     }
 
     function list($ticket_id) {
@@ -89,7 +194,7 @@ class ActionsApiController extends Controller
         //send notif to humas
         $admin = User::where('dapertement_id', 1)->first();
         $id_onesignal = $admin->_id_onesignal;
-        $message = 'Tindakan Baru Dibuat : '.$request->description;
+        $message = 'Tindakan Baru Dibuat : ' . $request->description;
         if (!empty($id_onesignal)) {
             OneSignal::sendNotificationToUser(
                 $message,
@@ -170,7 +275,7 @@ class ActionsApiController extends Controller
         //send notif to humas
         $admin = User::where('dapertement_id', 1)->first();
         $id_onesignal = $admin->_id_onesignal;
-        $message = 'Tindakan Baru Diupdate : '.$request->description;
+        $message = 'Tindakan Baru Diupdate : ' . $request->description;
         if (!empty($id_onesignal)) {
             OneSignal::sendNotificationToUser(
                 $message,
@@ -180,7 +285,7 @@ class ActionsApiController extends Controller
                 $buttons = null,
                 $schedule = null
             );}
-        
+
         //send notif to departement terkait
         $admin_arr = User::where('dapertement_id', $request->dapertement_id)->get();
         foreach ($admin_arr as $key => $admin) {
@@ -331,19 +436,19 @@ class ActionsApiController extends Controller
                 }
 
                 //send notif to humas
-        $admin = User::where('dapertement_id', 1)->first();
-        $id_onesignal = $admin->_id_onesignal;
-        $message = 'Petugas Baru Dipilih : '.$action->ticket->description;
-        if (!empty($id_onesignal)) {
-            OneSignal::sendNotificationToUser(
-                $message,
-                $id_onesignal,
-                $url = null,
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );}
-                
+                $admin = User::where('dapertement_id', 1)->first();
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Petugas Baru Dipilih : ' . $action->ticket->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}
+
                 //send notif to departement terkait
                 $admin_arr = User::where('dapertement_id', $action->dapertement_id)->get();
                 foreach ($admin_arr as $key => $admin) {
@@ -452,18 +557,18 @@ class ActionsApiController extends Controller
                 }
 
                 $admin = User::where('dapertement_id', 1)->first();
-        $id_onesignal = $admin->_id_onesignal;
-        $message = 'Petugas Diupdate : '.$action->ticket->description;
-        if (!empty($id_onesignal)) {
-            OneSignal::sendNotificationToUser(
-                $message,
-                $id_onesignal,
-                $url = null,
-                $data = null,
-                $buttons = null,
-                $schedule = null
-            );}
-                
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Petugas Diupdate : ' . $action->ticket->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}
+
                 //send notif to departement terkait
                 $admin_arr = User::where('dapertement_id', $action->dapertement_id)->get();
                 foreach ($admin_arr as $key => $admin) {
