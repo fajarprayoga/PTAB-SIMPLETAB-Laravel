@@ -2,19 +2,68 @@
 
 namespace App\Http\Controllers\Api\V1\Customer;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\CustomerApi;
+use App\CustomerMaps;
+use App\CustomerRequest;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApiCustomerRegisterPublicRequest;
+use App\Traits\TraitModel;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\TraitModel;
-use App\CustomerMaps;
 
 class CustomersApiController extends Controller
 {
     use TraitModel;
+
+    public function requestCustomer(Request $request)
+    {
+        try {
+            // ambil data dari request simpan di dataForm
+
+            $dataForm = json_decode($request->form);
+            $data['code'] = $dataForm->norek;
+            $data['phone'] = $dataForm->telp;
+            $data['address'] = $dataForm->alamat;
+            $requestcustomer = CustomerRequest::create($data);
+
+            $img_path = "/images/request";
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+
+            // cek status dan upload gambar
+            if ($request->file('image')) {
+                $resourceImage = $request->file('image');
+                $nameImage = strtolower($requestcustomer->id);
+                $file_extImage = $request->file('image')->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+
+                $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+
+                $resourceImage->move($basepath . $img_path, $img_name);
+            } 
+
+            if ($resourceImage) {
+                $requestcustomer->img = $img_name;
+                $requestcustomer->save();
+
+                return response()->json([
+                    'message' => 'Permintaan Dikirim',
+                    'data' => $requestcustomer,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Foto Gagal Di Simpan',
+                ]);
+            }
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Permintaan Gagal Dikirim',
+                'data' => $ex,
+            ]);
+        }
+    }
 
     public function login(Request $request)
     {
@@ -26,7 +75,7 @@ class CustomersApiController extends Controller
                 'password' => ['required'],
             ]);
 
-            if(Hash::check($request->password, $customer->password)){
+            if (Hash::check($request->password, $customer->password)) {
                 //  $this->smsApi($customer->phone, $request->OTP);
                 Auth::login($customer);
                 $customer->update(['_id_onesignal' => $request->_id_onesignal]);
@@ -39,15 +88,15 @@ class CustomersApiController extends Controller
                 //     'data' => $customer,
                 // ];
                 return response()->json([
-                    'success' =>  true,
+                    'success' => true,
                     'message' => 'success login',
                     'token' => $token,
                     'data' => $customer,
-                    'sugnal' => $request->_id_onesignal
+                    'sugnal' => $request->_id_onesignal,
                 ]);
-            }else{
+            } else {
                 return response()->json([
-                    'success' =>  false,
+                    'success' => false,
                     'failed' => 'Email Atau Password Yang Di masukkan Salah',
                 ]);
                 // $data =[
@@ -57,7 +106,7 @@ class CustomersApiController extends Controller
 
         } catch (QueryException $e) {
             return response()->json([
-                'message' => $e->message
+                'message' => $e->message,
             ]);
             // $data = [
             //     'message' => $e->message
@@ -74,13 +123,13 @@ class CustomersApiController extends Controller
 
         //$code = acc_code_generate($last_code, 8, 3);
         $code = $last_code + 1;
-        
+
         $customer = new CustomerApi;
         $customer->name = $request->name;
-        $customer->code = $code;       
-        if(!isset($request->email)){
+        $customer->code = $code;
+        if (!isset($request->email)) {
             $customer->email = null;
-        }else{
+        } else {
             $request->validate([
                 'email' => 'required|email',
             ]);
@@ -95,14 +144,14 @@ class CustomersApiController extends Controller
         $customer->address = $request->address;
         $customer->_synced = 0;
         $customer->_id_onesignal = $request->_id_onesignal;
-        
+
         try {
             $customer->save();
 
             $customer = CustomerApi::WhereMaps('phone', request('phone'))->first();
             Auth::login($customer);
             $token = Auth::user()->createToken('authToken')->accessToken;
-    
+
             return response()->json([
                 'message' => 'Registrasi Berhasil',
                 'token' => $token,
@@ -112,7 +161,7 @@ class CustomersApiController extends Controller
             return response()->json([
                 // 'message' => 'Registrasi Berhasil',
                 // 'token' => $token,
-                'data' => $request->email
+                'data' => $request->email,
             ]);
         }
     }
@@ -161,27 +210,25 @@ class CustomersApiController extends Controller
         try {
             $customerMaps = CustomerMaps::where('qrcode', $code)->first();
             $customer = CustomerApi::WhereMaps('code', $customerMaps->nomorrekening)->first();
-            
-            if(isset($customer)){
+
+            if (isset($customer)) {
                 return response()->json([
                     'message' => 'Anda terdaftar sebagai pelanggan',
-                    'data' => $customer
+                    'data' => $customer,
                 ]);
-            }else{
+            } else {
                 return response()->json([
                     'message' => 'data anda tidak ada',
                 ]);
             }
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => $ex
+                'message' => $ex,
             ]);
         }
 
-
-
     }
-    
+
     public function logout(Request $res)
     {
         if (Auth::user()) {

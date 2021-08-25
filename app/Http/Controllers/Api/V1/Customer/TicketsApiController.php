@@ -8,11 +8,10 @@ use App\Http\Controllers\Controller;
 use App\TicketApi;
 use App\Ticket_Image;
 use App\Traits\TraitModel;
+use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Berkayk\OneSignal\OneSignalClient;
 use OneSignal;
-use App\User;
 
 class TicketsApiController extends Controller
 {
@@ -21,7 +20,7 @@ class TicketsApiController extends Controller
     public function index($id)
     {
         try {
-            $ticket = TicketApi::where('customer_id', $id)->with('ticket_image')->with('category')->with('customer')->orderBy('id', 'DESC')->get();
+            $ticket = TicketApi::where('customer_id', $id)->with('ticket_image')->with('category')->with('customer')->with('action')->orderBy('id', 'DESC')->get();
             return response()->json([
                 'message' => 'Data Ticket',
                 'data' => $ticket,
@@ -126,18 +125,19 @@ class TicketsApiController extends Controller
             }
 
             //send notif to humas
-            $admin = User::where('dapertement_id', 1)->first();
-            $id_onesignal = $admin->_id_onesignal;
-            $message = 'Keluhan Baru Diterima : '.$dataForm->description;
-            if (!empty($id_onesignal)) {
-                OneSignal::sendNotificationToUser(
-                    $message,
-                    $id_onesignal,
-                    $url = null,
-                    $data = null,
-                    $buttons = null,
-                    $schedule = null
-                );}
+            $admin_arr = User::where('subdapertement_id', 8)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
 
             return response()->json([
                 'message' => 'Keluhan Diterima',

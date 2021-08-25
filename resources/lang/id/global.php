@@ -437,6 +437,18 @@ return [
             'status' => 'Status',
             'description' => 'Deskripsi'
         ]
-    ]
+    ],
+    'customerrequest' => [
+        'title' => 'Permintaan Pelanggan',
+        'title_singular' => 'Permintaan',
+        'fields' => [
+            'code' => 'Kode',
+            'name' => 'Nama',
+            'phone' => 'Telfon',
+            'address' => 'Alamat',
+            'status' => 'Status',
+            'img' => 'Foto',            
+        ]
+    ],
 ];
 

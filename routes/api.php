@@ -32,7 +32,7 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::get('ctm/pay/{id}', 'CtmApiController@ctmPay');
 
-    Route::get('ctm/customer/{id}', 'CtmApiController@ctmCustomer');
+    Route::get('ctm/customer/{id}', 'CtmApiController@ctmCustomer');    
 
 });
 
@@ -45,6 +45,8 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     Route::get('logout',  'CustomersApiController@logout');
 
     Route::post('code', 'CustomersApiController@scanBarcode');
+
+    Route::post('customerrequests', 'CustomersApiController@requestCustomer');
 });
 
 Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middleware' => 'auth:apiadmin'], function () {
@@ -80,12 +82,14 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
 
     // sub dapettement
     Route::resource('subdapertements', 'SubdapertementsApiController');
-    Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');
+    Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');    
 });
 
 
 Route::group(['prefix' => 'open/admin', 'namespace' => 'Api\V1\Admin'], function () {
     Route::post('login',  'AdminApiController@login' );
+    //test
+    Route::get('test/{id}', 'TicketsApiController@test');
 });
 
 Route::group(['prefix' => 'close/dapertement', 'namespace' => 'Api\V1\Dapertement'], function () {

@@ -12,6 +12,31 @@
             </li>
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
+                    <i class="fas fa-clipboard-list  nav-icon">
+
+                    </i>
+                    {{ trans('global.ticket.title') }}
+                </a>
+                <ul class="nav-dropdown-items">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.tickets.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                            {{ trans('global.ticket.title') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.customerrequests.index') }}" class="nav-link {{ request()->is('admin/customerrequests') || request()->is('admin/customerrequests/*') ? 'active' : '' }}">
+                            <i class="fas fa-user nav-icon">
+
+                            </i>
+                            {{ trans('global.customerrequest.title') }}
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-database  nav-icon">
 
                     </i>
@@ -54,17 +79,10 @@
                         <i class=" nav-icon fas fa-people-carry"></i>
                             {{ trans('global.staff.title') }}
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.tickets.index') }}" class="nav-link">
-                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
-                        <i class="nav-icon fas fa-clipboard-list"></i>
-                            {{ trans('global.ticket.title') }}
-                        </a>
-                    </li>
+                    </li>                    
                 </ul>
             </li>
-            
+
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-users nav-icon">
@@ -107,7 +125,7 @@
                     </i>
                     {{ trans('global.logout') }}
                 </a>
-            </li>            
+            </li>
         </ul>
 
         <div class="ps__rail-x" style="left: 0px; bottom: 0px;">

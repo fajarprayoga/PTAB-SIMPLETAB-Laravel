@@ -64,7 +64,7 @@
             <div class="form-group {{ $errors->has('subdapertement_id') ? 'has-error' : '' }}">
                 <label for="subdapertement_id">{{ trans('global.staff.fields.subdapertement') }}*</label>
                 <select id="subdapertement_id" name="subdapertement_id" class="form-control" value="{{ old('subdapertement_id', isset($user) ? $user->subdapertement : '') }}">
-                    <option value="">--Pilih Sub Depertement--</option>                    
+                    <option value="0">--Pilih Sub Depertement--</option>                    
                 </select>
                 @if($errors->has('subdapertement_id'))
                     <em class="invalid-feedback">
@@ -112,7 +112,7 @@
            success:function(res){               
             if(res){
                 $("#subdapertement_id").empty();
-                $("#subdapertement_id").append('<option>---Pilih Sub Depertement---</option>');
+                $("#subdapertement_id").append('<option value="0">---Pilih Sub Depertement---</option>');
                 $.each(res,function(id,name){
                     $("#subdapertement_id").append('<option value="'+id+'">'+name+'</option>');
                 });

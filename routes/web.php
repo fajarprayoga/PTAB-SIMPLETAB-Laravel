@@ -88,6 +88,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::delete('users/staff/delete/{action}/{staff}', 'ActionsController@actionStaffDestroy')->name('actions.actionStaffDestroy');
 
+    //customer request
+    Route::resource('customerrequests', 'CustomerRequestController');
+
     //test
     Route::resource('test-customers', 'TestController');
 

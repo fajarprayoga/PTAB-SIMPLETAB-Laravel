@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api\v1\admin;
 
+use App\Action;
 use App\CustomerApi;
 use App\Http\Controllers\Controller;
 use App\TicketApi;
@@ -11,7 +12,6 @@ use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Berkayk\OneSignal\OneSignalClient;
 use OneSignal;
 
 class TicketsApiController extends Controller
@@ -21,6 +21,7 @@ class TicketsApiController extends Controller
     public function tickets(Request $request)
     {
         $department = '';
+        $subdepartment = 0;
         if (isset($request->userid) && $request->userid != '') {
             $admin = User::with('roles')->find($request->userid);
             $role = $admin->roles[0];
@@ -28,18 +29,35 @@ class TicketsApiController extends Controller
             $permission = json_decode($role->permissions->pluck('title'));
             if (!in_array("ticket_all_access", $permission)) {
                 $department = $admin->dapertement_id;
+                $subdepartment = $admin->subdapertement_id;
             }
         }
         try {
 
-            $ticket = TicketApi::FilterStatus($request->status)
-                ->FilterDepartment($department)
-                ->orderBy('id', 'DESC')
-                ->with('department')
-                ->with('customer')
-                ->with('category')
-                ->with('ticket_image')
-                ->paginate(10, ['*'], 'page', $request->page);
+            if ($subdepartment == 0) {
+                $ticket = TicketApi::FilterStatus($request->status)
+                    ->FilterDepartment($department)
+                    ->orderBy('id', 'DESC')
+                    ->with('department')
+                    ->with('customer')
+                    ->with('category')
+                    ->with('ticket_image')
+                    ->with('action')
+                    ->paginate(10, ['*'], 'page', $request->page);
+            } else {
+                $ticket = TicketApi::selectRaw('DISTINCT tickets.*')
+                    ->join('actions', function ($join) use ($subdepartment) {
+                        $join->on('actions.ticket_id', '=', 'tickets.id')
+                            ->where('actions.subdapertement_id', '=', $subdepartment);
+                    })
+                    ->orderBy('id', 'DESC')
+                    ->with('department')
+                    ->with('customer')
+                    ->with('category')
+                    ->with('ticket_image')
+                    ->with('action')
+                    ->paginate(10, ['*'], 'page', $request->page);
+            }
 
             return response()->json([
                 'message' => 'success',
@@ -179,7 +197,7 @@ class TicketsApiController extends Controller
 
         }
 
-        if(!isset($dataForm->dapertement_id) && $dataForm->dapertement_id == ''){
+        if (!isset($dataForm->dapertement_id) && $dataForm->dapertement_id == '') {
             $dataForm->dapertement_id = 1;
         }
 
@@ -204,6 +222,39 @@ class TicketsApiController extends Controller
                 $upload_image->ticket_id = $ticket->id;
                 $upload_image->save();
             }
+
+            //send notif to humas
+            $admin_arr = User::where('subdapertement_id', 8)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to departement terkait
+            $admin_arr = User::where('dapertement_id', $dataForm->dapertement_id)
+                ->where('subdapertement_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
             return response()->json([
                 'message' => 'Keluhan Diterima',
             ]);
@@ -268,10 +319,10 @@ class TicketsApiController extends Controller
         $ticket->update($request->all());
 
         //send notif to departement terkait
-        $admin_arr = User::where('dapertement_id', $request->dapertement_id)->get();
+        $admin_arr = User::where('dapertement_id', $request->dapertement_id)->where('subdapertement_id', 0)->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Keluhan Baru Diterima : ' . $request->description;
+            $message = 'Keluhan Baru Dideligasikan : ' . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -288,6 +339,30 @@ class TicketsApiController extends Controller
         ]);
     }
 
+    public function test($id)
+    {
+        $data = "";
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin", \base_path());
+        $ticket_images = Ticket_Image::where('ticket_id', $id)->get();
+        foreach ($ticket_images as $ticket_image) {
+            $img = $ticket_image->image;
+            $img = str_replace('"', '', $img);
+            $img = str_replace('[', '', $img);
+            $img = str_replace(']', '', $img);
+            $img_arr = explode(",", $img);
+            foreach ($img_arr as $img_name) {
+                $file_path = $basepath . $img_name;
+                $data .= $file_path;
+                //unlink($file_path);
+            }
+        }
+        return response()->json([
+            'message' => 'Data Berhasil Di Hapus',
+            'data' => $data,
+        ]);
+
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -297,12 +372,39 @@ class TicketsApiController extends Controller
     public function destroy(TicketApi $ticket)
     {
         try {
-            $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
-            $ticket->delete();
-            return response()->json([
-                'message' => 'Data Berhasil Di Hapus',
-                'data' => $ticket_image,
-            ]);
+            $action = Action::where('ticket_id', '=', $ticket->id)->first();
+            if ($action === null) {
+
+                //unlink
+                $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin", \base_path());
+                $ticket_images = Ticket_Image::where('ticket_id', $ticket->id)->get();
+                foreach ($ticket_images as $ticket_image) {
+                    $img = $ticket_image->image;
+                    $img = str_replace('"', '', $img);
+                    $img = str_replace('[', '', $img);
+                    $img = str_replace(']', '', $img);
+                    $img_arr = explode(",", $img);
+                    foreach ($img_arr as $img_name) {
+                        $file_path = $basepath . $img_name;
+                        if (trim($img_name) != '' && file_exists($file_path)) {
+                            unlink($file_path);
+                        }
+                    }
+                }
+                $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
+                $ticket->delete();
+
+                return response()->json([
+                    'message' => 'Data Berhasil Di Hapus',
+                    'data' => $ticket_image,
+                ]);
+                // user doesn't exist
+            } else {
+                return response()->json([
+                    'message' => 'Data Masih Terkait dengan data yang lain',
+                    'data' => $action,
+                ]);
+            }
         } catch (QueryException $e) {
             return response()->json([
                 'message' => 'Data Masih Terkait dengan data yang lain',
