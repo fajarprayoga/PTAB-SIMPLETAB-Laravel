@@ -41,8 +41,8 @@
             clear: both;
         }
         @page { 
-            size: A5 ;
-            size:landscape;
+            size: A4 ;
+            size:portrait;
             margin-right: 1.5cm;
             margin-left: 1.5cm;
             margin-top: 0cm;
@@ -50,7 +50,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="onload()" >
     <div class="title">
         <h4>PERUSAHAAN DAERAH AIR MINUM KABUPATEN TABANAN
             <hr style="width: 240px;">
@@ -99,5 +99,10 @@
     NB:  Kalau Pekerjaan Lambat (Lebih dari 3 hari)
     <br>
     &nbsp &nbsp &nbsp &nbsp supaya laporan keatasan
+<script>
+    onload = function (){
+        window.print();
+    }
+</script>
 </body>
 </html>
