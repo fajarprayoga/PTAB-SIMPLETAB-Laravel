@@ -37,6 +37,30 @@
             </li>
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
+                    <i class="fas fa-file  nav-icon">
+
+                    </i>
+                    Laporan
+                </a>
+                <ul class="nav-dropdown-items">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.report.subhumas') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-file"></i>
+                            Laporan Humas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.report.subdistribusi') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-file"></i>
+                            Laporan Distribusi
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-database  nav-icon">
 
                     </i>
