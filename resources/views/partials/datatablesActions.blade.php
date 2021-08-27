@@ -15,11 +15,11 @@
         </a>
     @endcan
 @endif
-@if (isset($print) && $print)
+<!-- @if (isset($print) && $print)
         <a class="btn btn-xs btn-primary" href="{{ route('admin.' . $crudRoutePart . '.print', $row->id) }}">
             Print
         </a>
-@endif
+@endif -->
 @can($deleteGate)
     <form action="{{ route('admin.' . $crudRoutePart . '.destroy', $row->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
         <input type="hidden" name="_method" value="DELETE">

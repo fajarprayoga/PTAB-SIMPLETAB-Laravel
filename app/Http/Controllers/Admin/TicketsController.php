@@ -30,10 +30,12 @@ class TicketsController extends Controller
                 $qry = Ticket::with('customer')
                 ->with('category')
                 ->where('status', $status)
+                ->orderBy('created_at', 'DESC')
                 ->get();
             }else{
                 $qry = Ticket::with('customer')
                 ->with('category')
+                ->orderBy('created_at', 'DESC')
                 ->get();
             }  
 
@@ -243,5 +245,20 @@ class TicketsController extends Controller
         return view('admin.tickets.printAction', compact('ticket'));
 
         // dd($ticket);
+    }
+    public function printservice($id){
+        $ticket = Ticket::with(['customer','dapertement','action','category'])->findOrFail($id);
+        // dd($ticket);
+        return view('admin.tickets.printservice',compact('ticket'));
+    }
+
+    public function printspk($id){
+        $ticket = Ticket::with(['customer','dapertement','action','category'])->findOrFail($id);
+        return view('admin.tickets.printspk',compact('ticket'));
+    }
+
+    public function printReport($id){
+        $ticket = Ticket::with(['customer','dapertement','action','category'])->findOrFail($id);
+        return view ('admin.tickets.printreport',compact('ticket'));
     }
 }
