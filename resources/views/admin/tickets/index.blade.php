@@ -148,7 +148,7 @@
         { data: 'customer', name: 'customer' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
-    order: [[ 2, 'asc' ]],
+    // order: [[ 2, 'asc' ]],
     pageLength: 100,
   };
 

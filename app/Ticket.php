@@ -20,6 +20,10 @@ class Ticket extends Model
         'description'
     ];
 
+    public function dapertement() { 
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    }
+
     public function customer() { 
         return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening'); 
     }
@@ -29,7 +33,7 @@ class Ticket extends Model
     }
 
     public function action() { 
-        return $this->belongsTo('App\Action')->select('id'); 
+        return $this->belongsTo('App\Action')->select('*'); 
     }
 
     public function ticket_image()

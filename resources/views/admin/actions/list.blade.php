@@ -115,7 +115,7 @@
                                 
                         
 
-                                @if ($action->status == "pending")
+                                <!-- @if ($action->status == "pending")
                                     @can('action_print_service')
                                         <a class="btn btn-xs btn-primary"  href="{{ route('admin.actions.printservice') }}">
                                             {{ trans('global.action.print_service') }}
@@ -137,7 +137,7 @@
                                         {{ trans('global.action.print_Report') }}
                                     </a>
                                 @endcan
-                                @endif
+                                @endif -->
 
                                 <!-- end surya buat -->
 

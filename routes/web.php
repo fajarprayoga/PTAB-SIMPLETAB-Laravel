@@ -46,6 +46,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // tickets
 
+
     Route::resource('tickets', 'TicketsController');
 
     Route::get('tickets/print/{ticket_id}', 'TicketsController@print')->name('tickets.print');
@@ -54,6 +55,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::delete('tickets/destroy', 'TicketsController@massDestroy')->name('tickets.massDestroy');
 
+    Route::get('ticket/printservice/{ticket_id}', 'TicketsController@printservice')->name('tickets.printservice');
+
+    Route::get('ticket/printspk/{ticket_id}','TicketsController@printspk')->name('tickets.printspk');
+
+    Route::get('ticket/printreport/{ticket_id}','TicketsController@printreport')->name('tickets.printreport');
 
     // action & action staff
     // start surya buat

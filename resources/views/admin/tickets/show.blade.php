@@ -53,9 +53,26 @@
                 </video>
             </div>
         </div>
-        <div style="border-bottom: 1px solid" class="mt-3 pb-3" >
+        <!-- <div style="border-bottom: 1px solid" class="mt-3 pb-3" >
            
-        </div>
+        </div> -->
+       
+        <br>
+        @if ($ticket->status == "pending")
+            <a class="btn btn-lg btn-secondary fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
+                {{ trans('global.action.print_service') }}
+            </a>
+        @endif
+        @if ($ticket->status == "pending")
+            <a class="btn btn-lg btn-primary fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
+                {{ trans('global.action.print_SPK') }}
+            </a>
+        @endif
+        @if ($ticket->status == "close")
+            <a class="btn btn-lg btn-info fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
+                {{ trans('global.action.print_Report') }}
+            </a>
+        @endif
     </div>
 </div>
 
