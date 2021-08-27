@@ -18,6 +18,7 @@ class ActionApi extends Model
         'image',
         'subdapertement_id',
         'todo',
+        'spk',
     ];
 
     public function staff()

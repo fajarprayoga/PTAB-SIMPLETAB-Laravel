@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Customer;
 
+use App\Action;
 use App\CustomerApi;
 use App\CustomerMaps;
 use App\CustomerRequest;
@@ -41,7 +42,7 @@ class CustomersApiController extends Controller
                 $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
 
                 $resourceImage->move($basepath . $img_path, $img_name);
-            } 
+            }
 
             if ($resourceImage) {
                 $requestcustomer->img = $img_name;
@@ -119,10 +120,10 @@ class CustomersApiController extends Controller
     public function register_public(StoreApiCustomerRegisterPublicRequest $request)
     {
 
-        $last_code = $this->get_last_code('customer');
+        $last_code = $this->get_last_code('public');
 
-        //$code = acc_code_generate($last_code, 8, 3);
-        $code = $last_code + 1;
+        $code = acc_code_generate($last_code, 8, 3);
+        // $code = $last_code + 1;
 
         $customer = new CustomerApi;
         $customer->name = $request->name;
@@ -245,5 +246,19 @@ class CustomersApiController extends Controller
                 'message' => 'Unable to Logout',
             ]);
         }
+    }
+
+    public function test()
+    {
+
+        $arr['dapertement_id'] = 2;
+        // $arr['month'] = date("m");
+        // $arr['year'] = date("Y");
+        $date = date_create("2021-06-23 06:15:36");
+        $arr['month'] = date_format($date,"m");
+        $arr['year'] = date_format($date,"Y");
+        $last_code = $this->get_last_code('spk-ticket', $arr);
+        $code = acc_code_generate($last_code, 21, 17, 'Y');
+        return $code;
     }
 }

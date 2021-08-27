@@ -13,7 +13,8 @@ class Action extends Model
         'dapertement_id', 
         'ticket_id',
         'start',
-        'end'
+        'end',
+        'spk',
     ];
 
     public function staff()

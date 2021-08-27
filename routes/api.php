@@ -47,6 +47,9 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     Route::post('code', 'CustomersApiController@scanBarcode');
 
     Route::post('customerrequests', 'CustomersApiController@requestCustomer');
+
+    //test
+    Route::get('test', 'CustomersApiController@test');
 });
 
 Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middleware' => 'auth:apiadmin'], function () {

@@ -102,6 +102,13 @@ class TicketsApiController extends Controller
             $dataForm->category_id = $category->id;
         }
 
+        //set SPK
+        $arr['dapertement_id'] = 1;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_spk = $this->get_last_code('spk-ticket',$arr);
+        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+
         $data = array(
             'code' => $code,
             'title' => $dataForm->title,
@@ -112,6 +119,7 @@ class TicketsApiController extends Controller
             'customer_id' => $dataForm->customer_id,
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
+            'spk' => $spk,
         );
 
         try {

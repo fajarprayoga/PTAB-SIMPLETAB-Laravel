@@ -17,7 +17,8 @@ class Ticket extends Model
         'status',
         'category_id',
         'customer_id',
-        'description'
+        'description',
+        'spk',
     ];
 
     public function dapertement() { 

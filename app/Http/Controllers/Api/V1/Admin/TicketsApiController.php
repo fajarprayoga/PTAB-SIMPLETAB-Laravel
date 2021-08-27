@@ -201,6 +201,13 @@ class TicketsApiController extends Controller
             $dataForm->dapertement_id = 1;
         }
 
+        //set SPK
+        $arr['dapertement_id'] = $dataForm->dapertement_id;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_spk = $this->get_last_code('spk-ticket',$arr);
+        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+
         $data = array(
             'code' => $code,
             'title' => $dataForm->title,
@@ -212,6 +219,7 @@ class TicketsApiController extends Controller
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
             'dapertement_id' => $dataForm->dapertement_id,
+            'spk' => $spk,
         );
 
         try {
@@ -316,7 +324,21 @@ class TicketsApiController extends Controller
             ]);
         }
 
-        $ticket->update($request->all());
+        $data=$request->all();
+        //if dapertement_id is differ with prev
+        if($ticket->dapertement_id != $request->dapertement_id){
+        //set SPK
+        $arr['dapertement_id'] = $request->dapertement_id;
+        $created_at = date_create($ticket->created_at);
+        $arr['month'] = date_format($created_at,"m");
+        $arr['year'] = date_format($created_at,"Y");
+        $last_spk = $this->get_last_code('spk-ticket',$arr);
+        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+        //merge data
+        $data=array_merge($data, ['spk' => $spk]);
+        }
+
+        $ticket->update($data);
 
         //send notif to departement terkait
         $admin_arr = User::where('dapertement_id', $request->dapertement_id)->where('subdapertement_id', 0)->get();

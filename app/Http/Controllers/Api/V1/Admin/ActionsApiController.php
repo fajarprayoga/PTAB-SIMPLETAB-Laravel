@@ -226,6 +226,13 @@ class ActionsApiController extends Controller
 
         $data['status'] = 'pending';
         $data['start'] = $dateNow;
+        //set SPK
+        $arr['dapertement_id'] = $request->dapertement_id;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_spk = $this->get_last_code('spk',$arr);
+        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+        $data['spk'] = $spk;
 
         $action = ActionApi::create($data);
         $ticket = TicketApi::find($request->ticket_id);

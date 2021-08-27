@@ -310,7 +310,7 @@ trait TraitModel
         foreach ($arrCol as $key => $value) {
             $arrQry[$value] = $arrVal[$key];
         }
-        
+
         if ($tblpembayaran === null) {
             $result = DB::connection('mysql2')->table('tblpembayaran')->insert($arrQry);
         } else {
@@ -402,8 +402,50 @@ trait TraitModel
         return $return_obj;
     }
 
-    public function get_last_code($type)
+    public function get_last_code($type, $arr = [])
     {
+        if ($type == "spk-ticket") {
+            //get departement alias
+            $dapertement = Dapertement::where('id', $arr['dapertement_id'])->first();
+            $prefix = "/" . $dapertement->alias . "/SPK/" . $arr['month'] . "/" . $arr['year'];
+            $action = Ticket::where('dapertement_id', $arr['dapertement_id'])
+                ->whereYear('created_at', '=', $arr['year'])
+                ->whereMonth('created_at', '=', $arr['month'])
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($action && strlen($action->spk) == 21) {
+                $code = $action->spk;
+            } else {
+                $code = acc_codedef_generate($prefix, 21, 'Y');
+            }
+        }
+        
+        if ($type == "spk") {
+            //get departement alias
+            $dapertement = Dapertement::where('id', $arr['dapertement_id'])->first();
+            $prefix = "/" . $dapertement->alias . "/SPK/" . $arr['month'] . "/" . $arr['year'];
+            $action = Action::where('dapertement_id', $arr['dapertement_id'])
+                ->whereYear('created_at', '=', $arr['year'])
+                ->whereMonth('created_at', '=', $arr['month'])
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($action && strlen($action->spk) == 21) {
+                $code = $action->spk;
+            } else {
+                $code = acc_codedef_generate($prefix, 21, 'Y');
+            }
+        }
+
+        if ($type == "public") {
+            $customer = Customer::WhereMaps('type', 'public')->OrderMaps('id', 'desc')
+                ->first();
+            if ($customer && strlen($customer->code) == 8) {
+                $code = $customer->code;
+            } else {
+                $code = acc_codedef_generate('PUB', 8);
+            }
+        }
+
         if ($type == "action") {
             $action = Action::orderBy('id', 'desc')
                 ->first();
