@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Dapertement;
-use App\Http\Requests\StoreActionRequest;
-use App\Ticket;
-use App\Staff;
 use App\Action;
-use Yajra\DataTables\Facades\DataTables;
-use DB;
+use App\Dapertement;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreActionRequest;
+use App\Staff;
+use App\Ticket;
 use App\Traits\TraitModel;
+use DB;
+use Illuminate\Http\Request;
 
 class ActionsController extends Controller
 {
@@ -68,7 +67,7 @@ class ActionsController extends Controller
         $tickets = Ticket::all();
 
         $staffs = Staff::all();
-        
+
         return view('admin.actions.edit', compact('dapertements', 'tickets', 'staffs', 'action'));
 
     }
@@ -76,14 +75,14 @@ class ActionsController extends Controller
     public function update(Request $request, Action $action)
     {
         abort_unless(\Gate::allows('action_edit'), 403);
-        
+
         $action->update($request->all());
 
         return redirect()->route('admin.actions.list', $action->ticket_id);
 
     }
 
-    public function destroy(Request $request,Action $action)
+    public function destroy(Request $request, Action $action)
     {
         abort_unless(\Gate::allows('action_delete'), 403);
 
@@ -92,7 +91,7 @@ class ActionsController extends Controller
             $data[$key] = $staff->id;
         }
 
-         $cek = $action->staff()->detach($data);
+        $cek = $action->staff()->detach($data);
 
         $action->delete();
 
@@ -109,8 +108,7 @@ class ActionsController extends Controller
     }
 
     // list tindakan
-    public function list($ticket_id)
-    {
+    function list($ticket_id) {
         abort_unless(\Gate::allows('action_access'), 403);
 
         $actions = Action::with('staff')->with('dapertement')->with('ticket')->where('ticket_id', $ticket_id)->orderBy('start', 'desc')->get();
@@ -118,7 +116,6 @@ class ActionsController extends Controller
         return view('admin.actions.list', compact('actions', 'ticket_id'));
         // dd($actions);
     }
-
 
 // list pegawai
     public function actionStaff($action_id)
@@ -132,7 +129,7 @@ class ActionsController extends Controller
         return view('admin.actions.actionStaff', compact('action'));
     }
 
-    // nambah staff untuk tindakan 
+    // nambah staff untuk tindakan
     public function actionStaffCreate($action_id)
     {
 
@@ -142,52 +139,55 @@ class ActionsController extends Controller
 
         $action_staffs = Action::where('id', $action_id)->with('staff')->first();
 
-        $staffs = Staff::where('dapertement_id', $action->dapertement_id)->get();
-        
+        $staffs = Staff::where('subdapertement_id', $action->subdapertement_id)->get();
+
         // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
         $action_staffs_list = DB::table('staffs')
-        ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
-        ->get();
+            ->join('action_staff', function ($join) {
+                $join->on('action_staff.staff_id', '=', 'staffs.id')
+                    ->where('action_staff.status', '!=', 'close');
+            })
+            ->get();
 
         return view('admin.actions.actionStaffCreate', compact('action_id', 'staffs', 'action', 'action_staffs', 'action_staffs_list'));
 
         // dd($action_staffs_list);
     }
 
-    // store pegawai untuk tindakan 
+    // store pegawai untuk tindakan
 
     public function actionStaffStore(Request $request)
     {
         abort_unless(\Gate::allows('action_staff_create'), 403);
-        
+
         $action = Action::findOrFail($request->action_id);
 
-        if($action){
-           $cek =  $action->staff()->attach($request->staff_id, [ 'status' => 'pending' ]);
+        if ($action) {
+            $cek = $action->staff()->attach($request->staff_id, ['status' => 'pending']);
 
-            if($cek){
-                $action = Action::where('id',$request->action_id)->with('staff')->first();
-    
+            if ($cek) {
+                $action = Action::where('id', $request->action_id)->with('staff')->first();
+
                 // dd($action->staff[0]->pivot->status);
                 $cekAllStatus = false;
                 $statusAction = 'close';
-                for ($status=0;  $status < count($action->staff) ; $status++) { 
+                for ($status = 0; $status < count($action->staff); $status++) {
                     // dd($action->staff[$status]->pivot->status);
-                    if($action->staff[$status]->pivot->status =='pending' ){
+                    if ($action->staff[$status]->pivot->status == 'pending') {
                         $statusAction = 'pending';
                         break;
-                    }else if($action->staff[$status]->pivot->status =='active' ){
-                      
+                    } else if ($action->staff[$status]->pivot->status == 'active') {
+
                         $statusAction = 'active';
                     }
                 }
-                
+
                 $dateNow = date('Y-m-d H:i:s');
-    
+
                 $action->update([
                     'status' => $statusAction,
-                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 ]);
             }
         }
@@ -195,7 +195,7 @@ class ActionsController extends Controller
         return redirect()->route('admin.actions.actionStaff', $request->action_id);
     }
 
-    // update pegawai tindakan 
+    // update pegawai tindakan
 
     public function actionStaffEdit($action_id, $staff_id)
     {
@@ -204,10 +204,10 @@ class ActionsController extends Controller
         $action = Action::findOrFail($action_id);
 
         $action_staffs_list = DB::table('staffs')
-        ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
-        ->where('action_id', $action_id)
-        ->where('staff_id', $staff_id)
-        ->first();
+            ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
+            ->where('action_id', $action_id)
+            ->where('staff_id', $staff_id)
+            ->first();
         return view('admin.actions.actionStaffEdit', compact('action_staffs_list', 'action'));
     }
 
@@ -215,46 +215,46 @@ class ActionsController extends Controller
     {
         abort_unless(\Gate::allows('action_staff_edit'), 403);
 
-        $action = Action::where('id',$request->action_id)->with('staff')->first();
+        $action = Action::where('id', $request->action_id)->with('staff')->first();
 
-        if($action){
-            $cek = $action->staff()->updateExistingPivot($request->staff_id, [ 'status' => $request->status ]);
+        if ($action) {
+            $cek = $action->staff()->updateExistingPivot($request->staff_id, ['status' => $request->status]);
         }
 
-        if($cek){
-            $action = Action::where('id',$request->action_id)->with('staff')->first();
+        if ($cek) {
+            $action = Action::where('id', $request->action_id)->with('staff')->first();
 
             // dd($action->staff[0]->pivot->status);
             $cekAllStatus = false;
             $statusAction = 'close';
-            for ($status=0;  $status < count($action->staff) ; $status++) { 
+            for ($status = 0; $status < count($action->staff); $status++) {
                 // dd($action->staff[$status]->pivot->status);
-                if($action->staff[$status]->pivot->status =='pending' ){
+                if ($action->staff[$status]->pivot->status == 'pending') {
                     $statusAction = 'pending';
                     break;
-                }else if($action->staff[$status]->pivot->status =='active' ){
-                  
+                } else if ($action->staff[$status]->pivot->status == 'active') {
+
                     $statusAction = 'active';
                 }
             }
-            
+
             $dateNow = date('Y-m-d H:i:s');
 
             $action->update([
                 'status' => $statusAction,
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
             ]);
         }
 
         $statusTicket = 'close';
-        if($action){
+        if ($action) {
             $actionStatusAll = Action::where('ticket_id', $action->ticket_id)->get();
 
-            for($i = 0; $i < count($actionStatusAll); $i++){
-                if($actionStatusAll[$i]->status == 'pending'){
+            for ($i = 0; $i < count($actionStatusAll); $i++) {
+                if ($actionStatusAll[$i]->status == 'pending') {
                     $statusTicket = 'pending';
                     break;
-                }else if($actionStatusAll[$i]->status == 'active'){
+                } else if ($actionStatusAll[$i]->status == 'active') {
                     $statusTicket = 'active';
                 }
             }
@@ -262,7 +262,7 @@ class ActionsController extends Controller
             $ticket = Ticket::findOrFail($action->ticket_id);
 
             $ticket->update([
-                'status' => $statusTicket
+                'status' => $statusTicket,
             ]);
             // $actionStatusAll->update([
             //     'status' => $statusTicket,
@@ -279,55 +279,56 @@ class ActionsController extends Controller
     public function actionStaffDestroy($action_id, $staff_id)
     {
         abort_unless(\Gate::allows('action_staff_delete'), 403);
-    
+
         $action = Action::findOrFail($action_id);
 
-        if($action){
+        if ($action) {
             $cek = $action->staff()->detach($staff_id);
 
-            if($cek){
-                $action = Action::where('id',$action_id)->with('staff')->first();
-    
+            if ($cek) {
+                $action = Action::where('id', $action_id)->with('staff')->first();
+
                 // dd($action->staff[0]->pivot->status);
                 $cekAllStatus = false;
                 $statusAction = 'close';
-                for ($status=0;  $status < count($action->staff) ; $status++) { 
+                for ($status = 0; $status < count($action->staff); $status++) {
                     // dd($action->staff[$status]->pivot->status);
-                    if($action->staff[$status]->pivot->status =='pending' ){
+                    if ($action->staff[$status]->pivot->status == 'pending') {
                         $statusAction = 'pending';
                         break;
-                    }else if($action->staff[$status]->pivot->status =='active' ){
-                      
+                    } else if ($action->staff[$status]->pivot->status == 'active') {
+
                         $statusAction = 'active';
                     }
                 }
-                
+
                 $dateNow = date('Y-m-d H:i:s');
-    
+
                 $action->update([
                     'status' => $statusAction,
-                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow
+                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 ]);
             }
-            
+
         }
-        
 
         return redirect()->route('admin.actions.actionStaff', $action_id);
     }
     //start surya buat
-    public function printservice(){
+    public function printservice()
+    {
         return view('admin.actions.printservice');
     }
 
-    public function printspk(){
+    public function printspk()
+    {
         return view('admin.actions.printspk');
     }
 
-    public function printReport(){
-        return view ('admin.actions.printreport');
+    public function printReport()
+    {
+        return view('admin.actions.printreport');
     }
 
-    
     //end surya buat
 }

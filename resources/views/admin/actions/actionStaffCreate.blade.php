@@ -53,9 +53,7 @@
                                         <button class="btn btn-xs btn-success"  
                                             @foreach ($action_staffs_list as $list )
                                                 @if ($list->staff_id == $staff->id)
-                                                    @if ($list->status == 'pending')
-                                                        {{'disabled'}}
-                                                    @endif
+                                                    {{'disabled'}}
                                                 @endif
                                             @endforeach
 

@@ -16,17 +16,19 @@ class Ticket extends Model
         'lng',
         'status',
         'category_id',
+        'dapertement_id',
         'customer_id',
         'description',
+        'area',
         'spk',
     ];
 
-    public function dapertement() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    public function department() { 
+        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
     }
-
+    
     public function customer() { 
-        return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening'); 
+        return $this->belongsTo(CustomerApi::class, 'customer_id', 'nomorrekening'); 
     }
 
     public function category() { 
@@ -34,11 +36,42 @@ class Ticket extends Model
     }
 
     public function action() { 
-        return $this->belongsTo('App\Action')->select('*'); 
+        return $this->hasMany('App\Action', 'ticket_id', 'id');
     }
-
     public function ticket_image()
     {
-        return $this->hasMany('App\Ticket_Image');
+        return $this->hasMany('App\Ticket_Image', 'ticket_id', 'id');
+    }
+
+    public function scopeFilterStatus($query, $status)
+    {
+        if($status !=''){
+        $query->where('status', $status);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterDepartment($query, $department)
+    {
+        if($department !=''){
+        $query->where('dapertement_id', $department);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterJoinStatus($query, $status)
+    {
+        if($status !=''){
+        $query->where('tickets.status', $status);        
+        }
+        return $query;
+    }
+
+    public function scopeFilterJoinDepartment($query, $department)
+    {
+        if($department !=''){
+        $query->where('actions.dapertement_id', $department);        
+        }
+        return $query;
     }
 }
