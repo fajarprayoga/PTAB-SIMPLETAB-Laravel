@@ -105,5 +105,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::delete('subdapertements/destroy', 'SubdapertementsController@massDestroy')->name('subdapertements.massDestroy');
 
     Route::get('get-subdapertement', 'StaffsController@getSubdapertement')->name('staffs.subdepartment');
+
+    Route::get('reports/reportssubhumas','ReportsController@reportSubHumas')->name('report.subhumas');
+
+    Route::get('reports/reportssubdistribusi','ReportsController@reportSubDistribusi')->name('report.subdistribusi');
     
 });
