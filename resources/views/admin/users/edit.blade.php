@@ -77,6 +77,21 @@
                 @endif
             </div>
 
+            <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+                <label for="staff_id">{{ trans('global.staff.fields.name') }}*</label>
+                <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($user) ? $user->staff_id : '') }}">
+                    <option value="0">--Pilih Staff--</option> 
+                    @foreach ($staffs as $key=>$staff )
+                        <option value="{{$staff->id}}" {{$staff->id == $user->staff_id ? 'selected' : ''}} >{{$staff->name}}</option>
+                    @endforeach                   
+                </select>
+                @if($errors->has('staff_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff_id') }}
+                    </em>
+                @endif
+            </div>
+
             <div class="form-group {{ $errors->has('roles') ? 'has-error' : '' }}">
                 <label for="roles">{{ trans('global.user.fields.roles') }}*
                     <span class="btn btn-info btn-xs select-all">Select all</span>
@@ -127,6 +142,30 @@
         });
     }else{
         $("#subdapertement_id").empty();
+    }      
+   });
+
+   $('#subdapertement_id').change(function(){
+    var subdapertement_id = $(this).val();    
+    if(subdapertement_id){
+        $.ajax({
+           type:"GET",
+           url:"{{ route('admin.staffs.staff') }}?subdapertement_id="+subdapertement_id,
+           dataType: 'JSON',
+           success:function(res){               
+            if(res){
+                $("#staff_id").empty();
+                $("#staff_id").append('<option value="0">---Pilih Staff---</option>');
+                $.each(res,function(id,name){
+                    $("#staff_id").append('<option value="'+id+'">'+name+'</option>');
+                });
+            }else{
+               $("#staff_id").empty();
+            }
+           }
+        });
+    }else{
+        $("#staff_id").empty();
     }      
    });
 </script>

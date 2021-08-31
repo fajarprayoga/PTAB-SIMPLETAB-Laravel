@@ -9,8 +9,10 @@ use App\Http\Requests\StoreActionRequest;
 use App\Staff;
 use App\Ticket;
 use App\Traits\TraitModel;
+use App\User;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ActionsController extends Controller
 {
@@ -27,7 +29,26 @@ class ActionsController extends Controller
     {
         abort_unless(\Gate::allows('action_create'), 403);
 
-        $dapertements = Dapertement::all();
+        // $user_id = Auth::check() ? Auth::user()->id : null;
+        // $department = '';
+        // if (isset($user_id) && $user_id != '') {
+        //     $admin = User::with('roles')->find($user_id);
+        //     $role = $admin->roles[0];
+        //     $role->load('permissions');
+        //     $permission = json_decode($role->permissions->pluck('title'));
+        //     if (!in_array("ticket_all_access", $permission)) {
+        //         $department = $admin->dapertement_id;
+        //     }
+        // }
+
+        // if ($department != '') {
+        //     $dapertements = Dapertement::where('id', $department)->get();
+        // } else {
+        //     $dapertements = Dapertement::all();
+        // }
+
+        $ticket = Ticket::findOrFail($ticket_id);
+        $dapertements = Dapertement::where('id', $ticket->dapertement_id)->get();
 
         $staffs = Staff::all();
 
@@ -111,7 +132,42 @@ class ActionsController extends Controller
     function list($ticket_id) {
         abort_unless(\Gate::allows('action_access'), 403);
 
-        $actions = Action::with('staff')->with('dapertement')->with('ticket')->where('ticket_id', $ticket_id)->orderBy('start', 'desc')->get();
+        $user_id = Auth::check() ? Auth::user()->id : null;
+        $department = '';
+        $subdepartment = 0;
+        $staff = 0;
+        if (isset($user_id) && $user_id != '') {
+            $admin = User::with('roles')->find($user_id);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+                $subdepartment = $admin->subdapertement_id;
+                $staff = $admin->staff_id;
+            }
+        }
+
+        if ($subdepartment > 0 && $staff > 0) {
+            $actions = Action::selectRaw('DISTINCT actions.*')
+                ->join('action_staff', function ($join) use ($staff) {
+                    $join->on('action_staff.action_id', '=', 'actions.id')
+                        ->where('action_staff.staff_id', '=', $staff);
+                })
+                ->with('staff')
+                ->with('dapertement')
+                ->with('ticket')
+                ->where('ticket_id', $ticket_id)
+                ->orderBy('start', 'desc')
+                ->get();
+        }else{
+            $actions = Action::with('staff')
+                ->with('dapertement')
+                ->with('ticket')
+                ->where('ticket_id', $ticket_id)
+                ->orderBy('start', 'desc')
+                ->get();
+        }
 
         return view('admin.actions.list', compact('actions', 'ticket_id'));
         // dd($actions);
@@ -197,81 +253,61 @@ class ActionsController extends Controller
 
     // update pegawai tindakan
 
-    public function actionStaffEdit($action_id, $staff_id)
+    public function actionStaffEdit($action_id)
     {
         abort_unless(\Gate::allows('action_staff_edit'), 403);
 
-        $action = Action::findOrFail($action_id);
-
-        $action_staffs_list = DB::table('staffs')
-            ->join('action_staff', 'action_staff.staff_id', '=', 'staffs.id')
-            ->where('action_id', $action_id)
-            ->where('staff_id', $staff_id)
-            ->first();
-        return view('admin.actions.actionStaffEdit', compact('action_staffs_list', 'action'));
+        $action = Action::with('ticket')->findOrFail($action_id);
+        return view('admin.actions.actionStaffEdit', compact('action'));
     }
 
     public function actionStaffUpdate(Request $request)
     {
         abort_unless(\Gate::allows('action_staff_edit'), 403);
 
-        $action = Action::where('id', $request->action_id)->with('staff')->first();
+        $img_path = "/images/action";
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
 
-        if ($action) {
-            $cek = $action->staff()->updateExistingPivot($request->staff_id, ['status' => $request->status]);
-        }
+        // upload image
+        if ($request->file('image')) {
 
-        if ($cek) {
-            $action = Action::where('id', $request->action_id)->with('staff')->first();
+            foreach ($request->file('image') as $key => $image) {
+                $resourceImage = $image;
+                $nameImage = strtolower($request->action_id);
+                $file_extImage = $image->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "." . $file_extImage;
 
-            // dd($action->staff[0]->pivot->status);
-            $cekAllStatus = false;
-            $statusAction = 'close';
-            for ($status = 0; $status < count($action->staff); $status++) {
-                // dd($action->staff[$status]->pivot->status);
-                if ($action->staff[$status]->pivot->status == 'pending') {
-                    $statusAction = 'pending';
-                    break;
-                } else if ($action->staff[$status]->pivot->status == 'active') {
-
-                    $statusAction = 'active';
-                }
+                $resourceImage->move($basepath . $img_path, $img_name);
+                $dataImageName[] = $img_name;
             }
-
-            $dateNow = date('Y-m-d H:i:s');
-
-            $action->update([
-                'status' => $statusAction,
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
-            ]);
         }
 
-        $statusTicket = 'close';
-        if ($action) {
-            $actionStatusAll = Action::where('ticket_id', $action->ticket_id)->get();
+        $action = Action::where('id', $request->action_id)->with('ticket')->with('staff')->first();
+        $cekAllStatus = false;
+        $statusAction = $request->status;
 
-            for ($i = 0; $i < count($actionStatusAll); $i++) {
-                if ($actionStatusAll[$i]->status == 'pending') {
-                    $statusTicket = 'pending';
-                    break;
-                } else if ($actionStatusAll[$i]->status == 'active') {
-                    $statusTicket = 'active';
-                }
-            }
+        $dateNow = date('Y-m-d H:i:s');
 
-            $ticket = Ticket::findOrFail($action->ticket_id);
+        $dataNewAction = array(
+            'status' => $statusAction,
+            'image' => str_replace("\/", "/", json_encode($dataImageName)),
+            'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+            'memo' => $request->memo,
+        );
 
-            $ticket->update([
-                'status' => $statusTicket,
-            ]);
-            // $actionStatusAll->update([
-            //     'status' => $statusTicket,
-            // ]);
-
-            // dd($statusTicket);
+        $action->update($dataNewAction);
+        //update staff
+        $ids = $action->staff()->allRelatedIds();
+        foreach ($ids as $sid) {
+            $action->staff()->updateExistingPivot($sid, ['status' => $request->status]);
         }
+        //update ticket status
+        $ticket = Ticket::find($action->ticket_id);
+        $ticket->status = $statusAction;
+        $ticket->save();
 
-        return redirect()->route('admin.actions.actionStaff', $action->id);
+        return redirect()->route('admin.actions.list', $ticket->id);
 
     }
 

@@ -20,9 +20,9 @@
             <span class="v103_250">#Pelanggan</span>
             <span class="v103_251">#SH</span>
             <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
-            <span class="v103_253">{{$ticket->code}}</span>
+            <span class="v103_253">{{$ticket->spk}}</span>
             <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
-            <span class="v103_255">@if ($ticket->action != null)  {{$ticket->action->todo}}  @endif</span>
+            <span class="v103_255">@if (count($ticket->action)>0)  {{$ticket->action->todo}}  @endif</span>
             <span class="v103_256">{{$ticket->dapertement->name}}</span>
             <span class="v103_257">{{$ticket->updated_at->format('d/m/Y')}}</span>
             <span class="v103_258">{{$ticket->updated_at->format('d/m/Y')}}</span>
@@ -37,7 +37,7 @@
             <span class="v103_267">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>
             <span class="v103_268">{{$ticket->code}}</span>
             <span class="v103_269">{{$ticket->description}}</span>
-            <span class="v103_270">{{$ticket->customer->area}}</span>
+            <span class="v103_270">{{$ticket->area}}</span>
         </div>
     </div>
 	<script>

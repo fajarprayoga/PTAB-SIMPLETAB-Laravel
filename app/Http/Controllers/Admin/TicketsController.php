@@ -15,6 +15,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use App\Dapertement;
 
 class TicketsController extends Controller
 {
@@ -27,6 +28,7 @@ class TicketsController extends Controller
         $user_id = Auth::check() ? Auth::user()->id : null;
         $department = '';
         $subdepartment = 0;
+        $staff = 0;
         if (isset($user_id) && $user_id != '') {
             $admin = User::with('roles')->find($user_id);
             $role = $admin->roles[0];
@@ -35,14 +37,14 @@ class TicketsController extends Controller
             if (!in_array("ticket_all_access", $permission)) {
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
+                $staff = $admin->staff_id;
             }
-        }        
+        }
         if ($request->ajax()) {
             // set query
             if ($subdepartment == 0) {
                 $qry = Ticket::FilterStatus(request()->input('status'))
                     ->FilterDepartment($department)
-                    ->orderBy('id', 'DESC')
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -50,14 +52,31 @@ class TicketsController extends Controller
                     ->with('action')
                     ->orderBy('created_at', 'DESC')
                     ->get();
-            } else {
+            } else if($subdepartment > 0 && $staff >0){
+                $qry = Ticket::selectRaw('DISTINCT tickets.*')
+                    ->join('actions', function ($join) use ($subdepartment) {
+                        $join->on('actions.ticket_id', '=', 'tickets.id')
+                            ->where('actions.subdapertement_id', '=', $subdepartment);
+                    })
+                    ->join('action_staff', function ($join) use ($staff) {
+                        $join->on('action_staff.action_id', '=', 'actions.id')
+                            ->where('action_staff.staff_id', '=', $staff);
+                    })
+                    ->FilterStatus(request()->input('status'))
+                    ->with('department')
+                    ->with('customer')
+                    ->with('category')
+                    ->with('ticket_image')
+                    ->with('action')
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+            } else{
                 $qry = Ticket::selectRaw('DISTINCT tickets.*')
                     ->join('actions', function ($join) use ($subdepartment) {
                         $join->on('actions.ticket_id', '=', 'tickets.id')
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
                     ->FilterStatus(request()->input('status'))
-                    ->orderBy('id', 'DESC')
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -184,6 +203,14 @@ class TicketsController extends Controller
         $resource->move($basepath . $video_path, $video_name);
 
         // data
+        $dapertement_id = Auth::check() ? Auth::user()->dapertement_id : 1;
+        //set SPK
+        $arr['dapertement_id'] = $dapertement_id;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_spk = $this->get_last_code('spk-ticket', $arr);
+        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+        //set data
         $data = array(
             'code' => $request->code,
             'title' => $request->title,
@@ -192,6 +219,8 @@ class TicketsController extends Controller
             'image' => '',
             'video' => $video_name,
             'customer_id' => $request->customer_id,
+            'dapertement_id' => $dapertement_id,
+            'spk' => $spk,
         );
 
         try {
@@ -224,9 +253,25 @@ class TicketsController extends Controller
 
         $categories = Category::all();
 
-        //$customers = Customer::all();
+        $user_id = Auth::check() ? Auth::user()->id : null;
+        $department = '';
+        if (isset($user_id) && $user_id != '') {
+            $admin = User::with('roles')->find($user_id);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+            }
+        }
 
-        return view('admin.tickets.edit', compact('ticket', 'categories'));
+        if ($department != '') {
+            $dapertements = Dapertement::where('id', $department)->get();
+        } else {
+            $dapertements = Dapertement::all();
+        }
+
+        return view('admin.tickets.edit', compact('ticket', 'categories', 'dapertements'));
     }
 
     public function update(UpdateTicketRequest $request, Ticket $ticket)
@@ -234,7 +279,20 @@ class TicketsController extends Controller
         // dd($request->all());
         abort_unless(\Gate::allows('ticket_edit'), 403);
 
-        $ticket->update($request->all());
+        $data = $request->all();
+        if ($ticket->dapertement_id != $request->dapertement_id) {
+            //set SPK
+            $arr['dapertement_id'] = $request->dapertement_id;
+            $created_at = date_create($ticket->created_at);
+            $arr['month'] = date_format($created_at, "m");
+            $arr['year'] = date_format($created_at, "Y");
+            $last_spk = $this->get_last_code('spk-ticket', $arr);
+            $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+            //merge data
+            $data = array_merge($data, ['spk' => $spk]);
+        }
+
+        $ticket->update($data);
 
         return redirect()->route('admin.tickets.index');
     }
@@ -281,7 +339,6 @@ class TicketsController extends Controller
     public function printservice($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
-        // dd($ticket);
         return view('admin.tickets.printservice', compact('ticket'));
     }
 

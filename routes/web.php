@@ -86,7 +86,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::post('actions/staff/store/', 'ActionsController@actionStaffStore')->name('actions.actionStaffStore');
 
-    Route::get('actions/staff/{action}/edit/{staff}', 'ActionsController@actionStaffEdit')->name('actions.actionStaffEdit');
+    Route::get('actions/staff/{action}/edit', 'ActionsController@actionStaffEdit')->name('actions.actionStaffEdit');
 
     Route::put('actions/staff/update', 'ActionsController@actionStaffUpdate')->name('actions.actionStaffUpdate');
 
@@ -109,5 +109,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('reports/reportssubhumas','ReportsController@reportSubHumas')->name('report.subhumas');
 
     Route::get('reports/reportssubdistribusi','ReportsController@reportSubDistribusi')->name('report.subdistribusi');
+
+    Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
     
 });

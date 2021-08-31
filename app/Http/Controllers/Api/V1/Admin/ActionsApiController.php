@@ -170,9 +170,43 @@ class ActionsApiController extends Controller
         }
     }
 
-    function list($ticket_id) {
+    function list(Request $request) {
+        $department = '';
+        $subdepartment = 0;
+        $staff = 0;
+        if (isset($request->userid) && $request->userid != '') {
+            $admin = User::with('roles')->find($request->userid);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+                $subdepartment = $admin->subdapertement_id;
+                $staff = $admin->staff_id;
+            }
+        }
+
         try {
-            $actions = ActionApi::with('staff')->with('dapertement')->with('ticket')->where('ticket_id', $ticket_id)->orderBy('start', 'desc')->get();
+            if ($subdepartment > 0 && $staff > 0) {
+                $actions = ActionApi::selectRaw('DISTINCT actions.*')
+                    ->join('action_staff', function ($join) use ($staff) {
+                        $join->on('action_staff.action_id', '=', 'actions.id')
+                            ->where('action_staff.staff_id', '=', $staff);
+                    })
+                    ->with('staff')
+                    ->with('dapertement')
+                    ->with('ticket')
+                    ->where('ticket_id', $request->ticket_id)
+                    ->orderBy('start', 'desc')
+                    ->get();
+            } else {
+                $actions = ActionApi::with('staff')
+                    ->with('dapertement')
+                    ->with('ticket')
+                    ->where('ticket_id', $request->ticket_id)
+                    ->orderBy('start', 'desc')
+                    ->get();
+            }
             return response()->json([
                 'message' => 'Data Ticket',
                 'data' => $actions,
@@ -230,7 +264,7 @@ class ActionsApiController extends Controller
         $arr['dapertement_id'] = $request->dapertement_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
-        $last_spk = $this->get_last_code('spk',$arr);
+        $last_spk = $this->get_last_code('spk', $arr);
         $spk = acc_code_generate($last_spk, 21, 17, 'Y');
         $data['spk'] = $spk;
 

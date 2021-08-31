@@ -48,7 +48,7 @@
 
             <div class="form-group {{ $errors->has('dapertement_id') ? 'has-error' : '' }}">
                 <label for="dapertement_id">{{ trans('global.staff.fields.dapertement') }}*</label>
-                <select id="dapertement_id" name="dapertement_id" class="form-control" value="{{ old('dapertement_id', isset($user) ? $user->dapertement : '') }}">
+                <select id="dapertement_id" name="dapertement_id" class="form-control" value="{{ old('dapertement_id', isset($user) ? $user->dapertement_id : '') }}">
                     <option value="">--Pilih Dapertement--</option>
                     @foreach ($dapertements as $key=>$dapertement )
                         <option value="{{$dapertement->id}}">{{$dapertement->name}}</option>
@@ -63,12 +63,24 @@
 
             <div class="form-group {{ $errors->has('subdapertement_id') ? 'has-error' : '' }}">
                 <label for="subdapertement_id">{{ trans('global.staff.fields.subdapertement') }}*</label>
-                <select id="subdapertement_id" name="subdapertement_id" class="form-control" value="{{ old('subdapertement_id', isset($user) ? $user->subdapertement : '') }}">
+                <select id="subdapertement_id" name="subdapertement_id" class="form-control" value="{{ old('subdapertement_id', isset($user) ? $user->subdapertement_id : '') }}">
                     <option value="0">--Pilih Sub Depertement--</option>                    
                 </select>
                 @if($errors->has('subdapertement_id'))
                     <em class="invalid-feedback">
                         {{ $errors->first('subdapertement_id') }}
+                    </em>
+                @endif
+            </div>
+
+            <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+                <label for="staff_id">{{ trans('global.staff.fields.name') }}*</label>
+                <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($user) ? $user->staff_id : '') }}">
+                    <option value="0">--Pilih Staff--</option>                    
+                </select>
+                @if($errors->has('staff_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff_id') }}
                     </em>
                 @endif
             </div>
@@ -123,6 +135,30 @@
         });
     }else{
         $("#subdapertement_id").empty();
+    }      
+   });
+
+   $('#subdapertement_id').change(function(){
+    var subdapertement_id = $(this).val();    
+    if(subdapertement_id){
+        $.ajax({
+           type:"GET",
+           url:"{{ route('admin.staffs.staff') }}?subdapertement_id="+subdapertement_id,
+           dataType: 'JSON',
+           success:function(res){               
+            if(res){
+                $("#staff_id").empty();
+                $("#staff_id").append('<option value="0">---Pilih Staff---</option>');
+                $.each(res,function(id,name){
+                    $("#staff_id").append('<option value="'+id+'">'+name+'</option>');
+                });
+            }else{
+               $("#staff_id").empty();
+            }
+           }
+        });
+    }else{
+        $("#staff_id").empty();
     }      
    });
 </script>

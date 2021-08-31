@@ -10,10 +10,14 @@ class Action extends Model
     protected $fillable =[
         'description',
         'status',
-        'dapertement_id', 
+        'dapertement_id',
         'ticket_id',
         'start',
         'end',
+        'memo',
+        'image',
+        'subdapertement_id',
+        'todo',
         'spk',
     ];
 
@@ -30,6 +34,6 @@ class Action extends Model
     }
 
     public function ticket() { 
-        return $this->belongsTo('App\Ticket')->select('id', 'title'); 
+        return $this->belongsTo('App\Ticket')->select('id', 'title', 'code'); 
     }
 }

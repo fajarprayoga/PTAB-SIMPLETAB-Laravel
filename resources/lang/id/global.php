@@ -404,6 +404,7 @@ return [
             'status' => 'Status',
             'category' => 'Kategori',
             'customer' => 'Nama Pelanggan',
+            'customer_code' => 'Kode Pelanggan',
             'description' => 'Deskripsi'
         ]
     ],
@@ -422,7 +423,8 @@ return [
             'ticket' => 'Tiket',
             'start' => 'Waktu Mulai',
             'end' => 'Waktu Selesai',
-            'staff' => 'Pegawai'
+            'staff' => 'Pegawai',
+            'memo' => 'Memo'
         ]
     ],
     'action_staff' => [

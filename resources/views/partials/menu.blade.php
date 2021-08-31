@@ -10,6 +10,7 @@
                     {{ trans('global.dashboard') }}
                 </a>
             </li>
+            
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-clipboard-list  nav-icon">
@@ -18,6 +19,7 @@
                     {{ trans('global.ticket.title') }}
                 </a>
                 <ul class="nav-dropdown-items">
+                    @can('ticket_access')    
                     <li class="nav-item">
                         <a href="{{ route('admin.tickets.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -25,6 +27,8 @@
                             {{ trans('global.ticket.title') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('customerrequests_access') 
                     <li class="nav-item">
                         <a href="{{ route('admin.customerrequests.index') }}" class="nav-link {{ request()->is('admin/customerrequests') || request()->is('admin/customerrequests/*') ? 'active' : '' }}">
                             <i class="fas fa-user nav-icon">
@@ -33,8 +37,10 @@
                             {{ trans('global.customerrequest.title') }}
                         </a>
                     </li>
+                    @endcan
                 </ul>
-            </li>
+            </li>   
+            @can('report_access') 
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-file  nav-icon">
@@ -42,7 +48,8 @@
                     </i>
                     Laporan
                 </a>
-                <ul class="nav-dropdown-items">
+                <ul class="nav-dropdown-items">                       
+                    @can('reporthumas_access')    
                     <li class="nav-item">
                         <a href="{{ route('admin.report.subhumas') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -50,6 +57,8 @@
                             Laporan Humas
                         </a>
                     </li>
+                    @endcan
+                    @can('reportdistribusi_access')
                     <li class="nav-item">
                         <a href="{{ route('admin.report.subdistribusi') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -57,8 +66,10 @@
                             Laporan Distribusi
                         </a>
                     </li>
+                    @endcan
                 </ul>
             </li>
+            @endcan
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-database  nav-icon">
@@ -67,6 +78,7 @@
                     {{ trans('global.master.title') }}
                 </a>
                 <ul class="nav-dropdown-items">
+                    @can('customer_access')    
                     <li class="nav-item">
                         <a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->is('admin/customers') || request()->is('admin/customers/*') ? 'active' : '' }}">
                             <i class="fas fa-user nav-icon">
@@ -75,6 +87,8 @@
                             {{ trans('global.customer.title') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('categories_access')                    
                     <li class="nav-item">
                         <a href="{{ route('admin.categories.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt">
@@ -83,6 +97,8 @@
                             {{ trans('global.category.title') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('dapertement_access')                    
                     <li class="nav-item">
                         <a href="{{ route('admin.dapertements.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -90,6 +106,8 @@
                             {{ trans('global.dapertement.title') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('subdapertement_access')                    
                     <li class="nav-item">
                         <a href="{{ route('admin.subdapertements.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -97,16 +115,19 @@
                             {{ trans('global.subdapertement.title') }}
                         </a>
                     </li>
+                    @endcan
+                    @can('staff_access')                    
                     <li class="nav-item">
                         <a href="{{ route('admin.staffs.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
                         <i class=" nav-icon fas fa-people-carry"></i>
                             {{ trans('global.staff.title') }}
                         </a>
-                    </li>                    
+                    </li>
+                    @endcan                   
                 </ul>
             </li>
-
+            @can('user_management_access') 
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-users nav-icon">
@@ -141,7 +162,7 @@
                     </li>
                 </ul>
             </li>
-
+            @endcan
             <li class="nav-item">
                 <a href="#" class="nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
                     <i class="nav-icon fas fa-sign-out-alt">

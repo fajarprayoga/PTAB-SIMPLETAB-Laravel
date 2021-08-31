@@ -3,7 +3,7 @@
 <div class="content">
     <div class="row">
         <div class="col-lg-12">
-            asd
+        Dashboard
         </div>
     </div>
 </div>

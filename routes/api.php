@@ -75,7 +75,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
 
     // action
     Route::resource('actions', 'ActionsApiController');
-    Route::get('actionlists/{ticket_id}', 'ActionsApiController@list');
+    Route::post('actionlists', 'ActionsApiController@list');
     Route::get('actionStaffs/{action_id}', 'ActionsApiController@actionStaffs');
     Route::get('actionStaffLists/{action_id}', 'ActionsApiController@actionStaffLists');
     Route::post('actionStaffStore', 'ActionsApiController@actionStaffStore');

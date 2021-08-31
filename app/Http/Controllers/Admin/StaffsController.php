@@ -2,40 +2,66 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Dapertement;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
-use App\Dapertement;
 use App\Staff;
-use Yajra\DataTables\Facades\DataTables;
-use App\Traits\TraitModel;
-use Illuminate\Database\QueryException;
 use App\Subdapertement;
+use App\Traits\TraitModel;
+use App\User;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class StaffsController extends Controller
 {
     use TraitModel;
 
+    public function getStaff(Request $request)
+    {
+        $staffs = Staff::where('subdapertement_id', $request->subdapertement_id)
+            ->pluck('name', 'id');
+
+        return response()->json($staffs);
+    }
+
     public function getSubdapertement(Request $request)
     {
         $subdapertements = Subdapertement::where('dapertement_id', $request->dapertement_id)
             ->pluck('name', 'id');
-    
+
         return response()->json($subdapertements);
     }
-    
+
     public function index(Request $request)
     {
         if ($request->ajax()) {
+            //user role
+            $user_id = Auth::check() ? Auth::user()->id : null;
+            $department = '';
+            $subdepartment = 0;
+            $staff = 0;
+            if (isset($user_id) && $user_id != '') {
+                $admin = User::with('roles')->find($user_id);
+                $role = $admin->roles[0];
+                $role->load('permissions');
+                $permission = json_decode($role->permissions->pluck('title'));
+                if (!in_array("ticket_all_access", $permission)) {
+                    $department = $admin->dapertement_id;
+                    $subdepartment = $admin->subdapertement_id;
+                    $staff = $admin->staff_id;
+                }
+            }
             //set query
-            if(request()->input('dapertement_id')!=""){
-                $dapertement_id = request()->input('dapertement_id'); 
-    
-                $qry = Staff::where('dapertement_id', $dapertement_id)->with('dapertement')->with('subdapertement');
-            }else{
-                $qry = Staff::with('dapertement')->with('subdapertement')->get();
-            }  
+            if (request()->input('dapertement_id') != "") {
+                $dapertement_id = request()->input('dapertement_id');
+
+                $qry = Staff::where('dapertement_id', $dapertement_id)->with('dapertement')->with('subdapertement')->FilterDapertement($department);
+            } else {
+                $qry = Staff::with('dapertement')->with('subdapertement')->FilterDapertement($department)->get();
+            }
 
             $table = Datatables::of($qry);
 
@@ -71,11 +97,10 @@ class StaffsController extends Controller
             $table->editColumn('subdapertement', function ($row) {
                 return $row->subdapertement ? $row->subdapertement->name : "";
             });
-            
+
             $table->editColumn('phone', function ($row) {
                 return $row->phone ? $row->phone : "";
             });
-
 
             $table->rawColumns(['actions', 'placeholder']);
 
@@ -95,8 +120,28 @@ class StaffsController extends Controller
         $code = acc_code_generate($last_code, 8, 3);
 
         abort_unless(\Gate::allows('staff_create'), 403);
-        $dapertements = Dapertement::all();
-        
+        //user role
+        $user_id = Auth::check() ? Auth::user()->id : null;
+        $department = '';
+        $subdepartment = 0;
+        $staff = 0;
+        if (isset($user_id) && $user_id != '') {
+            $admin = User::with('roles')->find($user_id);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+                $subdepartment = $admin->subdapertement_id;
+                $staff = $admin->staff_id;
+            }
+        }
+        if ($department > 0) {
+            $dapertements = Dapertement::where('id', $department)->get();
+        } else {
+            $dapertements = Dapertement::all();
+        }
+
         return view('admin.staffs.create', compact('dapertements', 'code'));
     }
 
@@ -118,8 +163,26 @@ class StaffsController extends Controller
 
         $staff = Staff::findOrFail($id);
 
-        $dapertements = Dapertement::all();
-        $subdapertements = Subdapertement::all();
+        //user role
+        $user_id = Auth::check() ? Auth::user()->id : null;
+        $department = '';
+        $subdepartment = 0;
+        if (isset($user_id) && $user_id != '') {
+            $admin = User::with('roles')->find($user_id);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department = $admin->dapertement_id;
+                $subdepartment = $admin->subdapertement_id;
+            }
+        }
+        if ($department > 0) {
+            $dapertements = Dapertement::where('id', $department)->get();
+        } else {
+            $dapertements = Dapertement::all();
+        }
+        $subdapertements = Subdapertement::where('dapertement_id', $staff->dapertement_id)->get();
 
         return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements'));
     }
@@ -137,11 +200,10 @@ class StaffsController extends Controller
     {
         abort_unless(\Gate::allows('staff_delete'), 403);
 
-        try{
-            
+        try {
+
             $staff->delete();
-        }
-        catch(QueryException $e) {
+        } catch (QueryException $e) {
             return back()->withErrors(['Pegawai masih terdaftar dalam data Tiket']);
         }
 

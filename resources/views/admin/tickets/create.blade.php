@@ -42,6 +42,29 @@
                     </em>
                 @endif
             </div>
+            <div class="form-group {{ $errors->has('category') ? 'has-error' : '' }}">
+                <label for="category">{{ trans('global.ticket.fields.category') }}*</label>
+                <select id="category" name="category_id" class="form-control" value="{{ old('category', isset($customer) ? $customer->category : '') }}">
+                    <option value="">--Pilih Kategori--</option>
+                    @foreach ($categories as $category )
+                        <option value="{{$category->id}}" >{{$category->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('category'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('category') }}
+                    </em>
+                @endif
+            </div>
+            <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
+                <label for="customer">{{ trans('global.ticket.fields.customer_code') }}*</label>
+                <input type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer_id : '') }}">
+                @if($errors->has('customer'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('customer') }}
+                    </em>
+                @endif
+            </div>
             <div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}">
                 <label for="image">{{ trans('global.ticket.fields.image') }}*</label>
                 {{-- <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($ticket) ? $ticket->image : '') }}">
@@ -74,30 +97,7 @@
                     </em>
                 @endif
             </div>
-            <input type="hidden" value='pending' name='status'>
-            <div class="form-group {{ $errors->has('category') ? 'has-error' : '' }}">
-                <label for="category">{{ trans('global.ticket.fields.category') }}*</label>
-                <select id="category" name="category_id" class="form-control" value="{{ old('category', isset($customer) ? $customer->category : '') }}">
-                    <option value="">--Pilih Kategori--</option>
-                    @foreach ($categories as $category )
-                        <option value="{{$category->id}}" >{{$category->name}}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('category'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('category') }}
-                    </em>
-                @endif
-            </div>
-            <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
-                <label for="customer">{{ trans('global.ticket.fields.customer') }}*</label>
-                <input type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer_id : '') }}">
-                @if($errors->has('customer'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('customer') }}
-                    </em>
-                @endif
-            </div>
+            <input type="hidden" value='pending' name='status'>            
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

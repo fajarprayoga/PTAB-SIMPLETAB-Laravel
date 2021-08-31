@@ -97,16 +97,16 @@
                                     </a>
                                 @endcan -->
 
-                                @can('action_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.actions.edit', $action->id) }}">
-                                        {{ trans('global.edit') }}
+                                @can('action_staff_edit')
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.actions.actionStaffEdit', [$action->id]) }}">
+                                        Update Status Tindakan
                                     </a>
                                 @endcan
                                 
                            
-                                @can('action_staff_access')
+                                @can('action_staff_create')
                                     <a class="btn btn-xs btn-success"  href="{{ route('admin.actions.actionStaff', $action->id) }}">
-                                        {{ trans('global.staff.title') }}
+                                        Tambah {{ trans('global.staff.title') }}
                                     </a>
                                 @endcan
                                 

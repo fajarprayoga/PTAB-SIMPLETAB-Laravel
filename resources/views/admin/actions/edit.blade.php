@@ -18,19 +18,6 @@
                     </em>
                 @endif
             </div>
-            <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
-                <label for="dapertement">{{ trans('global.action.fields.dapertement') }}*</label>
-                <select id="dapertement" name="dapertement_id" class="form-control">
-                    @foreach ($dapertements as $dapertement )
-                        <option value="{{$dapertement->id}}" {{$action->dapertement_id == $dapertement->id ? 'selected' : ''}}>{{$dapertement->name}}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('dapertement'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('dapertement') }}
-                    </em>
-                @endif
-            </div>
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

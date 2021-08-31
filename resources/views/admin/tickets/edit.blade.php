@@ -38,39 +38,39 @@
                 @endif
             </div>
             <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
-                <label for="customer">{{ trans('global.ticket.fields.customer') }}*</label>
+                <label for="customer">{{ trans('global.ticket.fields.customer_code') }}*</label>
                 <input type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer', isset($ticket) ? $ticket->customer_id : '') }}">
                 @if($errors->has('customer'))
                     <em class="invalid-feedback">
                         {{ $errors->first('customer') }}
                     </em>
                 @endif
-            </div>
-            <div class="form-group {{ $errors->has('status') ? 'has-error' : '' }}">
-                <label for="status">{{ trans('global.ticket.fields.status') }}*</label>
-                <select id="status" name="status" class="form-control" value="{{ old('status', isset($ticket) ? $ticket->status : '') }}">
-                    <option value="">--Pilih status--</option>
-                    <option value="pending" {{$ticket->status == 'pending' ? 'selected' : ''}} >Pending</option>
-                    <option value="active" {{$ticket->status == 'active' ? 'selected' : ''}} >Active</option>
-                    <option value="close" {{$ticket->status == 'close' ? 'selected' : ''}} >Close</option>
-                </select>
-                @if($errors->has('status'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('status') }}
-                    </em>
-                @endif
-            </div>
+            </div>            
             <div class="form-group {{ $errors->has('category') ? 'has-error' : '' }}">
                 <label for="category">{{ trans('global.ticket.fields.category') }}*</label>
                 <select id="category" name="category_id" class="form-control" value="{{ old('category', isset($ticket) ? $ticket->category : '') }}">
                     <option value="">--Pilih category--</option>
                     @foreach ($categories as $key=>$category )
-                        <option value="{{$category->id}}" {{$category->id == $ticket->category->id ? 'selected' : ''}} >{{$category->name}}</option>
+                        <option value="{{$category->id}}" {{$category->id == $ticket->category_id ? 'selected' : ''}} >{{$category->name}}</option>
                     @endforeach
                 </select>
                 @if($errors->has('category'))
                     <em class="invalid-feedback">
                         {{ $errors->first('category') }}
+                    </em>
+                @endif
+            </div>
+            <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
+                <label for="dapertement">{{ trans('global.action.fields.dapertement') }}*</label>
+                <select id="dapertement" name="dapertement_id" class="form-control">
+                    <option value="">--Pilih dapertement--</option>
+                    @foreach ($dapertements as $dapertement )
+                        <option value="{{$dapertement->id}}" {{$dapertement->id == $ticket->dapertement_id ? 'selected' : ''}} >{{$dapertement->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('dapertement'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('dapertement') }}
                     </em>
                 @endif
             </div>

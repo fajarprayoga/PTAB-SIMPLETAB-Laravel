@@ -38,7 +38,8 @@ class User extends Authenticatable
         'email_verified_at',
         '_id_onesignal',
         'dapertement_id',
-        'subdapertement_id'
+        'subdapertement_id',
+        'staff_id'
     ];
 
     public function dapertement() { 

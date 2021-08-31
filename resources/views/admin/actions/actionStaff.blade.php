@@ -75,11 +75,11 @@
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan -->
-                                @can('action_staff_edit')
+                                <!-- @can('action_staff_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.actions.actionStaffEdit', [$action->id, $staff->id]) }}">
                                         {{ trans('global.edit') }}
                                     </a>
-                                @endcan
+                                @endcan -->
                                 @can('action_staff_delete')
                                     <form action="{{ route('admin.actions.actionStaffDestroy', [$action->id, $staff->id]) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">

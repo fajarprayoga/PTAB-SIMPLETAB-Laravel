@@ -22,6 +22,7 @@ class TicketsApiController extends Controller
     {
         $department = '';
         $subdepartment = 0;
+        $staff = 0;
         if (isset($request->userid) && $request->userid != '') {
             $admin = User::with('roles')->find($request->userid);
             $role = $admin->roles[0];
@@ -30,6 +31,7 @@ class TicketsApiController extends Controller
             if (!in_array("ticket_all_access", $permission)) {
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
+                $staff = $admin->staff_id;
             }
         }
         try {
@@ -44,18 +46,36 @@ class TicketsApiController extends Controller
                     ->with('ticket_image')
                     ->with('action')
                     ->paginate(10, ['*'], 'page', $request->page);
+            } else if ($subdepartment > 0 && $staff > 0) {
+                $ticket = TicketApi::selectRaw('DISTINCT tickets.*')
+                    ->join('actions', function ($join) use ($subdepartment) {
+                        $join->on('actions.ticket_id', '=', 'tickets.id')
+                            ->where('actions.subdapertement_id', '=', $subdepartment);
+                    })
+                    ->join('action_staff', function ($join) use ($staff) {
+                        $join->on('action_staff.action_id', '=', 'actions.id')
+                            ->where('action_staff.staff_id', '=', $staff);
+                    })
+                    ->FilterStatus(request()->input('status'))
+                    ->with('department')
+                    ->with('customer')
+                    ->with('category')
+                    ->with('ticket_image')
+                    ->with('action')
+                    ->orderBy('created_at', 'DESC')
+                    ->paginate(10, ['*'], 'page', $request->page);
             } else {
                 $ticket = TicketApi::selectRaw('DISTINCT tickets.*')
                     ->join('actions', function ($join) use ($subdepartment) {
                         $join->on('actions.ticket_id', '=', 'tickets.id')
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
-                    ->orderBy('id', 'DESC')
                     ->with('department')
                     ->with('customer')
                     ->with('category')
                     ->with('ticket_image')
                     ->with('action')
+                    ->orderBy('created_at', 'DESC')
                     ->paginate(10, ['*'], 'page', $request->page);
             }
 
@@ -205,7 +225,7 @@ class TicketsApiController extends Controller
         $arr['dapertement_id'] = $dataForm->dapertement_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
-        $last_spk = $this->get_last_code('spk-ticket',$arr);
+        $last_spk = $this->get_last_code('spk-ticket', $arr);
         $spk = acc_code_generate($last_spk, 21, 17, 'Y');
 
         $data = array(
@@ -324,18 +344,18 @@ class TicketsApiController extends Controller
             ]);
         }
 
-        $data=$request->all();
+        $data = $request->all();
         //if dapertement_id is differ with prev
-        if($ticket->dapertement_id != $request->dapertement_id){
-        //set SPK
-        $arr['dapertement_id'] = $request->dapertement_id;
-        $created_at = date_create($ticket->created_at);
-        $arr['month'] = date_format($created_at,"m");
-        $arr['year'] = date_format($created_at,"Y");
-        $last_spk = $this->get_last_code('spk-ticket',$arr);
-        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
-        //merge data
-        $data=array_merge($data, ['spk' => $spk]);
+        if ($ticket->dapertement_id != $request->dapertement_id) {
+            //set SPK
+            $arr['dapertement_id'] = $request->dapertement_id;
+            $created_at = date_create($ticket->created_at);
+            $arr['month'] = date_format($created_at, "m");
+            $arr['year'] = date_format($created_at, "Y");
+            $last_spk = $this->get_last_code('spk-ticket', $arr);
+            $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+            //merge data
+            $data = array_merge($data, ['spk' => $spk]);
         }
 
         $ticket->update($data);

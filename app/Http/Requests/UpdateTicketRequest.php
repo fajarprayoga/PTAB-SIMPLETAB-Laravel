@@ -29,10 +29,7 @@ class UpdateTicketRequest extends FormRequest
             ],
             'title' => [
                 'required'
-            ],
-            'status' =>[
-                'required'
-            ],
+            ],            
             'category_id' => [
                 'required'
             ],

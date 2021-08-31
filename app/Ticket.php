@@ -23,6 +23,10 @@ class Ticket extends Model
         'spk',
     ];
 
+    public function dapertement() { 
+        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
+    }
+
     public function department() { 
         return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
     }

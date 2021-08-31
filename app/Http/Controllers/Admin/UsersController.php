@@ -10,6 +10,7 @@ use App\Role;
 use App\User;
 use App\Dapertement;
 use App\Subdapertement;
+use App\Staff;
 
 class UsersController extends Controller
 {
@@ -50,9 +51,10 @@ class UsersController extends Controller
 
         $user->load('roles');
         $dapertements = Dapertement::all();
-        $subdapertements = Subdapertement::all();
+        $subdapertements = Subdapertement::where('dapertement_id', $user->dapertement_id)->get();
+        $staffs = Staff::where('subdapertement_id', $user->subdapertement_id)->get();
 
-        return view('admin.users.edit', compact('roles', 'user', 'dapertements', 'subdapertements'));
+        return view('admin.users.edit', compact('roles', 'user', 'dapertements', 'subdapertements', 'staffs'));
     }
 
     public function update(UpdateUserRequest $request, User $user)

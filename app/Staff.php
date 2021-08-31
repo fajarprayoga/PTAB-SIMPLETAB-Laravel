@@ -30,4 +30,12 @@ class Staff extends Model
                 'status'
             ]);
     }
+
+    public function scopeFilterDapertement($query, $dapertement)
+    {
+        if($dapertement !=''){
+        $query->where('dapertement_id', $dapertement);        
+        }
+        return $query;
+    }
 }
