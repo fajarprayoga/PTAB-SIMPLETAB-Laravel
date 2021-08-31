@@ -8,7 +8,7 @@
 <body class="A4" onload="onload()">
     <section class="sheet padding-10mm">
         <h3>PERUSAHAAN UMUM DAERAH AIR MINUM KABUPATEN DATI II TABANAN WILAYAH PELAYANAN KOTA</h3>
-        <h3>BULAN : AGUSTUS 2021</h3>
+        <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3>
         <table class="table">
             <thead>
                 <tr>
@@ -25,20 +25,22 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td class="text-center">1</td>
-                    <td>I Komang Sukarja</td>
-                    <td>Prm Yeh Dulang Blok A/1 - Celebuh</td>
-                    <td>I</td>
-                    <td>02.06/2021</td>
-                    <td>Bocor sebelum WM</td>
-                    <td>01/Dist/SPK/VI/2021</td>
-                    <td>02/06/2021</td>
-                    <td>Pihak ke III</td>
-                    <td>*1. Perbaikan PVC Dop O2"<br>
-                        Accesories: PVC Dop O2 1 Buah PVG Leem 1 Sube<br>
-                    </td>
-                </tr>
+                @foreach ($tickets as $ticket)
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>{{ $ticket->customer->name }}</td>
+                        <td>Prm Yeh Dulang Blok A/1 - Celebuh</td>
+                        <td>I</td>
+                        <td>02.06/2021</td>
+                        <td>Bocor sebelum WM</td>
+                        <td>01/Dist/SPK/VI/2021</td>
+                        <td>02/06/2021</td>
+                        <td>Pihak ke III</td>
+                        <td>*1. Perbaikan PVC Dop O2"<br>
+                            Accesories: PVC Dop O2 1 Buah PVG Leem 1 Sube<br>
+                        </td>
+                    </tr>
+                @endforeach
                
             </tbody>
         </table>

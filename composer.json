@@ -47,7 +47,8 @@
             "database/factories"
         ],
         "files": [
-            "app/Helpers/Helper.php"
+            "app/Helpers/Helper.php",
+            "app/Helpers/Hari_ini.php"
         ]
     },
     "autoload-dev": {

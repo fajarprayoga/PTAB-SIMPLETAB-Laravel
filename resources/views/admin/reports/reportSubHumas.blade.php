@@ -5,10 +5,12 @@
     <title>PERUSAHAAN UMUM DAERAH AIR MINUM</title>
     <link href="{{ asset('css/printsubhumas.css') }}" rel="stylesheet" />
 </head>
-<body class="A4" onload="onload()">
+<body class="A4"  onload="onload()" >
+
+    {{-- {{ dd($tickets) }} --}}
     <section class="sheet padding-10mm">
         <h3>REKAPITULASI PERMINTAAN SERVICE</h3>
-        <h3>BULAN : MEI 2021</h3>
+        <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3>
         <table class="table">
         <tr>
             <th rowspan="3">No</th>
@@ -36,82 +38,28 @@
             <th>AKHIR</th>
             <th>WAKTU</th>
         </tr>
-        <tr>
-            <td class="text-center">1</td>
-            <td>SABTU</td>
-            <td>01/05/2021</td>
-            <td>III</td>
-            <td>-</td>
-            <td>Pt.Darmawan</td>
-            <td>Claster Bakisan No.43</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>301</td>
-            <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
-            <td>T</td>
-            <td>0</td>
-            <td>03/05/2021</td>
-            <td>2</td>
-        </tr>
-       
-        
-        <tr>
-            <td class="text-center">3</td>
-            <td>SABTU</td>
-            <td>01/05/2021</td>
-            <td>III</td>
-            <td>-</td>
-            <td>Pt.Darmawan</td>
-            <td>Claster Bakisan No.43</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>301</td>
-            <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
-            <td>T</td>
-            <td>0</td>
-            <td>03/05/2021</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td class="text-center">4</td>
-            <td>SABTU</td>
-            <td>01/05/2021</td>
-            <td>III</td>
-            <td>-</td>
-            <td>Pt.Darmawan</td>
-            <td>Claster Bakisan No.43</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>301</td>
-            <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
-            <td>T</td>
-            <td>0</td>
-            <td>03/05/2021</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td class="text-center">5</td>
-            <td>SABTU</td>
-            <td>01/05/2021</td>
-            <td>III</td>
-            <td>-</td>
-            <td>Pt.Darmawan</td>
-            <td>Claster Bakisan No.43</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>301</td>
-            <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
-            <td>T</td>
-            <td>0</td>
-            <td>03/05/2021</td>
-            <td>2</td>
-        </tr>
-
-      
+        {{-- isi data --}}
+        @foreach ($tickets as $ticket)
+            <tr>
+                <td class="text-center">1</td>
+                <td>{{  date('D', strtotime($ticket->created_at))}}</td>
+                <td>{{  date('d-F-Y', strtotime($ticket->created_at))}}</td>
+                <td>{{ $ticket->area }}</td>
+                <td>-</td>
+                <td>{{ $ticket->customer->name }}</td>
+                <td>Claster Bakisan No.43</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>301</td>
+                <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
+                <td>T</td>
+                <td>0</td>
+                <td>03/05/2021</td>
+                <td>2</td>
+            </tr>
+        @endforeach
+        {{-- batas isi data  --}}
     </table>
     </section>
 <script>

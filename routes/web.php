@@ -108,7 +108,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::get('reports/reportssubhumas','ReportsController@reportSubHumas')->name('report.subhumas');
 
+    Route::post('reports/reportssubhumas/proses','ReportsController@reportSubHumasProses')->name('report.subhumasproses');
+
     Route::get('reports/reportssubdistribusi','ReportsController@reportSubDistribusi')->name('report.subdistribusi');
+
+    Route::post('reports/reportssubdistribusi/proses','ReportsController@reportSubDistribusiProses')->name('report.subdistribusiproses');
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
     
