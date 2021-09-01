@@ -24,7 +24,7 @@
                 <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
                 <span class="v103_253">{{$ticket->code}}</span>
                 <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
-                <span class="v103_255">@if ($ticket->action != null)  {{$ticket->action->todo}}  @endif</span>
+                <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257">{{$ticket->updated_at->format('d/m/Y')}}</span>
                 <span class="v103_258">{{$ticket->updated_at->format('d/m/Y')}}</span>
@@ -60,7 +60,7 @@
                 <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
                 <span class="v103_253">{{$ticket->code}}</span>
                 <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
-                <span class="v103_255">@if ($ticket->action != null)  {{$ticket->action->todo}}  @endif</span>
+                <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257">{{$ticket->updated_at->format('d/m/Y')}}</span>
                 <span class="v103_258">{{$ticket->updated_at->format('d/m/Y')}}</span>
@@ -96,7 +96,7 @@
                 <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
                 <span class="v103_253">{{$ticket->code}}</span>
                 <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
-                <span class="v103_255">@if ($ticket->action != null)  {{$ticket->action->todo}}  @endif</span>
+                <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257">{{$ticket->updated_at->format('d/m/Y')}}</span>
                 <span class="v103_258">{{$ticket->updated_at->format('d/m/Y')}}</span>
@@ -132,7 +132,7 @@
                 <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
                 <span class="v103_253">{{$ticket->code}}</span>
                 <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
-                <span class="v103_255">@if ($ticket->action != null)  {{$ticket->action->todo}}  @endif</span>
+                <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257">{{$ticket->updated_at->format('d/m/Y')}}</span>
                 <span class="v103_258">{{$ticket->updated_at->format('d/m/Y')}}</span>

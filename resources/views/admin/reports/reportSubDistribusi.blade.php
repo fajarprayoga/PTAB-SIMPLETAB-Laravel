@@ -25,19 +25,19 @@
                 </tr>
             </thead>
             <tbody>
+                <?php $no=1 ?>
                 @foreach ($tickets as $ticket)
                     <tr>
-                        <td class="text-center">1</td>
+                        <td class="text-center">{{$no++}}</td>
                         <td>{{ $ticket->customer->name }}</td>
-                        <td>Prm Yeh Dulang Blok A/1 - Celebuh</td>
-                        <td>I</td>
-                        <td>02.06/2021</td>
-                        <td>Bocor sebelum WM</td>
-                        <td>01/Dist/SPK/VI/2021</td>
-                        <td>02/06/2021</td>
-                        <td>Pihak ke III</td>
-                        <td>*1. Perbaikan PVC Dop O2"<br>
-                            Accesories: PVC Dop O2 1 Buah PVG Leem 1 Sube<br>
+                        <td>{{$ticket->customer->address}}</td>
+                        <td>{{$ticket->area}}</td>
+                        <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</td>
+                        <td>{{$ticket->description}}</td>
+                        <td>{{$ticket->spk}}</td>
+                        <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</td>
+                        <td>Internal</td>
+                        <td> @foreach ($ticket->action as $ticketaction)*{{$ticketaction->description}}"<br>@endforeach
                         </td>
                     </tr>
                 @endforeach

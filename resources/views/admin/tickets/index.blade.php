@@ -33,13 +33,20 @@
                         <option value="active">Active</option>
                         <option value="close">Close</option>
                     </select>
+                    <select id="departement" name="departement" class="form-control">
+                        <option value="">== Semua Departement ==</option>
+                        @foreach ($departementlist as $depart )
+                            <option value="{{$depart->id}}" >{{$depart->name}}</option>
+                        @endforeach
+                    </select>
                     <span class="input-group-btn">
                     &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
                     </span>
                 </div>                
              </form>
-             </div> 
-        </div>
+        </div> 
+    </div>
+    
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-ticket">
                 <thead>
@@ -52,6 +59,12 @@
                         </th>
                         <th>
                             {{ trans('global.ticket.fields.code') }}
+                        </th>
+                        <th>
+                            {{ trans('global.ticket.fields.date') }}
+                        </th>
+                        <th>
+                            {{ trans('global.ticket.fields.departement') }}
                         </th>
                         <th>
                             {{ trans('global.ticket.fields.title') }}
@@ -83,11 +96,19 @@
 <script>
     $(function () {
         let searchParams = new URLSearchParams(window.location.search)
+
         let status = searchParams.get('status')
         if (status) {
             $("#status").val(status);
         }else{
             $("#status").val('');
+        }
+
+        let departement = searchParams.get('departement')
+        if (departement) {
+            $("#departement").val(departement);
+        }else{
+            $("#departement").val('');
         }
 
         // console.log('type : ', type);
@@ -135,18 +156,22 @@
       url: "{{ route('admin.tickets.index') }}",
       data: {
         'status': $("#status").val(),
+        'departement': $("#departement").val(),
       }
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no' },
         { data: 'code', name: 'code' },
+        { data: 'created_at', name: 'created_at' },
+        { data: 'dapertement', name: 'dapertement' },
         { data: 'title', name: 'title' },
         { data: 'description', name: 'description' },
         { data: 'status', name: 'status' },
         { data: 'category', name: 'category' },
         { data: 'customer', name: 'customer' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
+
     ],
     // order: [[ 2, 'asc' ]],
     pageLength: 100,

@@ -24,7 +24,8 @@ class TicketsController extends Controller
     public function index(Request $request)
     {
         abort_unless(\Gate::allows('ticket_access'), 403);
-
+        $departementlist = Dapertement::all();
+        $ticket = Ticket::all();
         $user_id = Auth::check() ? Auth::user()->id : null;
         $department = '';
         $subdepartment = 0;
@@ -38,9 +39,13 @@ class TicketsController extends Controller
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
                 $staff = $admin->staff_id;
+                $departementlist = Dapertement::where('id', $department)->get();
             }
         }
         if ($request->ajax()) {
+            if($request->departement!=""){
+                $department =$request->departement;
+            }
             // set query
             if ($subdepartment == 0) {
                 $qry = Ticket::FilterStatus(request()->input('status'))
@@ -63,6 +68,7 @@ class TicketsController extends Controller
                             ->where('action_staff.staff_id', '=', $staff);
                     })
                     ->FilterStatus(request()->input('status'))
+                    
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -77,6 +83,7 @@ class TicketsController extends Controller
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
                     ->FilterStatus(request()->input('status'))
+                  
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -85,20 +92,6 @@ class TicketsController extends Controller
                     ->orderBy('created_at', 'DESC')
                     ->get();
             }
-
-            // if (request()->input('status') != "") {
-            //     $status = request()->input('status');
-            //     $qry = Ticket::with('customer')
-            //         ->with('category')
-            //         ->where('status', $status)
-            //         ->orderBy('created_at', 'DESC')
-            //         ->get();
-            // } else {
-            //     $qry = Ticket::with('customer')
-            //         ->with('category')
-            //         ->orderBy('created_at', 'DESC')
-            //         ->get();
-            // }
 
             $table = Datatables::of($qry);
 
@@ -123,8 +116,18 @@ class TicketsController extends Controller
                     'row'
                 ));
             });
+           
+
             $table->editColumn('code', function ($row) {
                 return $row->code ? $row->code : "";
+            });
+
+            $table->editColumn('date', function ($row) {
+                return $row->created_at ? $row->created_at : "";
+            });
+
+            $table->editColumn('dapertement', function ($row) {
+                return $row->dapertement->name ? $row->dapertement->name : "";
             });
 
             $table->editColumn('title', function ($row) {
@@ -152,7 +155,7 @@ class TicketsController extends Controller
         }
         //default view
 
-        return view('admin.tickets.index');
+        return view('admin.tickets.index',compact('departementlist'));
     }
 
     public function create()
@@ -339,6 +342,7 @@ class TicketsController extends Controller
     public function printservice($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
+        
         return view('admin.tickets.printservice', compact('ticket'));
     }
 
