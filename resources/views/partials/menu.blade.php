@@ -16,7 +16,7 @@
                     <i class="fas fa-clipboard-list  nav-icon">
 
                     </i>
-                    {{ trans('global.ticket.title') }}
+                    {{ trans('global.ticket_request') }}
                 </a>
                 <ul class="nav-dropdown-items">
                     @can('ticket_access')    
@@ -46,7 +46,7 @@
                     <i class="fas fa-file  nav-icon">
 
                     </i>
-                    Laporan
+                    {{ trans('global.report') }}
                 </a>
                 <ul class="nav-dropdown-items">                       
                     @can('reporthumas_access')    
@@ -54,7 +54,7 @@
                         <a href="{{ route('admin.report.subhumas') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
                         <i class="nav-icon fas fa-file"></i>
-                            Laporan Humas
+                        {{ trans('global.reporthumas') }}
                         </a>
                     </li>
                     @endcan
@@ -63,7 +63,7 @@
                         <a href="{{ route('admin.report.subdistribusi') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
                         <i class="nav-icon fas fa-file"></i>
-                            Laporan Distribusi
+                        {{ trans('global.reportdistribusi') }}
                         </a>
                     </li>
                     @endcan

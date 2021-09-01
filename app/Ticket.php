@@ -36,7 +36,7 @@ class Ticket extends Model
     }
 
     public function category() { 
-        return $this->belongsTo('App\Category')->select('id', 'name'); 
+        return $this->belongsTo('App\Category')->select('id', 'name','code'); 
     }
 
     public function action() { 
@@ -55,6 +55,7 @@ class Ticket extends Model
         return $query;
     }
 
+    
     public function scopeFilterDepartment($query, $department)
     {
         if($department !=''){

@@ -311,6 +311,10 @@ return [
     'team-management' => 'Teams',
     'team-management-singular' => 'Team',
     'site_title' => 'Sistem Keluhan Pelanggan',
+    'ticket_request' =>'Tiket & Permintaan',
+    'report' => 'Laporan',
+    'reporthumas' => 'Laporan Humas',
+    'reportdistribusi' => 'Laporan Distribusi', 
     'userManagement' => [
         'title' => 'User Management',
         'title_singular' => 'User Management',
@@ -405,7 +409,9 @@ return [
             'category' => 'Kategori',
             'customer' => 'Nama Pelanggan',
             'customer_code' => 'Kode Pelanggan',
-            'description' => 'Deskripsi'
+            'description' => 'Deskripsi',
+            'date' => 'Tanggal',
+            'departement' => 'Nama Departement'
         ]
     ],
     'action' => [

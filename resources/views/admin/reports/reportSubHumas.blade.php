@@ -39,24 +39,32 @@
             <th>WAKTU</th>
         </tr>
         {{-- isi data --}}
+        <?php $no=1 ?>
         @foreach ($tickets as $ticket)
+    
             <tr>
-                <td class="text-center">1</td>
-                <td>{{  date('D', strtotime($ticket->created_at))}}</td>
-                <td>{{  date('d-F-Y', strtotime($ticket->created_at))}}</td>
-                <td>{{ $ticket->area }}</td>
-                <td>-</td>
+                <td class="text-center">{{$no++}}</td>
+                <td>{{date('l', strtotime($ticket->created_at))}}</td>
+                <td>{{$ticket->created_at->format('d/m/Y')}}</td>
+                <td>{{$ticket->area }}</td>
+                <td>{{$ticket->customer->id}}</td>
                 <td>{{ $ticket->customer->name }}</td>
-                <td>Claster Bakisan No.43</td>
+                <td>{{$ticket->customer->address}}</td>
+                <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</td>
                 <td>-</td>
                 <td>-</td>
-                <td>-</td>
-                <td>301</td>
-                <td>Pipah Pecah/Bocor/Putus/Distribusi</td>
+                <td>{{$ticket->category->code}}</td>
+                <td>{{$ticket->category->name}}</td>
                 <td>T</td>
                 <td>0</td>
-                <td>03/05/2021</td>
-                <td>2</td>
+                <td>{{$ticket->updated_at->format('d/m/Y')}}</td>
+                   <?php 
+                   
+                    $datetime1 = strtotime($ticket->created_at);
+                    $datetime2 = strtotime($ticket->updated_at);
+                 
+                    $days = (int)(($datetime2 - $datetime1)/86400); ?>
+                <td>{{$days}}</td>
             </tr>
         @endforeach
         {{-- batas isi data  --}}
