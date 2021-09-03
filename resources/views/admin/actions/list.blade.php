@@ -47,6 +47,9 @@
                             {{ trans('global.action.fields.dapertement') }}
                         </th>
                         <th>
+                            {{ trans('global.action.fields.subdapertement') }}
+                        </th>
+                        <th>
                             {{ trans('global.action.fields.ticket') }}
                         </th>
                         <th>
@@ -67,7 +70,15 @@
 
                             </td>
                             <td>
-                              {{$action->status}}
+                            @if  ($action->status=='pending')
+                            <button type="button" class="btn btn-warning btn-sm" disabled>{{$action->status}}</button>
+                            @endif
+                            @if  ($action->status=='active')
+                            <button type="button" class="btn btn-primary btn-sm" disabled>{{$action->status}}</button>
+                            @endif
+                            @if  ($action->status=='close')
+                            <button type="button" class="btn btn-success btn-sm" disabled>{{$action->status}}</button>
+                            @endif
                             </td>
                             <td>
                                 {{ $action->description ?? '' }}
@@ -80,6 +91,9 @@
                             </td>
                             <td>
                                {{$action->dapertement->name}}
+                            </td>
+                            <td>
+                               {{$action->subdapertement->name}}
                             </td>
                             <td>
                                {{$action->ticket->title}}

@@ -62,14 +62,13 @@
             <hr style="width: 190px;">
         </h3>
         <div class="text-height">
-            Nomor : Perumda /&nbsp;&nbsp;&nbsp;/SPK/Agustus/2021
+            Nomor : {{$ticket->spk}}
         </div>
     </div>
     <br>
     Dengan ini kami tugaskan saudara
-    <p>a.</p>
-    <p>b.</p>
-    <p>c.</p>
+    <p>1. @if (!empty($subdapertement)) {{$subdapertement->name}} @endif</p>
+    @foreach ($staffs as $index => $staff)<p>{{$index+2}}. {{$staff->name}}</p>@endforeach
      untuk mengadakan kegiatan penelitian / perbaikan terhadap masalah-masalah yang terjadi pada saluran Air Minum seperti yang tercantum pada formulir Permintaan Service terlampir
     <p>Demikian untuk dilaksanakan sebagaimana mestinya.   </p>
    <div class="row">

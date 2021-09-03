@@ -12,17 +12,17 @@
     <div class="A1">
         <div class="v103_240">
             <div class="A1Text">
-               <span class="v103_243">{{$ticket->updated_at->format('d/m/Y')}}</span>
+               <span class="v103_243"></span>
                 <span class="v103_244">#Tindakan</span>
                 <span class="v103_245">{{$ticket->updated_at->format('H:i:s')}}</span>
-                <span class="v103_246">{{$ticket->updated_at->format('H:i:s')}}</span>
+                <span class="v103_246"></span>
                 <span class="v103_247">#Jumlah Biaya</span>
                 <span class="v103_248">#Keluhan</span>
                 <span class="v103_249">#Waktu</span>
                 <span class="v103_250">#Pelanggan</span>
                 <span class="v103_251">#SH</span>
                 <span class="v103_252">{{$ticket->updated_at->format('H:i:s')}}</span>
-                <span class="v103_253">{{$ticket->code}}</span>
+                <span class="v103_253">{{$ticket->spk}}</span>
                 <span class="v103_254">{{$ticket->updated_at->format('d/m/Y')}}</span>
                 <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
@@ -39,7 +39,7 @@
                 <span class="v103_267">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
-                <span class="v103_270">{{$ticket->customer->area}}</span>
+                <span class="v103_270">{{$ticket->area}}</span>
             </div>
         </div>
     </div>

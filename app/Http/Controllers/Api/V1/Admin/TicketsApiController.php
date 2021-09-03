@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\v1\admin;
 
 use App\Action;
 use App\CustomerApi;
+use App\CustomerMaps;
 use App\Http\Controllers\Controller;
 use App\TicketApi;
 use App\Ticket_Image;
@@ -228,6 +229,13 @@ class TicketsApiController extends Controller
         $last_spk = $this->get_last_code('spk-ticket', $arr);
         $spk = acc_code_generate($last_spk, 21, 17, 'Y');
 
+        //get lat lng customer
+        $customermaps = CustomerMaps::where('nomorrekening', $dataForm->customer_id)->first();
+        if (!empty($customermaps)) {
+            $dataForm->lat = $customermaps->lat;
+            $dataForm->lng = $customermaps->lng;
+        }
+        //set data
         $data = array(
             'code' => $code,
             'title' => $dataForm->title,

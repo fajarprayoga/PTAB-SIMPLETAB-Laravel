@@ -8,6 +8,8 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Requests\StoreCategoriesRequest;
 use App\Category;
 use App\Traits\TraitModel;
+use App\CategoryType;
+use App\CategoryGroup;
 
 class CategoriesController extends Controller
 {
@@ -26,9 +28,11 @@ class CategoriesController extends Controller
         $last_code = $this->get_last_code('category');
 
         $code = acc_code_generate($last_code, 8, 3);
+        $category_types = CategoryType::all();
+        $category_groups = CategoryGroup::all();
 
         abort_unless(\Gate::allows('categories_create'), 403);
-        return view('admin.categories.create', compact('code'));
+        return view('admin.categories.create', compact('code','category_types','category_groups'));
     }
 
     public function store(StoreCategoriesRequest $request)
@@ -48,7 +52,9 @@ class CategoriesController extends Controller
     {
         abort_unless(\Gate::allows('categories_edit'), 403);
         $category = Category::findOrFail($id);
-        return view('admin.categories.edit', compact('category'));
+        $category_types = CategoryType::all();
+        $category_groups = CategoryGroup::all();
+        return view('admin.categories.edit', compact('category','category_types','category_groups'));
     }
 
     public function update(UpdateCategoryRequest $request,Category $category)

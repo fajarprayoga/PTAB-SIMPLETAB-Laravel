@@ -24,15 +24,15 @@ class Ticket extends Model
     ];
 
     public function dapertement() { 
-        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
     }
 
     public function department() { 
-        return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
     }
     
     public function customer() { 
-        return $this->belongsTo(CustomerApi::class, 'customer_id', 'nomorrekening'); 
+        return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening'); 
     }
 
     public function category() { 
@@ -40,7 +40,7 @@ class Ticket extends Model
     }
 
     public function action() { 
-        return $this->hasMany('App\Action', 'ticket_id', 'id');
+        return $this->hasMany(Action::class, 'ticket_id', 'id')->with('staff')->with('subdapertement')->select('*');
     }
     public function ticket_image()
     {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Category;
 use App\Customer;
+use App\Dapertement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
@@ -15,7 +16,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
-use App\Dapertement;
 
 class TicketsController extends Controller
 {
@@ -43,8 +43,8 @@ class TicketsController extends Controller
             }
         }
         if ($request->ajax()) {
-            if($request->departement!=""){
-                $department =$request->departement;
+            if ($request->departement != "") {
+                $department = $request->departement;
             }
             // set query
             if ($subdepartment == 0) {
@@ -57,7 +57,7 @@ class TicketsController extends Controller
                     ->with('action')
                     ->orderBy('created_at', 'DESC')
                     ->get();
-            } else if($subdepartment > 0 && $staff >0){
+            } else if ($subdepartment > 0 && $staff > 0) {
                 $qry = Ticket::selectRaw('DISTINCT tickets.*')
                     ->join('actions', function ($join) use ($subdepartment) {
                         $join->on('actions.ticket_id', '=', 'tickets.id')
@@ -67,8 +67,8 @@ class TicketsController extends Controller
                         $join->on('action_staff.action_id', '=', 'actions.id')
                             ->where('action_staff.staff_id', '=', $staff);
                     })
-                    ->FilterStatus(request()->input('status'))
-                    
+                    ->FilterJoinStatus(request()->input('status'))
+
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -76,14 +76,14 @@ class TicketsController extends Controller
                     ->with('action')
                     ->orderBy('created_at', 'DESC')
                     ->get();
-            } else{
+            } else {
                 $qry = Ticket::selectRaw('DISTINCT tickets.*')
                     ->join('actions', function ($join) use ($subdepartment) {
                         $join->on('actions.ticket_id', '=', 'tickets.id')
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
-                    ->FilterStatus(request()->input('status'))
-                  
+                    ->FilterJoinStatus(request()->input('status'))
+
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -116,7 +116,6 @@ class TicketsController extends Controller
                     'row'
                 ));
             });
-           
 
             $table->editColumn('code', function ($row) {
                 return $row->code ? $row->code : "";
@@ -137,7 +136,7 @@ class TicketsController extends Controller
                 return $row->description ? $row->description : "";
             });
             $table->editColumn('status', function ($row) {
-                return $row->status ? $row->status : "";
+                return $row->status ? $row->status : "pending";
             });
 
             $table->editColumn('category', function ($row) {
@@ -155,7 +154,7 @@ class TicketsController extends Controller
         }
         //default view
 
-        return view('admin.tickets.index',compact('departementlist'));
+        return view('admin.tickets.index', compact('departementlist'));
     }
 
     public function create()
@@ -342,14 +341,20 @@ class TicketsController extends Controller
     public function printservice($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
-        
+
         return view('admin.tickets.printservice', compact('ticket'));
     }
 
     public function printspk($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
-        return view('admin.tickets.printspk', compact('ticket'));
+        $subdapertement = [];
+        $staffs = [];
+        if (!empty($ticket->action[0])) {
+            $subdapertement = $ticket->action[0]->subdapertement;
+            $staffs = $ticket->action[0]->staff;
+        }
+        return view('admin.tickets.printspk', compact('ticket', 'subdapertement', 'staffs'));
     }
 
     public function printReport($id)

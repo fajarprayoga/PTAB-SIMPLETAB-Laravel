@@ -442,7 +442,7 @@ trait TraitModel
             if ($customer && strlen($customer->code) == 8) {
                 $code = $customer->code;
             } else {
-                $code = acc_codedef_generate('PUB', 8);
+                $code = acc_codedef_generate('999', 8);
             }
         }
 

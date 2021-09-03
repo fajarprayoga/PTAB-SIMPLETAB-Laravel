@@ -27,6 +27,37 @@
                     </em>
                 @endif
             </div>
+
+            <div class="form-group {{ $errors->has('category_group_id') ? 'has-error' : '' }}">
+                <label for="category_group_id">{{ trans('global.category.fields.category_group_id') }}*</label>
+                <select id="category_group_id" name="category_group_id" class="form-control" value="{{ old('category_group_id', isset($category) ? $category->category_group_id : '') }}">
+                    <option value="">--Pilih Group--</option>
+                    @foreach ($category_groups as $key=>$category_group )
+                        <option value="{{$category_group->id}}">{{$category_group->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('category_group_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('category_group_id') }}
+                    </em>
+                @endif
+            </div>
+
+            <div class="form-group {{ $errors->has('category_type_id') ? 'has-error' : '' }}">
+                <label for="category_type_id">{{ trans('global.category.fields.category_type_id') }}*</label>
+                <select id="category_type_id" name="category_type_id" class="form-control" value="{{ old('category_type_id', isset($category) ? $category->category_type_id : '') }}">
+                    <option value="">--Pilih Type--</option>
+                    @foreach ($category_types as $key=>$category_type )
+                        <option value="{{$category_type->id}}">{{$category_type->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('category_type_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('category_type_id') }}
+                    </em>
+                @endif
+            </div>
+
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

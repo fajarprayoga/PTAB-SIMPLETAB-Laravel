@@ -167,7 +167,7 @@
         { data: 'dapertement', name: 'dapertement' },
         { data: 'title', name: 'title' },
         { data: 'description', name: 'description' },
-        { data: 'status', name: 'status' },
+        { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>':dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
         { data: 'category', name: 'category' },
         { data: 'customer', name: 'customer' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }

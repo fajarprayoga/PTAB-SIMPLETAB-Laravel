@@ -362,6 +362,8 @@ return [
         'fields' => [
             'code' => 'Kode',
             'name' => 'Nama Kategori',
+            'category_group_id' => 'Group',
+            'category_type_id' => 'Type',
         ]
     ],
     'dapertement' => [
@@ -425,7 +427,8 @@ return [
             'title' => 'Nama Tindakan',
             'description' => 'Deskripsi',
             'status' => 'Status',
-            'dapertement' => 'Dapertemen',
+            'dapertement' => 'Departemen',
+            'subdapertement' => 'Sub Departemen',
             'ticket' => 'Tiket',
             'start' => 'Waktu Mulai',
             'end' => 'Waktu Selesai',

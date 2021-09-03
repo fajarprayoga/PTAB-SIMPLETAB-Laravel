@@ -67,6 +67,7 @@ class ActionsController extends Controller
             'dapertement_id' => $request->dapertement_id,
             'ticket_id' => $request->ticket_id,
             'start' => $dateNow,
+            'subdapertement_id' => $request->subdapertement_id,
         );
 
         $action = Action::create($data);
@@ -156,6 +157,7 @@ class ActionsController extends Controller
                 })
                 ->with('staff')
                 ->with('dapertement')
+                ->with('subdapertement')
                 ->with('ticket')
                 ->where('ticket_id', $ticket_id)
                 ->orderBy('start', 'desc')
@@ -163,6 +165,7 @@ class ActionsController extends Controller
         }else{
             $actions = Action::with('staff')
                 ->with('dapertement')
+                ->with('subdapertement')
                 ->with('ticket')
                 ->where('ticket_id', $ticket_id)
                 ->orderBy('start', 'desc')
