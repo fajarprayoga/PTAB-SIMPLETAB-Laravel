@@ -36,7 +36,7 @@ class Ticket extends Model
     }
 
     public function category() { 
-        return $this->belongsTo('App\Category')->select('id', 'name','code'); 
+        return $this->belongsTo('App\Category')->with('categorygroup')->with('categorytype')->select('*'); 
     }
 
     public function action() { 

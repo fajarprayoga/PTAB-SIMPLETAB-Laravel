@@ -40,6 +40,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
+                <?php $group ="v{$ticket->category->categorygroup->id}"?>
+                <div class="{{$group}}"></div>
             </div>
         </div>
     </div>
@@ -76,6 +78,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
+                <?php $group ="v{$ticket->category->categorygroup->id}"?>
+                <div class="{{$group}}"></div>
             </div>
         </div>
     </div>
@@ -112,6 +116,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
+                <?php $group ="v{$ticket->category->categorygroup->id}"?>
+                <div class="{{$group}}"></div>
             </div>
         </div>
     </div>
@@ -148,6 +154,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
+                <?php $group ="v{$ticket->category->categorygroup->id}"?>
+                <div class="{{$group}}"></div>
             </div>
         </div>
     </div>

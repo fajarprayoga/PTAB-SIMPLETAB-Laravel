@@ -16,4 +16,12 @@ class Category extends Model
         'category_type_id',
     ];
     // protected $dates = ['deleted_at'];
+
+    public function categorygroup() { 
+        return $this->belongsTo(CategoryGroup::class, 'category_group_id', 'id'); 
+    }
+
+    public function categorytype() { 
+        return $this->belongsTo(CategoryType::class, 'category_type_id', 'id'); 
+    }
 }

@@ -8,7 +8,8 @@
 <body class="A4" onload="onload()">
     <section class="sheet padding-10mm">
         <h3>PERUSAHAAN UMUM DAERAH AIR MINUM KABUPATEN DATI II TABANAN WILAYAH PELAYANAN KOTA</h3>
-        <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3>
+        <!-- <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3> -->
+        <h3>PERIODE : Dari {{$request->from}} Sampai {{$request->to}}</h3>
         <table class="table">
             <thead>
                 <tr>
