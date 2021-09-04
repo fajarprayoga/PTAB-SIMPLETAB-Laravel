@@ -34,10 +34,10 @@
                 <div class="form-group">
                     <label>Pilih Status</label>
                     <select id="status" name="status" class="form-control">
-                        <option value="">== Semua Status ==</option>
-                        <option value="pending">Pending</option>
-                        <option value="active">Active</option>
                         <option value="close">Close</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="">== Semua Status ==</option>
                     </select>
                 </div>
 
