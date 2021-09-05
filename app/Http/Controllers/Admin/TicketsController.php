@@ -341,7 +341,7 @@ class TicketsController extends Controller
     public function printservice($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
-
+        // dd($ticket);
         return view('admin.tickets.printservice', compact('ticket'));
     }
 

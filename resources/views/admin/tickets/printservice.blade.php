@@ -13,7 +13,7 @@
         <div class="v103_240">
             <div class="A1Text">
                <span class="v103_243"></span>
-                <span class="v103_244">#Tindakan</span>
+                <span class=v103_244>#Tindakan</span>
                 <span class="v103_245">{{$ticket->updated_at->format('H:i:s')}}</span>
                 <span class="v103_246"></span>
                 <span class="v103_247">#Jumlah Biaya</span>
@@ -40,6 +40,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
+                <?php $group ="v{$ticket->category->categorygroup->id}"?>
+                <div class="{{$group}}"></div>
             </div>
         </div>
     </div>

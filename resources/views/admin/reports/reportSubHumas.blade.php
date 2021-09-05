@@ -10,7 +10,8 @@
     {{-- {{ dd($tickets) }} --}}
     <section class="sheet padding-10mm">
         <h3>REKAPITULASI PERMINTAAN SERVICE</h3>
-        <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3>
+        <!-- <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3> -->
+        <h3>PERIODE : Dari {{$request->from}} Sampai {{$request->to}}</h3>
         <table class="table">
         <tr>
             <th rowspan="3">No</th>
@@ -55,11 +56,22 @@
                 <td>-</td>
                 <td>{{$ticket->category->code}}</td>
                 <td>{{$ticket->category->name}}</td>
-                <td>T</td>
+                <? $type = '';
+                    if($ticket->category->categorytype->name == 'Teknik'){
+                        $type='T';
+                    }elseif($ticket->category->categorytype->name == 'Pelayanan'){
+                        $type='P';
+                    }elseif($ticket->category->categorytype->name == 'Rekening'){
+                        $type='R';
+                    }else{
+                        $type='L';
+
+                    }
+                ?>
+                <td>{{$type}}</td>
                 <td>0</td>
                 <td>{{$ticket->updated_at->format('d/m/Y')}}</td>
                    <?php 
-                   
                     $datetime1 = strtotime($ticket->created_at);
                     $datetime2 = strtotime($ticket->updated_at);
                  

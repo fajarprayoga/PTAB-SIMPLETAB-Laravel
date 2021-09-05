@@ -18,27 +18,53 @@ class ReportsController extends Controller
 
 
     public function reportSubHumas(){
-        return view ('admin.reports.subHumas');
+        $departementlist = Dapertement::all();
+        return view ('admin.reports.subHumas',compact('departementlist'));
         // return view ('admin.reports.reportSubHumas', compact('tickets'));
     }
 
     public function reportSubHumasProses(Request $request)
     {
-        $tickets = Ticket::whereYear('created_at', '=', $request->year)->whereMonth('created_at', '=', $request->month)->with(['action', 'customer', 'category','dapertement'])->get();
-        return view ('admin.reports.reportSubHumas', compact('tickets'));
-    }
+    //    return $request;
+            if($request->dapertement_id!='' && $request->status!=''){
+                $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('dapertement_id',$request->dapertement_id)->where('status',$request->status)->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubHumas', compact('tickets','request'));
+            }elseif($request->dapertement_id!='' && $request->status==''){
+                $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('dapertement_id',$request->dapertement_id)->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubHumas', compact('tickets','request'));
+            }elseif($request->status!=''){
+                $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('status',$request->status)->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubHumas', compact('tickets','request'));
+            }else{
+                $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubHumas', compact('tickets','request'));
+            }
+            
+         }
 
     public function reportSubDistribusi(){
+        $departementlist = Dapertement::all();
         // return view ('admin.reports.reportSubDistribusi');
-        return view ('admin.reports.subDistribusi');
+        return view ('admin.reports.subDistribusi',compact('departementlist'));
     }
 
     public function reportSubDistribusiProses(Request $request)
     {
-        $tickets = Ticket::whereYear('created_at', '=', $request->year)->whereMonth('created_at', '=', $request->month)->with(['action', 'customer', 'category','dapertement'])->get();
-        // return view ('admin.reports.reportSubHumas', compact('tickets'));
-        // $tickets = Ticket::whereYear('created_at', '=', $request->year)->whereMonth('created_at', '=', $request->month)->with('customer')->get();
-        return view ('admin.reports.reportSubDistribusi', compact('tickets'));
+        // return $request;
+            if($request->dapertement_id!='' && $request->status!=''){
+            $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('dapertement_id',$request->dapertement_id)->where('status',$request->status)->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubDistribusi', compact('tickets','request'));
+            }elseif($request->dapertement_id!='' && $request->status==''){
+            $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('dapertement_id',$request->dapertement_id)->with(['action', 'customer', 'category','dapertement'])->get();
+                return view ('admin.reports.reportSubDistribusi', compact('tickets','request'));
+            }elseif($request->status!=''){
+            $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->where('status',$request->status)->with(['action', 'customer', 'category','dapertement'])->get();
+                    return view ('admin.reports.reportSubDistribusi', compact('tickets','request'));
+            }else{
+            $tickets = Ticket::whereBetween('created_at', [$request->from, $request->to])->with(['action', 'customer', 'category','dapertement'])->get();
+            return view ('admin.reports.reportSubDistribusi', compact('tickets','request'));
+            }
+
     }
 
 }
