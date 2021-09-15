@@ -32,7 +32,7 @@
                 <span class="v103_260">{{$ticket->customer->address}}</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
                 <span class="v103_262">{{$ticket->customer->name}}</span>
-                <span class="v103_263">{{$ticket->dapertement->name}}</span>
+                <span class="v103_263">{{$ticket->dapertementReceive->name}}</span>
                 <span class="v103_264">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_265">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_266">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>
@@ -70,7 +70,7 @@
                 <span class="v103_260">{{$ticket->customer->address}}</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
                 <span class="v103_262">{{$ticket->customer->name}}</span>
-                <span class="v103_263">{{$ticket->dapertement->name}}</span>
+                <span class="v103_263">{{$ticket->dapertementReceive->name}}</span>
                 <span class="v103_264">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_265">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_266">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>
@@ -108,7 +108,7 @@
                 <span class="v103_260">{{$ticket->customer->address}}</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
                 <span class="v103_262">{{$ticket->customer->name}}</span>
-                <span class="v103_263">{{$ticket->dapertement->name}}</span>
+                <span class="v103_263">{{$ticket->dapertementReceive->name}}</span>
                 <span class="v103_264">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_265">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_266">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>
@@ -146,7 +146,7 @@
                 <span class="v103_260">{{$ticket->customer->address}}</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
                 <span class="v103_262">{{$ticket->customer->name}}</span>
-                <span class="v103_263">{{$ticket->dapertement->name}}</span>
+                <span class="v103_263">{{$ticket->dapertementReceive->name}}</span>
                 <span class="v103_264">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_265">@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_266">@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</span>

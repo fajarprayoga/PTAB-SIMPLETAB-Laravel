@@ -97,6 +97,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //customer request
     Route::resource('customerrequests', 'CustomerRequestController');
 
+    //ctm request
+    Route::resource('ctmrequests', 'CtmRequestController');
+
     //test
     Route::resource('test-customers', 'TestController');
 

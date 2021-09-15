@@ -39,19 +39,9 @@
                         {{ $errors->first('gender') }}
                     </em>
                 @endif
+                <input type="hidden" name="type" value="{{$customer->type}}">
             </div>
-            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
-                <label for="type">{{ trans('global.customer.fields.type') }}*</label>
-                <select id="type" name="type" class="form-control" value="{{ old('type', isset($customer) ? $customer->type : '') }}">
-                    <option value="customer" {{$customer->type =='customer' ? 'selected' : ''}} >Pelanggan</option>
-                    <option value="public" {{$customer->type =='public' ? 'selected' : ''}}>Umum</option>
-                </select>
-                @if($errors->has('type'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('type') }}
-                    </em>
-                @endif
-            </div>
+            
             {{-- <div class="form-group {{ $errors->has('address') ? 'has-error' : '' }}">
                 <label for="address">{{ trans('global.customer.fields.address') }}*</label>
                 <input type="text" id="address" name="address" class="form-control" value="{{ old('address', isset($customer) ? $customer->address : '') }}">

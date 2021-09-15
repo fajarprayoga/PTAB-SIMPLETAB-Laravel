@@ -58,21 +58,27 @@
         </div> -->
        
         <br>
-        @if ($ticket->status == "pending")
-            <a class="btn btn-lg btn-secondary fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
+        @can('action_print_service')
+        @if ($ticket->status != "close")
+            <a class="btn btn-lg btn-primary fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
                 {{ trans('global.action.print_service') }}
             </a>
         @endif
-        @if ($ticket->status == "pending")
-            <a class="btn btn-lg btn-primary fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
+        @endcan
+        @can('action_print_spk')
+        @if ($ticket->status != "close")
+            <a class="btn btn-lg btn-info fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
                 {{ trans('global.action.print_SPK') }}
             </a>
         @endif
+        @endcan
+        @can('action_print_report')
         @if ($ticket->status == "close")
-            <a class="btn btn-lg btn-info fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
+            <a class="btn btn-lg btn-success fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
                 {{ trans('global.action.print_Report') }}
             </a>
         @endif
+        @endcan
     </div>
 </div>
 

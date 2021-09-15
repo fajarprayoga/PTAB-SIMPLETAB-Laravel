@@ -38,6 +38,16 @@
                         </a>
                     </li>
                     @endcan
+                    @can('ctmrequests_access') 
+                    <li class="nav-item">
+                        <a href="{{ route('admin.ctmrequests.index') }}" class="nav-link {{ request()->is('admin/ctmrequests') || request()->is('admin/ctmrequests/*') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt nav-icon">
+
+                            </i>
+                            {{ trans('global.ctmrequest.title') }}
+                        </a>
+                    </li>
+                    @endcan
                 </ul>
             </li>   
             @can('report_access') 

@@ -6,6 +6,7 @@ use App\Action;
 use App\CustomerApi;
 use App\CustomerMaps;
 use App\Http\Controllers\Controller;
+use App\Subdapertement;
 use App\TicketApi;
 use App\Ticket_Image;
 use App\Traits\TraitModel;
@@ -86,42 +87,6 @@ class TicketsApiController extends Controller
                 'page' => $request->page,
                 'seacrh' => $request->search,
                 'department' => $department,
-            ]);
-        } catch (QueryException $ex) {
-            return response()->json([
-                'message' => 'failed',
-                'data' => $ex,
-            ]);
-        }
-    }
-
-    public function ticketsBAK(Request $request)
-    {
-        try {
-
-            if ($request->department != '') {
-                $ticket = TicketApi::selectRaw("DISTINCT tickets.*")
-                    ->join('actions', 'tickets.id', '=', 'actions.ticket_id')
-                    ->FilterJoinStatus($request->status)
-                    ->FilterJoinDepartment($request->department)
-                    ->orderBy('id', 'DESC')
-                    ->with('customer')
-                    ->with('category')
-                    ->with('ticket_image')
-                    ->paginate(10, ['*'], 'page', $request->page);
-            } else {
-                if ($request->status != '') {
-                    $ticket = TicketApi::where('status', $request->status)->orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
-                } else {
-                    $ticket = TicketApi::orderBy('id', 'DESC')->with('customer')->with('category')->with('ticket_image')->paginate(10, ['*'], 'page', $request->page);
-                }
-            }
-
-            return response()->json([
-                'message' => 'success',
-                'data' => $ticket,
-                'page' => $request->page,
-                'seacrh' => $request->search,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
@@ -218,12 +183,18 @@ class TicketsApiController extends Controller
 
         }
 
-        if (!isset($dataForm->dapertement_id) && $dataForm->dapertement_id == '') {
-            $dataForm->dapertement_id = 1;
+        //def subdap
+        $dateNow = date('Y-m-d H:i:s');
+        $subdapertement_def = Subdapertement::where('def', 1)->first();
+        $dapertement_def_id = $subdapertement_def->id;
+        if (!isset($dataForm->dapertement_id) || $dataForm->dapertement_id == '' || $dataForm->dapertement_id <=0) {
+            $dapertement_id = $dapertement_def_id;
+        } else {
+            $dapertement_id = $dataForm->dapertement_id;
         }
 
         //set SPK
-        $arr['dapertement_id'] = $dataForm->dapertement_id;
+        $arr['dapertement_id'] = $dapertement_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
         $last_spk = $this->get_last_code('spk-ticket', $arr);
@@ -246,9 +217,14 @@ class TicketsApiController extends Controller
             'customer_id' => $dataForm->customer_id,
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
-            'dapertement_id' => $dataForm->dapertement_id,
+            'dapertement_id' => $dapertement_id,
             'spk' => $spk,
+            'dapertement_receive_id' => $dapertement_id,
         );
+
+        if ($dapertement_def_id != $dataForm->dapertement_id) {
+            $data['delegated_at'] = $dateNow = date('Y-m-d H:i:s');
+        }
 
         try {
             $ticket = TicketApi::create($data);
@@ -259,11 +235,28 @@ class TicketsApiController extends Controller
                 $upload_image->save();
             }
 
-            //send notif to humas
-            $admin_arr = User::where('subdapertement_id', 8)->get();
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to humas
+            $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+                ->where('staff_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Humas: Keluhan Baru Diterima : ' . $dataForm->description;
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -275,7 +268,7 @@ class TicketsApiController extends Controller
                     );}}
 
             //send notif to departement terkait
-            $admin_arr = User::where('dapertement_id', $dataForm->dapertement_id)
+            $admin_arr = User::where('dapertement_id', $dapertement_id)
                 ->where('subdapertement_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
@@ -353,6 +346,7 @@ class TicketsApiController extends Controller
         }
 
         $data = $request->all();
+        $dateNow = date('Y-m-d H:i:s');
         //if dapertement_id is differ with prev
         if ($ticket->dapertement_id != $request->dapertement_id) {
             //set SPK
@@ -363,7 +357,7 @@ class TicketsApiController extends Controller
             $last_spk = $this->get_last_code('spk-ticket', $arr);
             $spk = acc_code_generate($last_spk, 21, 17, 'Y');
             //merge data
-            $data = array_merge($data, ['spk' => $spk]);
+            $data = array_merge($data, ['spk' => $spk,'delegated_at' => $dateNow]);
         }
 
         $ticket->update($data);

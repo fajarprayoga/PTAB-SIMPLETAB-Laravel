@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1\Customer;
 
-use App\Action;
 use App\CustomerApi;
 use App\CustomerMaps;
 use App\CustomerRequest;
@@ -63,6 +62,69 @@ class CustomersApiController extends Controller
                 'message' => 'Permintaan Gagal Dikirim',
                 'data' => $ex,
             ]);
+        }
+    }
+
+    public function smsReset($phone,$otp)
+    {
+        date_default_timezone_set("Asia/Singapore");
+        $date = date("Y-m-d H:i:s");
+        $number = "+62" . ltrim($phone, '0');
+        $message = '#plg OTP : ' . $otp;
+        $md5_str = "1f4a449a85" . $date . $number . $message;
+        $md5 = md5($md5_str);
+        $data = array(
+            'outbox' => '',
+            'date' => $date,
+            'number' => $number,
+            'message' => $message,
+            'md5' => $md5,
+        );
+
+        $url = 'https://ptab-vps.com/gs-gateway-sms-v3/api.php';
+
+        //open connection
+        $ch = curl_init();
+
+        //set the url, number of POST vars, POST data
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, count($data));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
+
+        //execute post
+        curl_exec($ch);
+
+        //close connection
+        curl_close($ch);
+    }
+
+    public function reset(Request $request)
+    {
+        $customer = CustomerApi::WhereMaps('phone', $request->phone)->first();
+
+        if (empty($customer)) {
+            $message = 'Reset gagal, Telfon tidak dikenali.';
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ]);
+        } else {
+            $password = passw_gnr(7);
+            $password_ency = bcrypt($password);
+            $customer->password = $password_ency;
+            $customer->save();
+            $customer->pass = $password;
+            //SMS Gateway
+            $this->smsReset($request->phone,$password);
+            //response
+            $message = 'Reset berhasil, Password baru telah terkirim via SMS.';
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $customer,
+            ]);
+                                   
         }
     }
 
@@ -255,8 +317,8 @@ class CustomersApiController extends Controller
         // $arr['month'] = date("m");
         // $arr['year'] = date("Y");
         $date = date_create("2021-06-23 06:15:36");
-        $arr['month'] = date_format($date,"m");
-        $arr['year'] = date_format($date,"Y");
+        $arr['month'] = date_format($date, "m");
+        $arr['year'] = date_format($date, "Y");
         $last_code = $this->get_last_code('spk-ticket', $arr);
         $code = acc_code_generate($last_code, 21, 17, 'Y');
         return $code;

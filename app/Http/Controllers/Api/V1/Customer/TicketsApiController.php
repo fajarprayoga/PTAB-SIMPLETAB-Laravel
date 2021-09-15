@@ -12,6 +12,7 @@ use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
+use App\Subdapertement;
 
 class TicketsApiController extends Controller
 {
@@ -103,10 +104,13 @@ class TicketsApiController extends Controller
         }
 
         //set SPK
-        $arr['dapertement_id'] = 1;
+        $dateNow = date('Y-m-d H:i:s');
+        $subdapertement_def = Subdapertement::where('def', 1)->first();
+        $dapertement_def_id=$subdapertement_def->id;
+        $arr['dapertement_id'] = $dapertement_def_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
-        $last_spk = $this->get_last_code('spk-ticket',$arr);
+        $last_spk = $this->get_last_code('spk-ticket', $arr);
         $spk = acc_code_generate($last_spk, 21, 17, 'Y');
 
         $data = array(
@@ -120,6 +124,8 @@ class TicketsApiController extends Controller
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
             'spk' => $spk,
+            'dapertement_id' => $dapertement_def_id,
+            'dapertement_receive_id' => $dapertement_def_id,
         );
 
         try {
@@ -132,11 +138,28 @@ class TicketsApiController extends Controller
                 $upload_image->save();
             }
 
-            //send notif to humas
-            $admin_arr = User::where('subdapertement_id', 8)->get();
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to humas            
+            $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+                ->where('staff_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Humas: Keluhan Baru Diterima : ' . $dataForm->description;
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,

@@ -12,6 +12,7 @@ return [
     'edit' => 'Edit',
     'delete' => 'Hapus',
     'save' => 'Save',
+    'approve' => 'Setujui',
     'pleaseSelect' => 'Please select',
     'areYouSure' => 'Are you sure?',
     'allRightsReserved' => 'All rights reserved.',
@@ -313,8 +314,8 @@ return [
     'site_title' => 'Sistem Keluhan Pelanggan',
     'ticket_request' =>'Tiket & Permintaan',
     'report' => 'Laporan',
-    'reporthumas' => 'Laporan Humas',
-    'reportdistribusi' => 'Laporan Distribusi', 
+    'reporthumas' => 'Rekap Permintaan',
+    'reportdistribusi' => 'Rekap Keluhan', 
     'userManagement' => [
         'title' => 'User Management',
         'title_singular' => 'User Management',
@@ -459,6 +460,20 @@ return [
             'address' => 'Alamat',
             'status' => 'Status',
             'img' => 'Foto',            
+        ]
+    ],
+    'ctmrequest' => [
+        'title' => 'Baca Mandiri',
+        'title_singular' => 'Permintaan',
+        'fields' => [
+            'norek' => 'No. SBG',
+            'name' => 'Nama',
+            'wmmeteran' => 'Hasil Bacaan',
+            'address' => 'Alamat',
+            'status' => 'Status',
+            'img' => 'Foto',  
+            'year' => 'Tahun',
+            'month' => 'Bulan',         
         ]
     ],
 ];

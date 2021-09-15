@@ -9,6 +9,8 @@ class CategoryApi extends Model
     protected $table = 'categories';
     protected $fillable = [
         'code',
-        'name'
+        'name',
+        'category_group_id',
+        'category_type_id',
     ];
 }

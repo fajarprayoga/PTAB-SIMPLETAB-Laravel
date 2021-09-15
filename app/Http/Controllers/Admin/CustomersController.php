@@ -82,10 +82,8 @@ class CustomersController extends Controller
 
     public function create()
     {
-        $last_code = $this->get_last_code('customer');
-
-        //$code = acc_code_generate($last_code, 8, 3);
-        $code = $last_code + 1;
+        $last_code = $this->get_last_code('public');
+        $code = acc_code_generate($last_code, 8, 3);
 
         abort_unless(\Gate::allows('customer_create'), 403);
         return view('admin.customers.create', compact('code'));

@@ -57,10 +57,9 @@ class CustomersApiController extends Controller
     {
 
 
-        $last_code = $this->get_last_code('customer');
+        $last_code = $this->get_last_code('public');
 
-        //$code = acc_code_generate($last_code, 8, 3);
-        $code = $last_code + 1;
+        $code = acc_code_generate($last_code, 8, 3);
         
         $rules=array(
             'name' => 'required',
@@ -83,14 +82,8 @@ class CustomersApiController extends Controller
 
         $customer = new CustomerApi;
         $customer->name = $request->name;
-        if(!isset($request->code)){
-            $customer->code = $code;
-        }else{
-            $request->validate([
-                'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening',
-            ]);
-            $customer->code = $request->code;
-        }       
+        $customer->code = $code;
+              
         if(!isset($request->email)){
             $customer->email = null;
         }else{
@@ -103,7 +96,7 @@ class CustomersApiController extends Controller
         $customer->remember_token = null;
         $customer->password = bcrypt($request->password);
         $customer->phone = $request->phone;
-        $customer->type = $request->type;
+        $customer->type = 'public';
         $customer->gender = $request->gender;
         $customer->address = $request->address;
         $customer->_synced = 0;

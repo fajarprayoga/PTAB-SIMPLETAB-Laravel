@@ -34,6 +34,10 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
 
     Route::get('ctm/customer/{id}', 'CtmApiController@ctmCustomer');    
 
+    Route::post('ctm/request', 'CtmApiController@ctmRequest');
+
+    Route::get('ctm/use/{id}', 'CtmApiController@ctmUse');
+
 });
 
 Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], function () {
@@ -48,6 +52,8 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
 
     Route::post('customerrequests', 'CustomersApiController@requestCustomer');
 
+    Route::post('reset', 'CustomersApiController@reset');
+
     //test
     Route::get('test', 'CustomersApiController@test');
 });
@@ -61,6 +67,8 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     // categori
     Route::resource('categories', 'CategoriesApiController');
     Route::get('categories/list/{page}', 'CategoriesApiController@categories');
+    Route::post('category-groups/list', 'CategoriesApiController@categoryGroups');
+    Route::post('category-types/list', 'CategoriesApiController@categoryTypes');
 
     // dapettement
     Route::resource('dapertements', 'DapertementsApiController');

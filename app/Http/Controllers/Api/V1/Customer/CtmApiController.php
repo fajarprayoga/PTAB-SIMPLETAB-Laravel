@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\api\v1\customer;
 
 use App\CtmGambarmetersms;
+use App\CtmPemakaianAir;
 use App\CtmPembayaran;
+use App\CtmRequest;
 use App\Customer;
 use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
@@ -12,6 +14,41 @@ use Illuminate\Http\Request;
 class CtmApiController extends Controller
 {
     use TraitModel;
+
+    public function ctmUse($id)
+    {
+        try {
+            $data = array();
+            for ($i = 0; $i < 12; $i++) {
+                $index = $i + 1;
+                $ctm = CtmPemakaianAir::selectRaw("pencatatanmeter" . $index . " AS pencatatanmeter,pemakaianair" . $index . " AS pemakaianair")
+                    ->where('nomorrekening', $id)
+                    ->where('tahunrekening', date('Y'))
+                    ->first();
+
+                if (!empty($ctm) && $ctm->pencatatanmeter > 0) {
+                    array_push($data, array(
+                        'bulanrekening' => $index,
+                        'tahunrekening' => date('Y'),
+                        'pencatatanmeter' => $ctm->pencatatanmeter,
+                        'pemakaianair' => $ctm->pemakaianair,
+                    ));
+                }
+            }
+            // $data = json_encode($data);
+            // $data = json_decode($data, true, JSON_UNESCAPED_SLASHES);
+            return response()->json([
+                'message' => 'Data CTM',
+                'data' => $data,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
+
+    }
 
     public function ctmCustomer($id)
     {
@@ -35,15 +72,32 @@ class CtmApiController extends Controller
     public function ctmPay($id)
     {
         try {
-            $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
-                ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpembayaran.nomorrekening', $id)
-                ->where('tblpembayaran.tahunrekening', date('Y'))
-                ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                ->get();
+            $date_now = date("Y-m-d");
+            $date_comp = date("Y-m") . "-20";
+            $month_next = date('n', strtotime('+1 month'));
+            if ($date_now > $date_comp) {
+                $ctm_lock=0;
+                $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
+                    ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                    ->where('tblpembayaran.nomorrekening', $id)
+                    ->where('tblpembayaran.tahunrekening', date('Y'))
+                    ->orderBy('tblpembayaran.bulanrekening', 'ASC')
+                    ->get();
+            } else {
+                $ctm_lock=1;
+                $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
+                    ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                    ->where('tblpembayaran.nomorrekening', $id)
+                    ->where('tblpembayaran.tahunrekening', date('Y'))
+                    ->where('tblpembayaran.bulanrekening', '<', $month_next)                    
+                    ->orderBy('tblpembayaran.bulanrekening', 'ASC')
+                    ->get();
+            }
             return response()->json([
                 'message' => 'Data CTM',
                 'data' => $ctm,
+                'month_next' => $month_next,
+                'ctm_lock' => $ctm_lock,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
@@ -119,6 +173,80 @@ class CtmApiController extends Controller
             ]);
         }
 
+    }
+
+    public function ctmRequest(Request $request)
+    {
+        //$data = $request->all();
+        $data = json_decode($request->form);
+        $var = [];
+        foreach ($data as $key => $dat) {
+            $var[$key] = $dat;
+        }
+        $var['datecatatf1'] = date("Y-m-d"); //2021-08-16
+        $var['datecatatf2'] = date("F d, Y, G:i:s a"); //August 16, 2021, 15:23:37 pm
+        $var['datecatatf3'] = date("Y-m-d G:i:s"); //2021-08-16 15:23:37
+        //get prev
+        $var['year'] = date("Y");
+        $var['month'] = date("m");
+
+        //get month year rekening
+        $datecatatf1_arr = explode("-", $var['datecatatf1']);
+        $month_catat = $datecatatf1_arr[1];
+        $year_catat = $datecatatf1_arr[0];
+
+        //img path
+        $img_path = "/gambar-test";
+        $basepath = str_replace("laravel-simpletab", "public_html/pdam/", \base_path());
+        $path = $basepath . $img_path . "/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+        $new_image_name = $var['norek'] . "_" . $year_catat . "_" . $month_catat . ".jpg"; //nama image dibuat sendiri
+        //move_uploaded_file($_FILES['file']['tmp_name'], $path . $new_image_name);
+        $img_name = $img_path . "/" . $new_image_name;
+        $resourceImage = $request->file('image');
+        $resourceImage->move($path, $img_name);
+        $path_img = "/" . "gambar/" . $year_catat . $month_catat . "/";
+        $path_img1 = "D:/MyAMP/www/" . "gambar/" . $year_catat . $month_catat . "/";
+        $var['img'] = $path_img . $new_image_name;
+        $var['img1'] = $path_img1 . $new_image_name;
+
+        //insert data
+        //set data
+        $data = array(
+            'norek' => $var['norek'],
+            'wmmeteran' => $var['wmmeteran'],
+            'namastatus' => $var['namastatus'],
+            'opp' => $var['opp'],
+            'lat' => $var['lat'],
+            'lng' => $var['lng'],
+            'accuracy' => $var['accuracy'],
+            'operator' => $var['operator'],
+            'nomorpengirim' => $var['nomorpengirim'],
+            'statusonoff' => $var['statusonoff'],
+            'description' => $var['description'],
+            'img' => $var['img'],
+            'img1' => $var['img1'],
+            'status' => 'pending',
+            'datecatatf1' => $var['datecatatf1'],
+            'datecatatf2' => $var['datecatatf2'],
+            'datecatatf3' => $var['datecatatf3'],
+            'year' => $var['year'],
+            'month' => $var['month'],
+        );
+
+        try {
+            $ticket = CtmRequest::create($data);
+            return response()->json([
+                'message' => 'Keluhan Diterima',
+            ]);
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal',
+            ]);
+        }
     }
 
     public function ctmPrev(Request $request)

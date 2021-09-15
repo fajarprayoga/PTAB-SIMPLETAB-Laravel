@@ -71,7 +71,6 @@
                 <label for="type">{{ trans('global.customer.fields.type') }}*</label>
                 <select id="type" name="type" class="form-control" value="{{ old('type', isset($customer) ? $customer->type : '') }}">
                     <option value="">--Pilih Tipe Pelanggan--</option>
-                    <option value="customer">Pelanggan</option>
                     <option value="public">Umum</option>
                 </select>
                 @if($errors->has('type'))

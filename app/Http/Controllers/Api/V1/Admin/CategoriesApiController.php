@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\CategoryApi;
 use Illuminate\Database\QueryException;
 use App\Traits\TraitModel;
+use App\CategoryGroup;
+use App\CategoryType;
+
 class CategoriesApiController extends Controller
 {
     use TraitModel;
@@ -17,7 +20,27 @@ class CategoriesApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function categories($page)
+    public function categoryGroups(Request $request)
+    {
+        $categorygroups = CategoryGroup::all();
+        
+        return response()->json([
+            'message' => 'success',
+            'data' => $categorygroups
+        ]);
+    }
+
+    public function categoryTypes(Request $request)
+    {
+        $categorytypes = CategoryType::all();
+        
+        return response()->json([
+            'message' => 'success',
+            'data' => $categorytypes
+        ]);
+    }
+    
+     public function categories($page)
     {
         $categories = CategoryApi::paginate(10, ['*'], 'page', $page);
         return response()->json([

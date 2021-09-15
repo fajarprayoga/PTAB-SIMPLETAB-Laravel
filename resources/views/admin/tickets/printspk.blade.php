@@ -67,7 +67,7 @@
     </div>
     <br>
     Dengan ini kami tugaskan saudara
-    <p>1. @if (!empty($subdapertement)) {{$subdapertement->name}} @endif</p>
+    <p>1. KA SUBAG @if (!empty($subdapertement)) {{$subdapertement->name}} @endif</p>
     @foreach ($staffs as $index => $staff)<p>{{$index+2}}. {{$staff->name}}</p>@endforeach
      untuk mengadakan kegiatan penelitian / perbaikan terhadap masalah-masalah yang terjadi pada saluran Air Minum seperti yang tercantum pada formulir Permintaan Service terlampir
     <p>Demikian untuk dilaksanakan sebagaimana mestinya.   </p>
@@ -77,7 +77,7 @@
         <div class="column">
         </div>
         <div class="column">
-            Tabanan, ____________________
+            Tabanan, {{$ticket->created_at->format('d/m/Y')}}
             <br>
             Yang memberi Perintah
             <br>

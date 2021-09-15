@@ -340,14 +340,14 @@ class TicketsController extends Controller
     }
     public function printservice($id)
     {
-        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
+        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category', 'dapertementReceive'])->findOrFail($id);
         // dd($ticket);
         return view('admin.tickets.printservice', compact('ticket'));
     }
 
     public function printspk($id)
     {
-        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
+        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category', 'dapertementReceive'])->findOrFail($id);
         $subdapertement = [];
         $staffs = [];
         if (!empty($ticket->action[0])) {
@@ -359,7 +359,7 @@ class TicketsController extends Controller
 
     public function printReport($id)
     {
-        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category'])->findOrFail($id);
+        $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category', 'dapertementReceive'])->findOrFail($id);
         return view('admin.tickets.printreport', compact('ticket'));
     }
 }

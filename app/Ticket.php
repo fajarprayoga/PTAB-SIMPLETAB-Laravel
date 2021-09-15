@@ -21,8 +21,14 @@ class Ticket extends Model
         'description',
         'area',
         'spk',
+        'dapertement_receive_id',
+        'delegated_at',
     ];
 
+    public function dapertementReceive() { 
+        return $this->belongsTo(Dapertement::class, 'dapertement_receive_id', 'id'); 
+    }
+    
     public function dapertement() { 
         return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
     }

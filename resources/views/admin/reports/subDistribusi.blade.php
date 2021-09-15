@@ -10,7 +10,7 @@
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>
                         </div>
-                        <input placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from">
+                        <input placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from" value = "{{date('Y-m-d')}}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -19,7 +19,7 @@
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>
                         </div>
-                        <input placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to">
+                        <input placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{date('Y-m-d')}}">
                     </div>
                 </div>
                 <div class="form-group">
@@ -34,10 +34,10 @@
                 <div class="form-group">
                     <label>Pilih Status</label>
                     <select id="status" name="status" class="form-control">
+                        <option value="">== Semua Status ==</option>    
                         <option value="close">Close</option>
                         <option value="active">Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="">== Semua Status ==</option>
+                        <option value="pending">Pending</option>                        
                     </select>
                 </div>
 
