@@ -91,14 +91,15 @@ class ActionsApiController extends Controller
 
                 //def subdap
                 $dateNow = date('Y-m-d H:i:s');
-                $subdapertement_def = Subdapertement::where('def', 1)->first();
-                $dapertement_def_id = $subdapertement_def->id;
+                $subdapertement_def = Subdapertement::where('def', '1')->first();
+                $dapertement_def_id = $subdapertement_def->dapertement_id;
+                $subdapertement_def_id = $subdapertement_def->id;
 
                 //if close send notif to user
                 if ($statusAction == 'close') {
                     $customer = CustomerApi::find($ticket->customer_id);
                     $id_onesignal = $customer->_id_onesignal;
-                    $message = 'Keluahan Sudah Diselesaikan  : ' . $ticket->code . $dataForm->memo;
+                    $message = 'Customer: Keluahan Sudah Diselesaikan  : ' . $ticket->code . $dataForm->memo;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -126,7 +127,7 @@ class ActionsApiController extends Controller
                         );}}
                 
                 //send notif to humas
-                $admin_arr = User::where('subdapertement_id', $dapertement_def_id)->get();
+                $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
@@ -146,7 +147,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+                    $message = 'Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -162,7 +163,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+                    $message = 'Sub Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -294,8 +295,9 @@ class ActionsApiController extends Controller
 
         //def subdap
         $dateNow = date('Y-m-d H:i:s');
-        $subdapertement_def = Subdapertement::where('def', 1)->first();
-        $dapertement_def_id = $subdapertement_def->id;
+        $subdapertement_def = Subdapertement::where('def', '1')->first();
+        $dapertement_def_id = $subdapertement_def->dapertement_id;
+        $subdapertement_def_id = $subdapertement_def->id;
 
         //send notif to admin
         $admin_arr = User::where('dapertement_id', 0)->get();
@@ -313,7 +315,7 @@ class ActionsApiController extends Controller
                 );}}
         
         //send notif to humas
-        $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+        $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
         foreach ($admin_arr as $key => $admin) {
@@ -335,7 +337,7 @@ class ActionsApiController extends Controller
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            $message = 'Bagian: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -351,7 +353,7 @@ class ActionsApiController extends Controller
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            $message = 'Sub Bagian: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -419,8 +421,9 @@ class ActionsApiController extends Controller
 
         //def subdap
         $dateNow = date('Y-m-d H:i:s');
-        $subdapertement_def = Subdapertement::where('def', 1)->first();
-        $dapertement_def_id = $subdapertement_def->id;
+        $subdapertement_def = Subdapertement::where('def', '1')->first();
+        $dapertement_def_id = $subdapertement_def->dapertement_id;
+        $subdapertement_def_id = $subdapertement_def->id;
 
         //send notif to admin
         $admin_arr = User::where('dapertement_id', 0)->get();
@@ -438,7 +441,7 @@ class ActionsApiController extends Controller
                 );}}
         
         //send notif to humas
-        $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+        $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
         foreach ($admin_arr as $key => $admin) {
@@ -460,7 +463,7 @@ class ActionsApiController extends Controller
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            $message = 'Bagian: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -476,7 +479,7 @@ class ActionsApiController extends Controller
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            $message = 'Sub Bagian: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -650,8 +653,9 @@ class ActionsApiController extends Controller
 
                 //def subdap
                 $dateNow = date('Y-m-d H:i:s');
-                $subdapertement_def = Subdapertement::where('def', 1)->first();
-                $dapertement_def_id = $subdapertement_def->id;
+                $subdapertement_def = Subdapertement::where('def', '1')->first();
+                $dapertement_def_id = $subdapertement_def->dapertement_id;
+                $subdapertement_def_id = $subdapertement_def->id;
 
                 //send notif to admin
                 $admin_arr = User::where('dapertement_id', 0)->get();
@@ -669,7 +673,7 @@ class ActionsApiController extends Controller
                         );}}
                 
                 //send notif to humas
-                $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+                $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
                 foreach ($admin_arr as $key => $admin) {
@@ -691,7 +695,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    $message = 'Bagian: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -707,7 +711,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    $message = 'Sub Bagian: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -813,8 +817,9 @@ class ActionsApiController extends Controller
 
                 //def subdap
                 $dateNow = date('Y-m-d H:i:s');
-                $subdapertement_def = Subdapertement::where('def', 1)->first();
-                $dapertement_def_id = $subdapertement_def->id;
+                $subdapertement_def = Subdapertement::where('def', '1')->first();
+                $dapertement_def_id = $subdapertement_def->dapertement_id;
+                $subdapertement_def_id = $subdapertement_def->id;
 
                 //send notif to admin
                 $admin_arr = User::where('dapertement_id', 0)->get();
@@ -832,7 +837,7 @@ class ActionsApiController extends Controller
                         );}}
                 
                 //send notif to humas
-                $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+                $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
                 foreach ($admin_arr as $key => $admin) {
@@ -854,7 +859,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    $message = 'Bagian: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -870,7 +875,7 @@ class ActionsApiController extends Controller
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
-                    $message = 'Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    $message = 'Sub Bagian: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,

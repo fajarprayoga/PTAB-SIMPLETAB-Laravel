@@ -55,7 +55,8 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     Route::post('reset', 'CustomersApiController@reset');
 
     //test
-    Route::get('test', 'CustomersApiController@test');
+    // Route::get('test', 'CustomersApiController@test');
+    Route::get('test', 'TicketsApiController@test');
 });
 
 Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middleware' => 'auth:apiadmin'], function () {

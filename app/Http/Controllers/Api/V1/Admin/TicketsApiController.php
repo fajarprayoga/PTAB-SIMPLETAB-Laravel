@@ -185,8 +185,9 @@ class TicketsApiController extends Controller
 
         //def subdap
         $dateNow = date('Y-m-d H:i:s');
-        $subdapertement_def = Subdapertement::where('def', 1)->first();
-        $dapertement_def_id = $subdapertement_def->id;
+        $subdapertement_def = Subdapertement::where('def', '1')->first();
+        $dapertement_def_id = $subdapertement_def->dapertement_id;
+        $subdapertement_def_id = $subdapertement_def->id;
         if (!isset($dataForm->dapertement_id) || $dataForm->dapertement_id == '' || $dataForm->dapertement_id <=0) {
             $dapertement_id = $dapertement_def_id;
         } else {
@@ -251,7 +252,7 @@ class TicketsApiController extends Controller
                     );}}
 
             //send notif to humas
-            $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+            $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
@@ -273,7 +274,7 @@ class TicketsApiController extends Controller
                 ->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Keluhan Baru Diterima : ' . $dataForm->description;
+                $message = 'Bagian: Keluhan Baru Diterima : ' . $dataForm->description;
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -366,7 +367,7 @@ class TicketsApiController extends Controller
         $admin_arr = User::where('dapertement_id', $request->dapertement_id)->where('subdapertement_id', 0)->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
-            $message = 'Keluhan Baru Dideligasikan : ' . $request->description;
+            $message = 'Bagian: Keluhan Baru Dideligasikan : ' . $request->description;
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,

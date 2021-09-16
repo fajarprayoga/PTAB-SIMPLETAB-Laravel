@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Ticket extends Model
 {
     protected $table = 'tickets';
+    protected $dates = ['delegated_at'];
     protected $fillable = [
         'code',
         'title',

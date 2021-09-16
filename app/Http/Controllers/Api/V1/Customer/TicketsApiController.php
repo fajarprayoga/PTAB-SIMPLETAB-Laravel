@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Customer;
 use App\CategoryApi;
 use App\Customer;
 use App\Http\Controllers\Controller;
+use App\Subdapertement;
 use App\TicketApi;
 use App\Ticket_Image;
 use App\Traits\TraitModel;
@@ -12,11 +13,19 @@ use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
-use App\Subdapertement;
 
 class TicketsApiController extends Controller
 {
     use TraitModel;
+
+    public function test()
+    {
+        $subdapertement_def = Subdapertement::where('def', '1')->get();
+        // $dapertement_def_id = $subdapertement_def->dapertement_id;
+        // $subdapertement_def_id = $subdapertement_def->id;
+        return $subdapertement_def;
+        // return $dapertement_def_id." - ".$subdapertement_def_id;
+    }
 
     public function index($id)
     {
@@ -105,8 +114,9 @@ class TicketsApiController extends Controller
 
         //set SPK
         $dateNow = date('Y-m-d H:i:s');
-        $subdapertement_def = Subdapertement::where('def', 1)->first();
-        $dapertement_def_id=$subdapertement_def->id;
+        $subdapertement_def = Subdapertement::where('def', '1')->first();
+        $dapertement_def_id = $subdapertement_def->dapertement_id;
+        $subdapertement_def_id = $subdapertement_def->id;
         $arr['dapertement_id'] = $dapertement_def_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
@@ -153,8 +163,8 @@ class TicketsApiController extends Controller
                         $schedule = null
                     );}}
 
-            //send notif to humas            
-            $admin_arr = User::where('subdapertement_id', $dapertement_def_id)
+            //send notif to humas
+            $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
                 ->where('staff_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
