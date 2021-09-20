@@ -1,42 +1,43 @@
 <?php
-    function Hari_ini(){
-        // $hari = date ("D");
+    function Hari_ini($date){
      
-        // switch($hari){
-        //     case 'Sun':
-        //         $hari_ini = "Minggu";
-        //     break;
+        $hari = $date;
      
-        //     case 'Mon':			
-        //         $hari_ini = "Senin";
-        //     break;
+        switch($hari){
+            case 'Sunday':
+                $hari_ini = "Minggu";
+            break;
      
-        //     case 'Tue':
-        //         $hari_ini = "Selasa";
-        //     break;
+            case 'Monday':			
+                $hari_ini = "Senin";
+            break;
      
-        //     case 'Wed':
-        //         $hari_ini = "Rabu";
-        //     break;
+            case 'Tuesday':
+                $hari_ini = "Selasa";
+            break;
      
-        //     case 'Thu':
-        //         $hari_ini = "Kamis";
-        //     break;
+            case 'Wednesday':
+                $hari_ini = "Rabu";
+            break;
      
-        //     case 'Fri':
-        //         $hari_ini = "Jumat";
-        //     break;
+            case 'Thursday':
+                $hari_ini = "Kamis";
+            break;
      
-        //     case 'Sat':
-        //         $hari_ini = "Sabtu";
-        //     break;
+            case 'Friday':
+                $hari_ini = "Jumat";
+            break;
+     
+            case 'Saturday':
+                $hari_ini = "Sabtu";
+            break;
             
-        //     default:
-        //         $hari_ini = "Tidak di ketahui";		
-        //     break;
-        // }
+            default:
+                $hari_ini = "Tidak di ketahui";		
+            break;
+        }
      
-        return "<b>" . 'hari ini' . "</b>";
+        return $hari_ini;
      
     }
 ?>
