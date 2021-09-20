@@ -100,6 +100,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //ctm request
     Route::resource('ctmrequests', 'CtmRequestController');
 
+    //pbk
+    Route::resource('pbks', 'CtmPbkController');
+    Route::get('pbk/status/{id}', 'CtmPbkController@editStatus')->name('pbks.status');
+    Route::put('pbk/update', 'CtmPbkController@updateStatus')->name('pbks.statusUpdate');
+
     //test
     Route::resource('test-customers', 'TestController');
 

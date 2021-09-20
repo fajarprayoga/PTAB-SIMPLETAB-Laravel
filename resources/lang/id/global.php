@@ -476,5 +476,14 @@ return [
             'month' => 'Bulan',         
         ]
     ],
+    'pbk' => [
+        'title' => 'Operator Pembaca',
+        'title_singular' => 'Pembaca',
+        'fields' => [
+            'name' => 'Nama',
+            'number' => 'No. HP',
+            'status' => 'Status', 
+        ]
+    ],
 ];
 

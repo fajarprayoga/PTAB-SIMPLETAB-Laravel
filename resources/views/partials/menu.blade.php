@@ -134,7 +134,16 @@
                             {{ trans('global.staff.title') }}
                         </a>
                     </li>
-                    @endcan                   
+                    @endcan   
+                    @can('pbk_access')                    
+                    <li class="nav-item">
+                        <a href="{{ route('admin.pbks.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class=" nav-icon fas fa-user-cog"></i>
+                            {{ trans('global.pbk.title') }}
+                        </a>
+                    </li>
+                    @endcan                
                 </ul>
             </li>
             @can('user_management_access') 
