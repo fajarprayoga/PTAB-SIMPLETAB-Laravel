@@ -14,20 +14,20 @@
             <div class="A1Text">
                <span class="v103_243"></span>
                 <span class=v103_244>#Tindakan</span>
-                <span class="v103_245">{{$ticket->delegated_at->format('H:i:s')}}</span>
+                <span class="v103_245">@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('H:i:s')}} @else {{$ticket->created_at->format('H:i:s')}} @endif</span>
                 <span class="v103_246"></span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
                 <span class="v103_249"></span>
                 <span class="v103_250"></span>
                 <span class="v103_251"></span>
-                <span class="v103_252">{{$ticket->delegated_at->format('H:i:s')}}</span>
+                <span class="v103_252">@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('H:i:s')}} @else {{$ticket->created_at->format('H:i:s')}} @endif</span>
                 <span class="v103_253">{{$ticket->spk}}</span>
-                <span class="v103_254">{{$ticket->delegated_at->format('d/m/Y')}}</span>
+                <span class="v103_254">@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('d/m/Y')}} @else {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_255">Internal</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
-                <span class="v103_257">{{$ticket->delegated_at->format('d/m/Y')}}</span>
-                <span class="v103_258">{{$ticket->delegated_at->format('d/m/Y')}}</span>
+                <span class="v103_257">@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('d/m/Y')}} @else {{$ticket->created_at->format('d/m/Y')}} @endif</span>
+                <span class="v103_258">@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('d/m/Y')}} @else {{$ticket->created_at->format('d/m/Y')}} @endif</span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
                 <span class="v103_260">{{$ticket->customer->address}}</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
@@ -40,8 +40,8 @@
                 <span class="v103_268">{{$ticket->code}}</span>
                 <span class="v103_269">{{$ticket->description}}</span>
                 <span class="v103_270">{{$ticket->area}}</span>
-                <?php $group ="v{$ticket->category->categorygroup->id}"?>
-                <div class="{{$group}}"></div>
+                <span class="v1">{{$ticket->category->categorygroup->name}}</span>
+               
             </div>
         </div>
     </div>

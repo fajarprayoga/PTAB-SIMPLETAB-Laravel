@@ -45,15 +45,20 @@
     
             <tr>
                 <td class="text-center">{{$no++}}</td>
-                <td>{{date('l', strtotime($ticket->created_at))}}</td>
+                <td>{{Hari_ini(date('l', strtotime($ticket->created_at)))}}</td>
                 <td>{{$ticket->created_at->format('d/m/Y')}}</td>
                 <td>{{$ticket->area }}</td>
                 <td>{{$ticket->customer->id}}</td>
                 <td>{{ $ticket->customer->name }}</td>
                 <td>{{$ticket->customer->address}}</td>
                 <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</td>
-                <td>-</td>
-                <td>-</td>
+                <td>@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('H:i:s')}} @else {{$ticket->created_at->format('H:i:s')}} @endif</td>
+                <?php 
+                    $mulai  = date_create($ticket->created_at);
+                    $selesai = $ticket->delegated_at != null ? date_create($ticket->delegated_at) : date_create($ticket->created_at);
+                    $hasil  = date_diff( $mulai, $selesai );
+                ?>
+                <td>{{$hasil->format('%H:%I:%S')}}</td>
                 <td>{{$ticket->category->code}}</td>
                 <td>{{$ticket->category->name}}</td>
                 <? $type = '';

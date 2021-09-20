@@ -23,7 +23,7 @@ body{
   }
 
 .A1{
-    background-image: url("../images/Service.png");
+    background-image: url("../images/PrintService.png");
     width: 1123px;
     height: 794px; 
     background-size:1089px 770px;
@@ -389,102 +389,13 @@ body{
   }
 
   .v1 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
     position: absolute;
-    top: 255px;
-    left: 195px;
-  }
-  .v2 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 276px;
-    left: 195px;
-  }
-  .v3 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 300px;
-    left: 195px;
-  }
-  .v4 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 323px;
-    left: 195px;
-  }
-  .v5 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 345px;
-    left: 195px;
-  }
-  .v6 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 366px;
-    left: 195px;
-  }
-  .v7 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 388px;
-    left: 195px;
-  }
-  .v8 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 410px;
-    left: 195px;
-  }
-  .v9 {
-    width: 40px;
-    height: 21px;
-    background-image: url("../images/silang.png");
-    background-size: 28px 18px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-    top: 432px;
-    left: 195px;
+    width: 155px;
+    top: 258px;
+    left: 240px;
+    word-wrap: break-word;
+    font-size: 13px;
+    font-weight: Regular;
+    color: rgba(0,0,0,1);
   }
   
