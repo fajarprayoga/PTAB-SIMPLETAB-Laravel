@@ -26,6 +26,7 @@
             <th rowspan="3">T/P/R/L</th>
             <th rowspan="3">&nbsp;</th>
             <th colspan="2">TINDAKAN PENYELESESAIAN</th>
+            <th rowspan="3">KETERANGAN</th>
         </tr>
         <tr>
             <th colspan="3" class="text-center">Jam</th>
@@ -82,7 +83,14 @@
                  
                     $days = (int)(($datetime2 - $datetime1)/86400); ?>
                 <td>{{$days}}</td>
+                <?php $number=1;?>
+                <td> 
+                    @foreach ($ticket->action as $ticketaction)
+                    {{$number++ . '. ' . $ticketaction->memo}}<br>
+                    @endforeach
+                </td>
             </tr>
+          
         @endforeach
         {{-- batas isi data  --}}
     </table>
