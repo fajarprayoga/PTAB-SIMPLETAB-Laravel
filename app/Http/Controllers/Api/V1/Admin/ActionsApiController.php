@@ -83,26 +83,30 @@ class ActionsApiController extends Controller
 
 
             // foto sebelum pengerjaan 
-            $resource_image_prework = $request->file('image_prework');
-            $id_name_image_prework = strtolower($action->id);
-            $file_ext_image_prework = $request->file('image_prework')->extension();
-            $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
-
-            $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id . $file_ext_image_prework;
-
-            $resource_image_prework->move($basepath.$img_path.$name_image_prework);
-            $data_image_prework = $name_image_prework;
+            if($request->file('image_prework')){
+                $resource_image_prework = $request->file('image_prework');
+                $id_name_image_prework = strtolower($action->id);
+                $file_ext_image_prework = $request->file('image_prework')->extension();
+                $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
+    
+                $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id . $file_ext_image_prework;
+    
+                $resource_image_prework->move($basepath.$img_path.$name_image_prework);
+                $data_image_prework = $name_image_prework;
+            }
 
             // foto alat 
-            $resource_image_tools = $request->file('image_tools');
-            $id_name_image_tools = strtolower($action->id);
-            $file_ext_image_tools = $request->file('image_tools')->extension();
-            $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
+            if($request->file('image_tools')){
+                $resource_image_tools = $request->file('image_tools');
+                $id_name_image_tools = strtolower($action->id);
+                $file_ext_image_tools = $request->file('image_tools')->extension();
+                $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
 
-            $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id . $file_ext_image_tools;
+                $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id . $file_ext_image_tools;
 
-            $resource_image_tools->move($basepath.$img_path.$name_image_tools);
-            $data_image_tools = $name_image_tools;
+                $resource_image_tools->move($basepath.$img_path.$name_image_tools);
+                $data_image_tools = $name_image_tools;
+            }
 
 
 
