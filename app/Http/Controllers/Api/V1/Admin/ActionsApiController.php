@@ -43,7 +43,7 @@ class ActionsApiController extends Controller
             $img_path = "/images/action";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
 
-            // cek status dan upload gambar
+            // cek status dan upload gambar dalam pengerjaan 
             for ($i = 1; $i <= 2; $i++) {
                 if ($request->file('image' . $i)) {
                     $resourceImage = $request->file('image' . $i);
@@ -62,6 +62,51 @@ class ActionsApiController extends Controller
                 }
             }
 
+            // foto selesai pengerjaan 
+            for ($i = 1; $i <= 2; $i++) {
+                if ($request->file('image_done' . $i)) {
+                    $resource_image_done = $request->file('image_done' . $i);
+                    $id_name_image_done = strtolower($action->id);
+                    $file_ext_image_done = $request->file('image_done' . $i)->extension();
+                    $id_name_image_done = str_replace(" ", "-", $id_name_image_done);
+
+                    $name_image_done = $img_path . "/" . $id_name_image_done . "-" . $dataForm->action_id . $i . "." . $file_ext_image_done;
+
+                    $resource_image_done->move($basepath . $img_path, $name_image_done);
+
+                    $data_image_done[] = $name_image_done;
+                } else {
+                    $responseImage = 'Image tidak di dukung';
+                    break;
+                }
+            }
+
+
+            // foto sebelum pengerjaan 
+            $resource_image_prework = $request->file('image_prework');
+            $id_name_image_prework = strtolower($action->id);
+            $file_ext_image_prework = $request->file('image_prework')->extension();
+            $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
+
+            $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id . $file_ext_image_prework;
+
+            $resource_image_prework->move($basepath.$img_path.$name_image_prework);
+            $data_image_prework = $name_image_prework;
+
+            // foto alat 
+            $resource_image_tools = $request->file('image_tools');
+            $id_name_image_tools = strtolower($action->id);
+            $file_ext_image_tools = $request->file('image_tools')->extension();
+            $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
+
+            $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id . $file_ext_image_tools;
+
+            $resource_image_tools->move($basepath.$img_path.$name_image_tools);
+            $data_image_tools = $name_image_tools;
+
+
+
+
             // $dataForm['image'] =  str_replace("\/", "/", json_encode($dataImageName));
 
             if ($resourceImage) {
@@ -74,9 +119,17 @@ class ActionsApiController extends Controller
                 $dataNewAction = array(
                     'status' => $statusAction,
                     'image' => str_replace("\/", "/", json_encode($dataImageName)),
+                    'image_prework' => $data_image_prework,
+                    'image_tools' => $data_image_tools,
                     'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                     'memo' => $dataForm->memo,
                 );
+                
+                if($statusAction == 'close'){
+                  $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_done));
+                }
+
+
 
                 $action->update($dataNewAction);
                 //update staff
