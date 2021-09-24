@@ -37,50 +37,52 @@ class ActionsApiController extends Controller
             $dataForm = json_decode($request->form);
             // data action
             $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
-
+            $uploadAction = false;
+            $cekError = 'kosong';
             // image yang lama disimpan
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            $dataImageName=[];
+
 
             // cek status dan upload gambar dalam pengerjaan 
-            for ($i = 1; $i <= 2; $i++) {
-                if ($request->file('image' . $i)) {
-                    $resourceImage = $request->file('image' . $i);
-                    $nameImage = strtolower($action->id);
-                    $file_extImage = $request->file('image' . $i)->extension();
-                    $nameImage = str_replace(" ", "-", $nameImage);
-
-                    $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
-
-                    $resourceImage->move($basepath . $img_path, $img_name);
-
-                    $dataImageName[] = $img_name;
-                } else {
-                    $responseImage = 'Image tidak di dukung';
-                    break;
+            if($action->status =='pending' && $dataForm->status == 'active'){
+                for ($i = 1; $i <= 2; $i++) {
+                    if ($request->file('image' . $i)) {
+                        $resourceImage = $request->file('image' . $i);
+                        $nameImage = strtolower($action->id);
+                        $file_extImage = $request->file('image' . $i)->extension();
+                        $nameImage = str_replace(" ", "-", $nameImage);
+    
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+    
+                        $resourceImage->move($basepath . $img_path, $img_name);
+    
+                        $dataImageName[] = $img_name;
+                    } else {
+                        $responseImage = 'Image tidak di dukung';
+                        break;
+                    }
+                }
+            }else if($action->status =='active' && $dataForm->status =='active'){
+                for ($i = 1; $i <= 2; $i++) {
+                    if ($request->file('image' . $i)) {
+                        $resourceImage = $request->file('image' . $i);
+                        $nameImage = strtolower($action->id);
+                        $file_extImage = $request->file('image' . $i)->extension();
+                        $nameImage = str_replace(" ", "-", $nameImage);
+    
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+    
+                        $resourceImage->move($basepath . $img_path, $img_name);
+    
+                        $dataImageName[] = $img_name;
+                    } else {
+                        $responseImage = 'Image tidak di dukung';
+                    }
                 }
             }
-
-            // foto selesai pengerjaan 
-            for ($i = 1; $i <= 2; $i++) {
-                if ($request->file('image_done' . $i)) {
-                    $resource_image_done = $request->file('image_done' . $i);
-                    $id_name_image_done = strtolower($action->id);
-                    $file_ext_image_done = $request->file('image_done' . $i)->extension();
-                    $id_name_image_done = str_replace(" ", "-", $id_name_image_done);
-
-                    $name_image_done = $img_path . "/" . $id_name_image_done . "-" . $dataForm->action_id . $i . "." . $file_ext_image_done;
-
-                    $resource_image_done->move($basepath . $img_path, $name_image_done);
-
-                    $data_image_done[] = $name_image_done;
-                } else {
-                    $responseImage = 'Image tidak di dukung';
-                    break;
-                }
-            }
-
 
             // foto sebelum pengerjaan 
             if($request->file('image_prework')){
@@ -89,52 +91,80 @@ class ActionsApiController extends Controller
                 $file_ext_image_prework = $request->file('image_prework')->extension();
                 $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
     
-                $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id . $file_ext_image_prework;
+                $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id .'-pre.'. $file_ext_image_prework;
     
-                $resource_image_prework->move($basepath.$img_path.$name_image_prework);
+                $resource_image_prework->move($basepath.$img_path,$name_image_prework);
                 $data_image_prework = $name_image_prework;
             }
 
-            // foto alat 
+                 // foto alat 
             if($request->file('image_tools')){
                 $resource_image_tools = $request->file('image_tools');
                 $id_name_image_tools = strtolower($action->id);
                 $file_ext_image_tools = $request->file('image_tools')->extension();
                 $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
 
-                $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id . $file_ext_image_tools;
+                $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id .'-tools.'. $file_ext_image_tools;
 
-                $resource_image_tools->move($basepath.$img_path.$name_image_tools);
+                $resource_image_tools->move($basepath.$img_path,$name_image_tools);
                 $data_image_tools = $name_image_tools;
             }
 
+            for ($i = 1; $i <= 2; $i++) {
+                // if($request->file('image_done')){
+                    if ($request->file('image_done' . $i)) {
+                        $resource_image_done = $request->file('image_done' . $i);
+                        $id_name_image_done = strtolower($action->id);
+                        $file_ext_image_done = $request->file('image_done' . $i)->extension();
+                        $id_name_image_done = str_replace(" ", "-", $id_name_image_done);
+    
+                        $name_image_done = $img_path . "/" . $id_name_image_done . "-" . $dataForm->action_id . $i . "-done." . $file_ext_image_done;
+    
+                        $resource_image_done->move($basepath . $img_path, $name_image_done);
+    
+                        $data_image_done[] = $name_image_done;
+                    } else {
+                        $responseImage = 'Image tidak di dukung';
+                        break;
+                    }
+                // }
+            }
+
+            $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+            $cekAllStatus = false;
+            $statusAction = $dataForm->status;
+
+            $dateNow = date('Y-m-d H:i:s');
 
 
+            // update database
+            $dataNewAction = array(
+                'status' => $statusAction,
+                // 'image_prework' => $data_image_prework,
+                // 'image_tools' => $data_image_tools,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'memo' => $dataForm->memo,
+            );
+            if($action->status !='close' || $dataForm->status !='close'){
 
-            // $dataForm['image'] =  str_replace("\/", "/", json_encode($dataImageName));
-
-            if ($resourceImage) {
-                $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
-                $cekAllStatus = false;
-                $statusAction = $dataForm->status;
-
-                $dateNow = date('Y-m-d H:i:s');
-
-                $dataNewAction = array(
-                    'status' => $statusAction,
-                    'image' => str_replace("\/", "/", json_encode($dataImageName)),
-                    'image_prework' => $data_image_prework,
-                    'image_tools' => $data_image_tools,
-                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
-                    'memo' => $dataForm->memo,
-                );
-                
-                if($statusAction == 'close'){
-                  $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_done));
+                if($request->file('image_tools')){
+                    $dataNewAction['image_tools'] = $data_image_tools;
                 }
 
+                if($request->file('image_prework')){
+                    $dataNewAction['image_prework'] = $data_image_prework;
+                }
 
+                if($dataImageName && count($dataImageName) > 0){
+                    $dataNewAction['image'] =str_replace("\/", "/", json_encode($dataImageName));
+                }
+                $uploadAction=true;
+            }else{
+                $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_done));
+                $uploadAction=true;
+            }
 
+            if($uploadAction){
                 $action->update($dataNewAction);
                 //update staff
                 $ids = $action->staff()->allRelatedIds();
@@ -234,13 +264,18 @@ class ActionsApiController extends Controller
                 return response()->json([
                     'message' => 'Status di ubah ',
                     'data' => $action,
+                    'datanew' => $dataNewAction
                 ]);
-            } else {
+            }else{
                 return response()->json([
-                    'message' => 'Image Tidak Di Simpan',
+                    'message' => '500',
+                    'data' => $uploadAction,
+                    'pesan' => $cekError,
+                    'status' => $action->status
                 ]);
             }
-
+            
+            
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal update status ',
