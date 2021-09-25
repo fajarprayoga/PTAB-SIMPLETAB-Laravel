@@ -66,6 +66,8 @@ class ActionsApiController extends Controller
                     }
                 }
             }else if($action->status =='active' && $dataForm->status =='active'){
+                $oldImage = json_decode($action->image);
+                $index = 0;
                 for ($i = 1; $i <= 2; $i++) {
                     if ($request->file('image' . $i)) {
                         $resourceImage = $request->file('image' . $i);
@@ -79,8 +81,10 @@ class ActionsApiController extends Controller
     
                         $dataImageName[] = $img_name;
                     } else {
+                        $dataImageName[] = $oldImage[$i-1];
                         $responseImage = 'Image tidak di dukung';
                     }
+                    // $index++;
                 }
             }
 
@@ -111,25 +115,22 @@ class ActionsApiController extends Controller
             }
 
             for ($i = 1; $i <= 2; $i++) {
-                // if($request->file('image_done')){
-                    if ($request->file('image_done' . $i)) {
-                        $resource_image_done = $request->file('image_done' . $i);
-                        $id_name_image_done = strtolower($action->id);
-                        $file_ext_image_done = $request->file('image_done' . $i)->extension();
-                        $id_name_image_done = str_replace(" ", "-", $id_name_image_done);
-    
-                        $name_image_done = $img_path . "/" . $id_name_image_done . "-" . $dataForm->action_id . $i . "-done." . $file_ext_image_done;
-    
-                        $resource_image_done->move($basepath . $img_path, $name_image_done);
-    
-                        $data_image_done[] = $name_image_done;
-                    } else {
-                        $responseImage = 'Image tidak di dukung';
-                        break;
-                    }
-                // }
-            }
+                if ($request->file('image_done' . $i)) {
+                    $resourceImageDone = $request->file('image_done' . $i);
+                    $nameImageDone = strtolower($action->id);
+                    $file_extImageDone = $request->file('image_done' . $i)->extension();
+                    $nameImageDone = str_replace(" ", "-", $nameImageDone);
 
+                    $img_name_done = $img_path . "/" . $nameImageDone . "-" . $dataForm->action_id . $i . "-done." . $file_extImageDone;
+
+                    $resourceImageDone->move($basepath . $img_path, $img_name_done);
+
+                    $dataImageNameDone[] = $img_name_done;
+                } else {
+                    $responseImage = 'Image tidak di dukung';
+                    break;
+                }
+            }
             $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
             $cekAllStatus = false;
             $statusAction = $dataForm->status;
@@ -160,7 +161,7 @@ class ActionsApiController extends Controller
                 }
                 $uploadAction=true;
             }else{
-                $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_done));
+                $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($dataImageNameDone));
                 $uploadAction=true;
             }
 
@@ -262,7 +263,7 @@ class ActionsApiController extends Controller
                         );}}
 
                 return response()->json([
-                    'message' => 'Status di ubah ',
+                    'message' => 'Status di ubah ' ,
                     'data' => $action,
                     'datanew' => $dataNewAction
                 ]);
