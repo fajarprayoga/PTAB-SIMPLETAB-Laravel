@@ -146,7 +146,7 @@ class ActionsApiController extends Controller
                 'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 'memo' => $dataForm->memo,
             );
-            if($action->status !='close' || $dataForm->status !='close'){
+            if($action->status !='close' && $dataForm->status !='close'){
 
                 if($request->file('image_tools')){
                     $dataNewAction['image_tools'] = $data_image_tools;

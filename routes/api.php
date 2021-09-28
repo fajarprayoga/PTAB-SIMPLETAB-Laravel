@@ -94,7 +94,9 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
 
     // sub dapettement
     Route::resource('subdapertements', 'SubdapertementsApiController');
-    Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');    
+    Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');   
+    
+    Route::get('defcustomer','CustomersApiController@defcustomer' );
 });
 
 

@@ -31,28 +31,116 @@
             <h5 style="font-weight:bold">{{ trans('global.ticket.fields.customer') }}</h5>
             <p>{{$ticket->customer->name}}</p>
         </div>
-        <div style="border-bottom: 1px solid" class="mt-3 pb-3 row" >
-            <div class="col-md-6">
-                <h5 style="font-weight:bold">{{ trans('global.ticket.fields.image') }}</h5>
-             
-                {{-- @foreach (json_decode($ticket->image->image) as $image)
-                    <img  height="200px" width="300px"  src={{"https://simpletabadmin.ptab-vps.com/$image"}} alt="">
-                @endforeach --}}
-
-                @foreach ($ticket->ticket_image as $image)
-                    @foreach (json_decode($image->image) as $item)
-                        <img  height="200px" width="300px"  src={{"https://simpletabadmin.ptab-vps.com/$item"}} alt="">
-                    @endforeach
+        <div style="border-bottom: 1px solid" class="mt-3" >
+            <h5 style="font-weight:bold">{{ trans('global.ticket.fields.memo') }}</h5>
+            <p> 
+            @if($ticket->action != null) 
+                @foreach ($ticket->action as $ticketaction)
+                    @if($ticketaction->memo != null) 
+                        {{$ticketaction->memo}}
+                        <p></p>
+                    @endif
                 @endforeach
-            </div>
-            <div class="col-md-6">
-                <h5 style="font-weight:bold">{{ trans('global.ticket.fields.video') }}</h5>
-                <video width="300px" height="200px" controls>
-                    <source src={{"https://simpletabadmin.ptab-vps.com/$ticket->video"}} type="video/mp4">
-                    {{-- <source src="mov_bbb.ogg" type="video/ogg"> --}}
-                </video>
+            @endif
+            </p>
+        </div>
+
+        <div class="container-fluid">
+            <div class="container">
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h3>Bukti Laporan</h3>
+                    </div>
+                </div>
+                <h5 style="font-weight:bold">Foto Laporan</h5>
+                <div class="row">
+                    @foreach ($ticket->ticket_image as $image)
+                        @foreach (json_decode($image->image) as $item)
+                        <div class="col-md-5">
+                            <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/$item"}} alt="">
+                            <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$item"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                        </div>
+                        @endforeach
+                    @endforeach
+                </div>
+                    @if ($ticket->video != null) 
+                    <h5 style="font-weight:bold">{{ trans('global.ticket.fields.video') }}</h5>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <video width="350px" height="250px" controls>
+                                    <source src={{"https://simpletabadmin.ptab-vps.com/$ticket->video"}} type="video/mp4">
+                                    
+                                    {{-- <source src="mov_bbb.ogg" type="video/ogg"> --}}
+                                
+                                </video>
+                            </div>
+                        </div>
+                    @endif
             </div>
         </div>
+        @if ($ticket->status != 'pending') 
+        <div class="container-fluid">
+            <div class="container">
+            <div class="row my-3">
+                <div class="col-md-12">
+                    <h3 >Bukti Tindakan</h3>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <h5 style="font-weight:bold">Foto Sebelum Pengerjaan</h5>
+                    </div>
+                    <div class="col-md-5">
+                        <h5 style="font-weight:bold">Foto Alat Pengerjaan</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    @foreach ($ticket->action as $acti)
+                        <div class="col-md-5">
+                            <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/" . $acti->image_prework}} alt="">
+                            <p class="my-2"><a href="{{'https://simpletabadmin.ptab-vps.com/' . $acti->image_prework}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                        </div>
+                    @endforeach
+                    @foreach ($ticket->action as $acti)
+                        <div class="col-md-5">
+                            <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/" . $acti->image_tools}} alt="">
+                            <p class="my-2"><a href="{{'https://simpletabadmin.ptab-vps.com/' . $acti->image_tools}}"  target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <h5 style="font-weight:bold">Foto Pengerjaan</h5>
+                <div class="row">
+                    @foreach ($ticket->action as $acti)
+                        @if ($acti->image != null) 
+                            @foreach (json_decode($acti->image) as $itemimage)
+                            <div class="col-md-5">
+                                <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/$itemimage"}} alt="">
+                                <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$itemimage"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                            </div>
+                            @endforeach
+                        @endif
+                    @endforeach
+                </div>
+
+                <h5 style="font-weight:bold">Foto Selesai</h5>
+                <div class="row">
+                    @foreach ($ticket->action as $acti)
+                        @if ($acti->image_done != null) 
+                            @foreach (json_decode($acti->image_done) as $itemdone)
+                            <div class="col-md-5">
+                                <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/$itemdone"}} alt="">
+                                <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$itemdone"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                            </div>
+                            @endforeach
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        <div> 
+        @endif
+      
+      
         <!-- <div style="border-bottom: 1px solid" class="mt-3 pb-3" >
            
         </div> -->

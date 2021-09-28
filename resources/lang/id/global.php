@@ -414,7 +414,8 @@ return [
             'customer_code' => 'Kode Pelanggan',
             'description' => 'Deskripsi',
             'date' => 'Tanggal',
-            'departement' => 'Nama Departement'
+            'departement' => 'Nama Departement',
+            'memo' => 'Memo'
         ]
     ],
     'action' => [
