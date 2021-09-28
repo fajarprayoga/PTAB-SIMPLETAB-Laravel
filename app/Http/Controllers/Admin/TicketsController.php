@@ -246,6 +246,7 @@ class TicketsController extends Controller
     public function show(Ticket $ticket)
     {
         // dd($ticket->customer);
+        
         return view('admin.tickets.show', compact('ticket'));
     }
 
