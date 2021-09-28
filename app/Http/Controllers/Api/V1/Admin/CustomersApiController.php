@@ -2,38 +2,62 @@
 
 namespace App\Http\Controllers\api\v1\admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\CustomerApi;
-use App\Http\Requests\UpdateCustomerRequest;
-use Illuminate\Database\QueryException;
+use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 
 class CustomersApiController extends Controller
 {
-    
+
     use TraitModel;
+
+    public function defcustomer()
+    {
+        try {
+            $customer = CustomerApi::where('_def', '1')->first();
+            if (!empty($customer)) {
+                $customer_id = $customer->id;
+                return response()->json([
+                    'message' => 'success',
+                    'data' => $customer_id,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'failed',
+                    'data' => '',
+                ]);
+            }
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'failed',
+                'data' => $ex,
+            ]);
+        }
+    }
 
     public function customers(Request $request)
     {
         try {
             $search = $request->search;
-            if($search !=''){
-                $customer = CustomerApi::WhereMaps('name',"%$search%", 'LIKE')->paginate(10, ['*'], 'page', $request->page);
-            }else{
+            if ($search != '') {
+                $customer = CustomerApi::WhereMaps('name', "%$search%", 'LIKE')->paginate(10, ['*'], 'page', $request->page);
+            } else {
                 $customer = CustomerApi::paginate(10, ['*'], 'page', $request->page);
             }
 
-             return response()->json([
+            return response()->json([
                 'message' => 'success',
                 'data' => $customer,
                 'page' => $request->page,
-                'seacrh' => $request->search
-             ]);
+                'seacrh' => $request->search,
+            ]);
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'failed',
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
     }
@@ -44,7 +68,7 @@ class CustomersApiController extends Controller
 
         return response()->json([
             'message' => 'Sucess',
-            'data' => $customer
+            'data' => $customer,
         ]);
     }
 
@@ -56,37 +80,35 @@ class CustomersApiController extends Controller
     public function store(Request $request)
     {
 
-
         $last_code = $this->get_last_code('public');
 
         $code = acc_code_generate($last_code, 8, 3);
-        
-        $rules=array(
+
+        $rules = array(
             'name' => 'required',
             'phone' => 'required|unique:mysql2.tblpelanggan,telp',
             'type' => 'required',
             'gender' => 'required',
-            'address' => 'required'
+            'address' => 'required',
         );
 
-        $validator=\Validator::make($request->all(),$rules);
-        if($validator->fails())
-        {
-            $messages=$validator->messages();
-            $errors=$messages->all();
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $request->all()
+                'data' => $request->all(),
             ]);
         }
 
         $customer = new CustomerApi;
         $customer->name = $request->name;
         $customer->code = $code;
-              
-        if(!isset($request->email)){
+
+        if (!isset($request->email)) {
             $customer->email = null;
-        }else{
+        } else {
             $request->validate([
                 'email' => 'required|email',
             ]);
@@ -105,13 +127,13 @@ class CustomersApiController extends Controller
             $customer->save();
             return response()->json([
                 'message' => 'Registrasi Berhasil',
-                'data' => $customer
+                'data' => $customer,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
                 // 'message' => 'Registrasi Berhasil',
                 // 'token' => $token,
-                'data' => $ex
+                'data' => $ex,
             ]);
         }
 
@@ -130,26 +152,25 @@ class CustomersApiController extends Controller
     public function update(Request $request)
     {
         $customer = CustomerApi::find($request->code);
-        $rules=array(
+        $rules = array(
             'email' => 'required|email',
-            'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening,'.$request->code.',nomorrekening',
+            'code' => 'required|unique:mysql2.tblpelanggan,nomorrekening,' . $request->code . ',nomorrekening',
             'name' => 'required',
-            'phone' => 'required|unique:mysql2.tblpelanggan,telp,'.$request->code.',nomorrekening',
+            'phone' => 'required|unique:mysql2.tblpelanggan,telp,' . $request->code . ',nomorrekening',
             'type' => 'required',
             'gender' => 'required',
-            'address' => 'required'
+            'address' => 'required',
         );
-        $validator=\Validator::make($request->all(),$rules);
-        if($validator->fails())
-        {
-            $messages=$validator->messages();
-            $errors=$messages->all();
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
             return response()->json([
                 'message' => $errors,
-                'data' => $customer
+                'data' => $customer,
             ]);
         }
-        
+
         $customer->name = $request->name;
         $customer->code = $request->code;
         $customer->email = $request->email;
@@ -162,7 +183,7 @@ class CustomersApiController extends Controller
 
         return response()->json([
             'message' => 'Data Customer Update Success',
-            'data' => $customer
+            'data' => $customer,
         ]);
 
     }
@@ -171,21 +192,19 @@ class CustomersApiController extends Controller
     {
         // abort_unless(\Gate::allows('staff_delete'), 403);
 
-        try{
-            
+        try {
+
             $customer->delete();
             return response()->json([
                 'message' => 'Customer berhasil di hapus',
             ]);
-        }
-        catch(QueryException $e) {
-           return response()->json([
-               'message' => 'data masih ada dalam daftar keluhan',
-               'data' => $e
-           ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'message' => 'data masih ada dalam daftar keluhan',
+                'data' => $e,
+            ]);
         }
 
     }
 
-    
 }
