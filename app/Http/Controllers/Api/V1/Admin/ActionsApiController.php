@@ -32,9 +32,15 @@ class ActionsApiController extends Controller
 
     public function getSr(Request $request)
     {
-        $customer = CtmPelanggan::selectRaw('idareal,count(nomorrekening) as total')
-        ->where('status', 1)
-        ->groupBy('idareal')
+        $customer = CtmPelanggan::selectRaw('CASE
+        WHEN tblwilayah.group_unit = 1 THEN "DAERAH KOTA"
+        WHEN tblwilayah.group_unit = 2 THEN "UNIT KERAMBITAN"
+        WHEN tblwilayah.group_unit = 3 THEN "UNIT SELEMADEG"
+        WHEN tblwilayah.group_unit = 4 THEN "UNIT PENEBEL"
+        ELSE "UNIT BATURITI"
+    END AS namawilayah,SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as totalaktif, SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as totalpasif')
+        ->join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+        ->groupBy('tblwilayah.group_unit')
         ->get();
         try {
             if (!empty($customer)) {
