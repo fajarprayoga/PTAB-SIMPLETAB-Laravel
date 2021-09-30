@@ -97,6 +97,9 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');   
     
     Route::get('defcustomer','CustomersApiController@defcustomer' );
+
+    //SR aktif pasif
+    Route::get('customer-sr', 'ActionsApiController@getSr');
 });
 
 
