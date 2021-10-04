@@ -97,6 +97,11 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('subdapertements/list', 'SubdapertementsApiController@subdapertements');   
     
     Route::get('defcustomer','CustomersApiController@defcustomer' );
+
+    //SR aktif pasif
+    Route::get('customer-sr', 'ActionsApiController@getSr');
+    Route::get('customer-srnew', 'ActionsApiController@getSrnew');
+    Route::post('ctm-mapping', 'ActionsApiController@getCtmmapping');
 });
 
 
@@ -104,6 +109,7 @@ Route::group(['prefix' => 'open/admin', 'namespace' => 'Api\V1\Admin'], function
     Route::post('login',  'AdminApiController@login' );
     //test
     Route::get('test/{id}', 'TicketsApiController@test');
+    Route::post('login-js',  'AdminApiController@loginJs' );
 });
 
 Route::group(['prefix' => 'close/dapertement', 'namespace' => 'Api\V1\Dapertement'], function () {

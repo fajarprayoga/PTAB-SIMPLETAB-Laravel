@@ -7,6 +7,7 @@ use App\ActionStaff;
 use App\CustomerApi;
 use App\Http\Controllers\Controller;
 use App\StaffApi;
+use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
@@ -14,7 +15,8 @@ use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
-use App\Subdapertement;
+use App\CtmPelanggan;
+use App\CtmGambarmetersms;
 
 class ActionsApiController extends Controller
 {
@@ -27,6 +29,93 @@ class ActionsApiController extends Controller
     public function index()
     {
 
+    }
+
+    public function getCtmmapping(Request $request)
+    {
+        $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
+        ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+        ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+        ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+        ->where('gambarmetersms.bulanrekening','9')
+        ->where('gambarmetersms.tahunrekening','2021')
+        ->take(10)
+        ->get();
+        try {
+            if (!empty($mapping)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $mapping,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    public function getSrnew(Request $request)
+    {
+        $year = date('Y');
+        $customer = CtmPelanggan::selectRaw('CASE
+        WHEN MONTH(tgltersambung) = 1 THEN "Januari"
+        WHEN MONTH(tgltersambung) = 2 THEN "Februari"
+        WHEN MONTH(tgltersambung) = 3 THEN "Maret"
+        WHEN MONTH(tgltersambung) = 4 THEN "April"
+        WHEN MONTH(tgltersambung) = 5 THEN "Mei"
+        WHEN MONTH(tgltersambung) = 6 THEN "Juni"
+        WHEN MONTH(tgltersambung) = 7 THEN "Juli"
+        WHEN MONTH(tgltersambung) = 8 THEN "Agustus"
+        WHEN MONTH(tgltersambung) = 9 THEN "September"
+        WHEN MONTH(tgltersambung) = 10 THEN "Oktober"
+        WHEN MONTH(tgltersambung) = 11 THEN "November"
+        ELSE "Desember"
+    END AS bulan,COUNT(nomorrekening) as total, MONTH(tgltersambung) as month, YEAR(tgltersambung) as tahun')
+        ->groupBy('month')
+        ->whereYear('tgltersambung', '=', $year)
+        ->get();
+        try {
+            if (!empty($customer)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $customer,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    public function getSr(Request $request)
+    {
+        $customer = CtmPelanggan::selectRaw('CASE
+        WHEN tblwilayah.group_unit = 1 THEN "DAERAH KOTA"
+        WHEN tblwilayah.group_unit = 2 THEN "UNIT KERAMBITAN"
+        WHEN tblwilayah.group_unit = 3 THEN "UNIT SELEMADEG"
+        WHEN tblwilayah.group_unit = 4 THEN "UNIT PENEBEL"
+        ELSE "UNIT BATURITI"
+    END AS namawilayah,SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as totalaktif, SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as totalpasif')
+        ->join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+        ->groupBy('tblwilayah.group_unit')
+        ->get();
+        try {
+            if (!empty($customer)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $customer,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
     }
 
     public function actionStatusUpdate(Request $request)
@@ -43,42 +132,43 @@ class ActionsApiController extends Controller
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-            $dataImageName=[];
+            $dataImageName = [];
 
-
-            // cek status dan upload gambar dalam pengerjaan 
-            if($action->status =='pending' && $dataForm->status == 'active'){
+            // cek status dan upload gambar dalam pengerjaan
+            if ($action->status == 'pending' && $dataForm->status == 'active') {
                 for ($i = 1; $i <= 2; $i++) {
                     if ($request->file('image' . $i)) {
                         $resourceImage = $request->file('image' . $i);
                         $nameImage = strtolower($action->id);
                         $file_extImage = $request->file('image' . $i)->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
-    
+
                         $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
-    
+
                         $resourceImage->move($basepath . $img_path, $img_name);
-    
+
                         $dataImageName[] = $img_name;
                     } else {
                         $responseImage = 'Image tidak di dukung';
                         break;
                     }
                 }
+
             }else if($action->status =='active' && $dataForm->status =='active'){
                 $oldImage = json_decode($action->image);
                 $index = 0;
+
                 for ($i = 1; $i <= 2; $i++) {
                     if ($request->file('image' . $i)) {
                         $resourceImage = $request->file('image' . $i);
                         $nameImage = strtolower($action->id);
                         $file_extImage = $request->file('image' . $i)->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
-    
+
                         $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
-    
+
                         $resourceImage->move($basepath . $img_path, $img_name);
-    
+
                         $dataImageName[] = $img_name;
                     } else {
                         $dataImageName[] = $oldImage[$i-1];
@@ -88,33 +178,34 @@ class ActionsApiController extends Controller
                 }
             }
 
-            // foto sebelum pengerjaan 
-            if($request->file('image_prework')){
+            // foto sebelum pengerjaan
+            if ($request->file('image_prework')) {
                 $resource_image_prework = $request->file('image_prework');
                 $id_name_image_prework = strtolower($action->id);
                 $file_ext_image_prework = $request->file('image_prework')->extension();
                 $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
-    
-                $name_image_prework = $img_path .'/'. $id_name_image_prework.'-'. $dataForm->action_id .'-pre.'. $file_ext_image_prework;
-    
-                $resource_image_prework->move($basepath.$img_path,$name_image_prework);
+
+                $name_image_prework = $img_path . '/' . $id_name_image_prework . '-' . $dataForm->action_id . '-pre.' . $file_ext_image_prework;
+
+                $resource_image_prework->move($basepath . $img_path, $name_image_prework);
                 $data_image_prework = $name_image_prework;
             }
 
-                 // foto alat 
-            if($request->file('image_tools')){
+            // foto alat
+            if ($request->file('image_tools')) {
                 $resource_image_tools = $request->file('image_tools');
                 $id_name_image_tools = strtolower($action->id);
                 $file_ext_image_tools = $request->file('image_tools')->extension();
                 $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
 
-                $name_image_tools = $img_path .'/'. $id_name_image_tools.'-'. $dataForm->action_id .'-tools.'. $file_ext_image_tools;
+                $name_image_tools = $img_path . '/' . $id_name_image_tools . '-' . $dataForm->action_id . '-tools.' . $file_ext_image_tools;
 
-                $resource_image_tools->move($basepath.$img_path,$name_image_tools);
+                $resource_image_tools->move($basepath . $img_path, $name_image_tools);
                 $data_image_tools = $name_image_tools;
             }
 
             for ($i = 1; $i <= 2; $i++) {
+
                 if ($request->file('image_done' . $i)) {
                     $resourceImageDone = $request->file('image_done' . $i);
                     $nameImageDone = strtolower($action->id);
@@ -124,6 +215,7 @@ class ActionsApiController extends Controller
                     $img_name_done = $img_path . "/" . $nameImageDone . "-" . $dataForm->action_id . $i . "-done." . $file_extImageDone;
 
                     $resourceImageDone->move($basepath . $img_path, $img_name_done);
+
 
                     $dataImageNameDone[] = $img_name_done;
                 } else {
@@ -137,7 +229,6 @@ class ActionsApiController extends Controller
 
             $dateNow = date('Y-m-d H:i:s');
 
-
             // update database
             $dataNewAction = array(
                 'status' => $statusAction,
@@ -146,26 +237,28 @@ class ActionsApiController extends Controller
                 'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 'memo' => $dataForm->memo,
             );
-            if($action->status !='close' && $dataForm->status !='close'){
+            if ($action->status != 'close' && $dataForm->status != 'close') {
 
-                if($request->file('image_tools')){
+                if ($request->file('image_tools')) {
                     $dataNewAction['image_tools'] = $data_image_tools;
                 }
 
-                if($request->file('image_prework')){
+                if ($request->file('image_prework')) {
                     $dataNewAction['image_prework'] = $data_image_prework;
                 }
 
-                if($dataImageName && count($dataImageName) > 0){
-                    $dataNewAction['image'] =str_replace("\/", "/", json_encode($dataImageName));
+                if ($dataImageName && count($dataImageName) > 0) {
+                    $dataNewAction['image'] = str_replace("\/", "/", json_encode($dataImageName));
                 }
+
                 $uploadAction=true;
             }else{
                 $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($dataImageNameDone));
                 $uploadAction=true;
+
             }
 
-            if($uploadAction){
+            if ($uploadAction) {
                 $action->update($dataNewAction);
                 //update staff
                 $ids = $action->staff()->allRelatedIds();
@@ -213,7 +306,7 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );}}
-                
+
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->get();
                 foreach ($admin_arr as $key => $admin) {
@@ -265,18 +358,17 @@ class ActionsApiController extends Controller
                 return response()->json([
                     'message' => 'Status di ubah ' ,
                     'data' => $action,
-                    'datanew' => $dataNewAction
+                    'datanew' => $dataNewAction,
                 ]);
-            }else{
+            } else {
                 return response()->json([
                     'message' => '500',
                     'data' => $uploadAction,
                     'pesan' => $cekError,
-                    'status' => $action->status
+                    'status' => $action->status,
                 ]);
             }
-            
-            
+
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal update status ',
@@ -406,11 +498,11 @@ class ActionsApiController extends Controller
                     $buttons = null,
                     $schedule = null
                 );}}
-        
+
         //send notif to humas
         $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
-                ->where('staff_id', 0)
-                ->get();
+            ->where('staff_id', 0)
+            ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Humas: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
@@ -532,11 +624,11 @@ class ActionsApiController extends Controller
                     $buttons = null,
                     $schedule = null
                 );}}
-        
+
         //send notif to humas
         $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
-                ->where('staff_id', 0)
-                ->get();
+            ->where('staff_id', 0)
+            ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Humas: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
@@ -764,11 +856,11 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );}}
-                
+
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
-                ->where('staff_id', 0)
-                ->get();
+                    ->where('staff_id', 0)
+                    ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
@@ -928,11 +1020,11 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );}}
-                
+
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
-                ->where('staff_id', 0)
-                ->get();
+                    ->where('staff_id', 0)
+                    ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
