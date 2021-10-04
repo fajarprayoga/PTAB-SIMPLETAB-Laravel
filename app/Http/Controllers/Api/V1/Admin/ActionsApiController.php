@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
 use App\CtmPelanggan;
+use App\CtmGambarmetersms;
 
 class ActionsApiController extends Controller
 {
@@ -30,6 +31,66 @@ class ActionsApiController extends Controller
 
     }
 
+    public function getCtmmapping(Request $request)
+    {
+        $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
+        ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+        ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+        ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+        ->where('gambarmetersms.bulanrekening','9')
+        ->where('gambarmetersms.tahunrekening','2021')
+        ->take(10)
+        ->get();
+        try {
+            if (!empty($mapping)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $mapping,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    public function getSrnew(Request $request)
+    {
+        $year = date('Y');
+        $customer = CtmPelanggan::selectRaw('CASE
+        WHEN MONTH(tgltersambung) = 1 THEN "Januari"
+        WHEN MONTH(tgltersambung) = 2 THEN "Februari"
+        WHEN MONTH(tgltersambung) = 3 THEN "Maret"
+        WHEN MONTH(tgltersambung) = 4 THEN "April"
+        WHEN MONTH(tgltersambung) = 5 THEN "Mei"
+        WHEN MONTH(tgltersambung) = 6 THEN "Juni"
+        WHEN MONTH(tgltersambung) = 7 THEN "Juli"
+        WHEN MONTH(tgltersambung) = 8 THEN "Agustus"
+        WHEN MONTH(tgltersambung) = 9 THEN "September"
+        WHEN MONTH(tgltersambung) = 10 THEN "Oktober"
+        WHEN MONTH(tgltersambung) = 11 THEN "November"
+        ELSE "Desember"
+    END AS bulan,COUNT(nomorrekening) as total, MONTH(tgltersambung) as month, YEAR(tgltersambung) as tahun')
+        ->groupBy('month')
+        ->whereYear('tgltersambung', '=', $year)
+        ->get();
+        try {
+            if (!empty($customer)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $customer,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
     public function getSr(Request $request)
     {
         $customer = CtmPelanggan::selectRaw('CASE
