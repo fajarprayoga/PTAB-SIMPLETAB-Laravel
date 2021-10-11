@@ -102,6 +102,10 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::get('customer-sr', 'ActionsApiController@getSr');
     Route::get('customer-srnew', 'ActionsApiController@getSrnew');
     Route::post('ctm-mapping', 'ActionsApiController@getCtmmapping');
+    Route::get('ctm-operator', 'ActionsApiController@getCtmoperator');
+    Route::get('ctm-arealgroup', 'ActionsApiController@getCtmarealgroup');
+    Route::post('ctm-kubikasi', 'ActionsApiController@getCtmkubikasi');
+    Route::post('ctm-statussm', 'ActionsApiController@getCtmStatussm');
 });
 
 

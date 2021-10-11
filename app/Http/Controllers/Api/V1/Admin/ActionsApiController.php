@@ -4,6 +4,10 @@ namespace App\Http\Controllers\api\v1\admin;
 
 use App\ActionApi;
 use App\ActionStaff;
+use App\CtmGambarmetersms;
+use App\CtmPbk;
+use App\CtmPelanggan;
+use App\CtmWilayah;
 use App\CustomerApi;
 use App\Http\Controllers\Controller;
 use App\StaffApi;
@@ -15,8 +19,7 @@ use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
-use App\CtmPelanggan;
-use App\CtmGambarmetersms;
+use App\CtmStatussmPelanggan;
 
 class ActionsApiController extends Controller
 {
@@ -31,16 +34,42 @@ class ActionsApiController extends Controller
 
     }
 
-    public function getCtmmapping(Request $request)
+    public function getCtmStatussm(Request $request)
     {
-        $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
-        ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
-        ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
-        ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
-        ->where('gambarmetersms.bulanrekening','9')
-        ->where('gambarmetersms.tahunrekening','2021')
-        ->take(10)
-        ->get();
+        $status = CtmStatussmPelanggan::selectRaw('CASE
+        WHEN tblstatuswm.NamaStatus = "-" THEN "Terbaca" ELSE tblstatuswm.NamaStatus END AS namastatus, COUNT(tblstatussmpelanggan.nomorrekening) jumlahstatus')
+            ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')            
+            ->FilterMonth($request->month)
+            ->FilterYear($request->year)
+            ->groupBy('tblstatuswm.id')
+            ->get();
+        try {
+            if (!empty($status)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $status,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    public function getCtmkubikasi(Request $request)
+    {
+        $mapping = CtmGambarmetersms::selectRaw('tbljenispelanggan.jenispelanggan, count(gambarmetersms.nomorrekening) lembar, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12)) kubikasi, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12))/count(gambarmetersms.nomorrekening) avg')
+            ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('tbljenispelanggan', 'tblpelanggan.idgol', '=', 'tbljenispelanggan.id')
+            ->join('tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+            ->FilterMonth($request->month)
+            ->FilterYear($request->year)
+            ->FilterAreal($request->areal)
+            ->groupBy('tbljenispelanggan.id')
+            ->get();
         try {
             if (!empty($mapping)) {
                 return response()->json([
@@ -55,7 +84,80 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-    
+
+    public function getCtmarealgroup(Request $request)
+    {
+        $wilayah = CtmWilayah::selectRaw('CASE
+        WHEN tblwilayah.group_unit = 1 THEN "DAERAH KOTA"
+        WHEN tblwilayah.group_unit = 2 THEN "UNIT KERAMBITAN"
+        WHEN tblwilayah.group_unit = 3 THEN "UNIT SELEMADEG"
+        WHEN tblwilayah.group_unit = 4 THEN "UNIT PENEBEL"
+        ELSE "UNIT BATURITI"
+    END AS namawilayah,tblwilayah.group_unit')
+            ->groupBy('group_unit')
+            ->get();
+        try {
+            if (!empty($wilayah)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $wilayah,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
+    public function getCtmoperator(Request $request)
+    {
+        $operator = CtmPbk::where('Status', '1')
+            ->get();
+        try {
+            if (!empty($operator)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $operator,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
+    public function getCtmmapping(Request $request)
+    {
+        $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening,tblopp.operator, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
+            ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+            ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('tblopp', 'tblopp.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->FilterMonth($request->month)
+            ->FilterYear($request->year)
+            ->FilterOperator($request->operator)
+            ->FilterSbg($request->nomorrekening)
+            ->where('tblopp.status', '1')
+            ->get();
+        try {
+            if (!empty($mapping)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $mapping,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
     public function getSrnew(Request $request)
     {
         $year = date('Y');
@@ -73,9 +175,9 @@ class ActionsApiController extends Controller
         WHEN MONTH(tgltersambung) = 11 THEN "November"
         ELSE "Desember"
     END AS bulan,COUNT(nomorrekening) as total, MONTH(tgltersambung) as month, YEAR(tgltersambung) as tahun')
-        ->groupBy('month')
-        ->whereYear('tgltersambung', '=', $year)
-        ->get();
+            ->groupBy('month')
+            ->whereYear('tgltersambung', '=', $year)
+            ->get();
         try {
             if (!empty($customer)) {
                 return response()->json([
@@ -90,7 +192,7 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-    
+
     public function getSr(Request $request)
     {
         $customer = CtmPelanggan::selectRaw('CASE
@@ -100,9 +202,9 @@ class ActionsApiController extends Controller
         WHEN tblwilayah.group_unit = 4 THEN "UNIT PENEBEL"
         ELSE "UNIT BATURITI"
     END AS namawilayah,SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as totalaktif, SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as totalpasif')
-        ->join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
-        ->groupBy('tblwilayah.group_unit')
-        ->get();
+            ->join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+            ->groupBy('tblwilayah.group_unit')
+            ->get();
         try {
             if (!empty($customer)) {
                 return response()->json([
@@ -154,7 +256,7 @@ class ActionsApiController extends Controller
                     }
                 }
 
-            }else if($action->status =='active' && $dataForm->status =='active'){
+            } else if ($action->status == 'active' && $dataForm->status == 'active') {
                 $oldImage = json_decode($action->image);
                 $index = 0;
 
@@ -171,7 +273,7 @@ class ActionsApiController extends Controller
 
                         $dataImageName[] = $img_name;
                     } else {
-                        $dataImageName[] = $oldImage[$i-1];
+                        $dataImageName[] = $oldImage[$i - 1];
                         $responseImage = 'Image tidak di dukung';
                     }
                     // $index++;
@@ -216,7 +318,6 @@ class ActionsApiController extends Controller
 
                     $resourceImageDone->move($basepath . $img_path, $img_name_done);
 
-
                     $dataImageNameDone[] = $img_name_done;
                 } else {
                     $responseImage = 'Image tidak di dukung';
@@ -251,10 +352,10 @@ class ActionsApiController extends Controller
                     $dataNewAction['image'] = str_replace("\/", "/", json_encode($dataImageName));
                 }
 
-                $uploadAction=true;
-            }else{
+                $uploadAction = true;
+            } else {
                 $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($dataImageNameDone));
-                $uploadAction=true;
+                $uploadAction = true;
 
             }
 
@@ -356,7 +457,7 @@ class ActionsApiController extends Controller
                         );}}
 
                 return response()->json([
-                    'message' => 'Status di ubah ' ,
+                    'message' => 'Status di ubah ',
                     'data' => $action,
                     'datanew' => $dataNewAction,
                 ]);

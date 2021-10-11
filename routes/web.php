@@ -123,5 +123,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('reports/reportssubdistribusi/proses','ReportsController@reportSubDistribusiProses')->name('report.subdistribusiproses');
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
-    
+
+    Route::get('segel-meter', 'SegelMeterController@index')->name('segelmeter.index');
+    Route::get('segel-meter/show/{id}', 'SegelMeterController@show')->name('segelmeter.show');
+    Route::get('segel-meter/sppprint/{id}', 'SegelMeterController@sppPrint')->name('segelmeter.sppprint');
 });
