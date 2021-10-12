@@ -106,6 +106,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::get('ctm-arealgroup', 'ActionsApiController@getCtmarealgroup');
     Route::post('ctm-kubikasi', 'ActionsApiController@getCtmkubikasi');
     Route::post('ctm-statussm', 'ActionsApiController@getCtmStatussm');
+    Route::post('ctm-hasilbaca', 'ActionsApiController@getCtmHasilbaca');
 });
 
 

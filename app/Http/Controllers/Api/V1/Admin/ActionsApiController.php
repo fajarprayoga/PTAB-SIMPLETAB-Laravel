@@ -34,6 +34,34 @@ class ActionsApiController extends Controller
 
     }
 
+    public function getCtmHasilbaca(Request $request)
+    {
+        $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, DATE(gambarmetersms.tanggal) as date, COUNT(gambarmetersms.nomorrekening) total')
+            ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
+            ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->join('tblopp', 'tblopp.nomorrekening', '=', 'gambarmetersms.nomorrekening')
+            ->FilterMonth($request->month)
+            ->FilterYear($request->year)
+            ->FilterOperator($request->operator)
+            ->where('tblopp.status', '1')
+            ->groupBy('date')
+            ->get();
+        try {
+            if (!empty($mapping)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $mapping,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
     public function getCtmStatussm(Request $request)
     {
         $status = CtmStatussmPelanggan::selectRaw('CASE
