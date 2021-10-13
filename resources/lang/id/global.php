@@ -291,7 +291,7 @@ return [
     'email_greet' => 'Hello',
     'email_regards' => 'Regards',
     'confirm_password' => 'Confirm password',
-    'if_you_are_having_trouble' => 'If you’re having trouble clicking the',
+    'if_you_are_having_trouble' => 'If youâ€™re having trouble clicking the',
     'copy_paste_url_bellow' => 'button, copy and paste the URL below into your web browser:',
     'registration' => 'Registration',
     'not_approved_title' => 'You are not approved',
@@ -486,5 +486,16 @@ return [
             'status' => 'Status', 
         ]
     ],
+    'segelmeter' => [
+        'title' => 'Segel Meter',
+        'norekening' => 'No Rekening',
+        'name' => 'Nama ',
+        'address' => 'Alamat',
+        'tunggakan' => 'Jumlah Tunggakan',
+        'status' => 'Status Tunggakan'
+    ],
+    'laporan_audited' => [
+        'title' => 'Keuangan Audited'
+    ]
 ];
 

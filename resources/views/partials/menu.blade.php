@@ -80,6 +80,21 @@
                 </ul>
             </li>
             @endcan
+            <li class="nav-item">
+                <a href="{{ route('admin.segelmeter.index') }}" class="nav-link">
+                    <i class="nav-icon fas fa-lock">
+
+                    </i>
+                    {{ trans('global.segelmeter.title') }}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.file.upload') }}" class="nav-link">
+                    <i class="nav-icon fas fa-money-bill">
+                    </i>
+                    {{ trans('global.laporan_audited.title') }}
+                </a>
+            </li>
             <li class="nav-item nav-dropdown">
                 <a class="nav-link  nav-dropdown-toggle">
                     <i class="fas fa-database  nav-icon">
