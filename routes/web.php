@@ -127,4 +127,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('segel-meter', 'SegelMeterController@index')->name('segelmeter.index');
     Route::get('segel-meter/show/{id}', 'SegelMeterController@show')->name('segelmeter.show');
     Route::get('segel-meter/sppprint/{id}', 'SegelMeterController@sppPrint')->name('segelmeter.sppprint');
+
+    Route::get('file-upload', 'PdfUploadController@fileUpload')->name('file.upload');
+    Route::post('file-upload', 'PdfUploadController@fileUploadPost')->name('file.upload.post');
 });
