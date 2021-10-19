@@ -15,6 +15,23 @@
         </a>
     @endcan
 @endif
+
+@if (isset($staffGate))
+    @can($staffGate)
+        <a class="btn btn-xs btn-success" href="{{ route('admin.lock.actionStaff', $row->id) }}">
+            Tambah {{ trans('global.staff.title') }}
+        </a>
+    @endcan
+@endif
+
+@if (isset($actionLockGate))
+    @can($actionLockGate)
+        <a class="btn btn-xs btn-info" href="{{ route('admin.lock.list', $row->id) }}">
+            {{ trans('global.action.title') }}
+        </a>
+    @endcan
+@endif
+
 <!-- @if (isset($print) && $print)
         <a class="btn btn-xs btn-primary" href="{{ route('admin.' . $crudRoutePart . '.print', $row->id) }}">
             Print
@@ -27,3 +44,10 @@
         <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
     </form>
 @endcan
+
+
+@if (isset($lockGate) && $lockGate == 1)
+    <a class="btn btn-xs btn-info" href="{{ route('admin.lock.create') }}">
+      Teruskan
+    </a>
+@endif
