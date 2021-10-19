@@ -5,7 +5,7 @@
 @can('lock_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route('admin.lock.create', $lockaction_id) }}">
+            <a class="btn btn-success" href="{{ route('admin.lock.lockcreate', $lockaction_id) }}">
                 {{ trans('global.add') }} {{ trans('global.action.title_singular') }}
             </a>
         </div>

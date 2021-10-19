@@ -146,7 +146,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::get('lock/list/{action}', 'LockController@list')->name('lock.list');
 
-    Route::get('lock/create/{lock_id}', 'LockController@actioncreate')->name('lock.create');
+    Route::get('lock/create/{lock_id}', 'LockController@actioncreate')->name('lock.lockcreate');
 
     Route::post('lock/action/store/', 'LockController@lockstore')->name('lock.lockstore');
 

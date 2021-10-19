@@ -183,6 +183,7 @@ class LockController extends Controller
             return back();
 
         } catch (QueryException $e) {
+            
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
         }
 
