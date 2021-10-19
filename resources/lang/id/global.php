@@ -487,7 +487,7 @@ return [
         ]
     ],
     'segelmeter' => [
-        'title' => 'Segel Meter',
+        'title' => 'Info tunggakan',
         'norekening' => 'No Rekening',
         'name' => 'Nama ',
         'address' => 'Alamat',
@@ -496,6 +496,18 @@ return [
     ],
     'laporan_audited' => [
         'title' => 'Keuangan Audited'
+    ],
+    'lock' => [
+        'title' => 'Info Segel',
+        'customer' => 'Kode Pelanggan',
+        'code' => 'Kode',
+        'status' => 'Status',
+        'subdapertement' => 'Subdpaertemen',
+        'description' => 'Deskripsi',
+        'start' => 'Start',
+        'end' => 'End',
+        'dapertement' => 'Dapertemen',
+        'type' => 'Type'
     ]
 ];
 

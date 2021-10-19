@@ -80,13 +80,33 @@
                 </ul>
             </li>
             @endcan
-            <li class="nav-item">
-                <a href="{{ route('admin.segelmeter.index') }}" class="nav-link">
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link  nav-dropdown-toggle">
                     <i class="nav-icon fas fa-lock">
-
+        
                     </i>
-                    {{ trans('global.segelmeter.title') }}
+                    {{-- {{ trans('global.segelmeter.index') }} --}}
+                    Segel Meter
                 </a>
+                <ul class="nav-dropdown-items">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.segelmeter.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-lock">
+        
+                            </i>
+                            {{ trans('global.segelmeter.title') }}
+                        </a>
+
+                    </li>
+                    @can('lock_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.lock.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-user-lock"></i>
+                            {{ trans('global.lock.title') }}
+                        </a>
+                    </li>
+                    @endcan
+                </ul>
             </li>
             <li class="nav-item">
                 <a href="{{ route('admin.file.upload') }}" class="nav-link">

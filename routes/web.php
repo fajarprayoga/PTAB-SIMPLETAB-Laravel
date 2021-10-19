@@ -125,9 +125,32 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
 
     Route::get('segel-meter', 'SegelMeterController@index')->name('segelmeter.index');
+
     Route::get('segel-meter/show/{id}', 'SegelMeterController@show')->name('segelmeter.show');
+    
     Route::get('segel-meter/sppprint/{id}', 'SegelMeterController@sppPrint')->name('segelmeter.sppprint');
 
     Route::get('file-upload', 'PdfUploadController@fileUpload')->name('file.upload');
+    
     Route::post('file-upload', 'PdfUploadController@fileUploadPost')->name('file.upload.post');
+
+    Route::resource('lock', 'LockController');
+
+    Route::get('lock/staff/{action}', 'LockController@lockactionStaff')->name('lock.actionStaff');
+
+    Route::get('lock/staff/create/{action}', 'LockController@lockactionStaffCreate')->name('lock.actionStaffCreate');
+
+    Route::post('lock/staff/store/', 'LockController@lockactionStaffStore')->name('lock.actionStaffStore');
+
+    Route::delete('lock/staff/delete/{action}/{staff}', 'LockController@lockactionStaffDestroy')->name('lock.actionStaffDestroy');
+
+    Route::get('lock/list/{action}', 'LockController@list')->name('lock.list');
+
+    Route::get('lock/create/{lock_id}', 'LockController@actioncreate')->name('lock.create');
+
+    Route::post('lock/action/store/', 'LockController@lockstore')->name('lock.lockstore');
+
+    Route::delete('lock/action/delete/{action}', 'LockController@lockactionDestroy')->name('lock.actiondestroy');
+
+    Route::get('lock/action/{action}/view', 'LockController@lockView')->name('lock.LockView');
 });
