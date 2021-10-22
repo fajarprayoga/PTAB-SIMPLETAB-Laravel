@@ -107,6 +107,19 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('ctm-kubikasi', 'ActionsApiController@getCtmkubikasi');
     Route::post('ctm-statussm', 'ActionsApiController@getCtmStatussm');
     Route::post('ctm-hasilbaca', 'ActionsApiController@getCtmHasilbaca');
+
+    //Lock
+    Route::post('lock/list','ActionsApiController@locklist');
+    Route::delete('lockdestroy/{lockaction_id}', 'ActionsApiController@lockDestroy');
+     //LockStaff
+    Route::get('lockStaffs/{lockaction_id}', 'ActionsApiController@lockStaffs');
+    Route::get('lockStaffList/{lockaction_id}', 'ActionsApiController@lockStaffList');
+    Route::post('lockStaffStore', 'ActionsApiController@lockStaffStore');
+    Route::delete('lockStaffDestroy/{action}/{staff}', 'ActionsApiController@lockStaffDestroy');
+    //LockAction
+    Route::post('actionlocklists', 'ActionsApiController@actionlocklist');
+    Route::post('lockactionscreate', 'ActionsApiController@lockactionscreate');
+    Route::delete('lockactionsdestroy/{lockaction_id}', 'ActionsApiController@lockactionsDestroy');
 });
 
 

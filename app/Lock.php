@@ -23,6 +23,10 @@ class Lock extends Model
     public function subdapertement() { 
         return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id'); 
     }
+    public function lockaction() { 
+        return $this->belongsTo(LockAction::class, 'id', 'lock_id'); 
+    }
+    
 
     public function scopeFilterStatus($query, $status)
     {
@@ -43,7 +47,7 @@ class Lock extends Model
 
     public function staff()
     {
-        return $this->belongsToMany(Staff::class, 'lock_staff', 'lock_id', 'staff_id');
+        return $this->belongsToMany(Staff::class, 'lock_staff', 'lock_id', 'staff_id')->with('dapertement');
     }
 
     public function dapertement() { 
