@@ -212,9 +212,9 @@ class LockController extends Controller
         $staffs = Staff::where('subdapertement_id', $action->subdapertement_id)->get();
 
         $action_staffs_list = DB::table('staffs')
-            ->join('action_staff', function ($join) {
-                $join->on('action_staff.staff_id', '=', 'staffs.id')
-                    ->where('action_staff.status', '!=', 'close');
+            ->join('lock_staff', function ($join) {
+                $join->on('lock_staff.staff_id', '=', 'staffs.id');
+                  
             })
             ->get();
 
@@ -248,14 +248,10 @@ class LockController extends Controller
                 $action = Lock::where('id', $lockaction_id)->with('staff')->first();
 
                 $cekAllStatus = false;
-                $statusAction = 'close';
               
                 $dateNow = date('Y-m-d H:i:s');
 
-                $action->update([
-                    'status' => $statusAction,
-                    'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
-                ]);
+                $action->update();
             }
 
         }
@@ -269,8 +265,6 @@ class LockController extends Controller
                 ->with('lock')
                 ->where('lock_id', $lockaction_id)
                 ->get();
-        // return $actions;
-        // return $actions
         return view('admin.lock.list', compact('lockaction_id', 'actions'));
     }
 
@@ -281,8 +275,6 @@ class LockController extends Controller
         $dapertements = Dapertement::where('id', $lock->dapertement_id)->get();
 
         $staffs = Staff::all();
-
-
         return view('admin.lock.actionCreate', compact('dapertements', 'lock_id', 'staffs'));
     }
 
@@ -314,7 +306,6 @@ class LockController extends Controller
         );
         
         $action = LockAction::create($data);
-        // return $action;
         return redirect()->route('admin.lock.list', $request->lock_id);
     }
    

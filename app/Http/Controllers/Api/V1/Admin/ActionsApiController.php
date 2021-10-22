@@ -15,6 +15,8 @@ use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
+use App\Lock;
+use App\LockAction;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -1262,4 +1264,277 @@ class ActionsApiController extends Controller
             ]);
         }
     }
+
+   
+
+    public function locklist(Request $request)
+    {
+        try {
+            if($request->status != ''){
+            $lock= Lock::FilterStatus($request->status)
+                    ->with('subdapertement')
+                    ->with('lockaction')
+                    ->with('customer')
+                    ->paginate(10, ['*'], 'page', $request->page);
+            }else{$lock = Lock::with('subdapertement')
+                    ->with('lockaction')
+                    ->with('customer')
+                    ->paginate(10, ['*'], 'page', $request->page);
+            }
+            return response()->json([
+                'message' => 'success',
+                'data' => $lock,
+                'search' => $request->search,
+                'page' => $request->page,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'failed',
+                'data' => $ex,
+            ]);
+        }
+    }
+
+
+    public function lockDestroy($lockaction_id)
+    {
+        
+        try {
+            $lock =Lock::find($lockaction_id);
+            $lockaction = LockAction::where('lock_id', '=', $lock->id)->first();
+            if ($lockaction === null) {
+                $lock->delete();
+                return response()->json([
+                    'message' => 'Data Berhasil Di Hapus',
+                    'data' => $lock,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Data Masih Terkait dengan data yang lain',
+                    'data' => $lockaction,
+                ]);
+            }
+        } catch (QueryException $e) {
+            return response()->json([
+                'message' => 'Data Masih Terkait dengan data yang lain',
+                'data' => $e,
+            ]);
+        }
+    }
+
+    public function lockStaffs($lockaction_id)
+    {
+
+        try {
+         
+            $lock = Lock::where('id',$lockaction_id)->with('staff')->first();
+            
+            return response()->json([
+                'message' => 'sucssess',
+                'data' => $lock,
+            ]);
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'sucssess',
+                'data' => $ex,
+            ]);
+        }
+
+    }
+
+
+    public function lockStaffList($lockaction_id)
+    {
+        try {
+            $action = Lock::findOrFail($lockaction_id);
+
+            $action_staffs = Lock::where('id', $lockaction_id)->with('staff')->first();
+
+            $staffs = StaffApi::where('subdapertement_id', $action->subdapertement_id)->get();
+
+            // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+
+            $action_staff_lists = DB::table('staffs')
+                ->join('lock_staff', function ($join) {
+                    $join->on('lock_staff.staff_id', '=', 'staffs.id');
+                })
+                ->get();
+
+            $data = [
+                'action' => $action,
+                'action_staffs' => $action_staffs,
+                'staffs' => $staffs,
+                'action_staff_lists' => $action_staff_lists,
+            ];
+
+            return response()->json([
+                'message' => 'success',
+                'data' => $data,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal ambil data',
+                'data' => $ex,
+            ]);
+        }
+    }
+    public function lockStaffStore(Request $request)
+    {
+
+        try {
+            $rules = array(
+                'lockaction_id' => 'required',
+                'staff_id' => 'required',
+            );
+
+            $validator = \Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                $messages = $validator->messages();
+                $errors = $messages->all();
+                return response()->json([
+                    'message' => $errors,
+                    'data' => $request->all(),
+                ]);
+            }
+
+            $action = Lock::findOrFail($request->lockaction_id);
+
+            if ($action) {
+                $cek = $action->staff()->attach($request->staff_id);
+
+            }
+
+            return response()->json([
+                'message' => 'staff Berhasil di tambahkan ',
+                'data' => $action,
+            ]);
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal tambah staff ',
+                'data' => $ex,
+            ]);
+        }
+
+    }
+
+    function actionlocklist(Request $request) {
+        try {
+            $actions = LockAction::with('subdapertement')
+            ->with('lock')
+            ->where('lock_id', $request->lockaction_id)
+            ->get();
+            return response()->json([
+                'message' => 'Success',
+                'data' => $actions,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'data' => $ex,
+            ]);
+        }
+
+    }
+    public function lockactionscreate(Request $request){
+        
+        $img_path = "/pdf";
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+        $dataForm = json_decode($request->form);
+        $responseImage = '';
+        $dataQtyImage = json_decode($request->qtyImage);
+        for ($i = 1; $i <= $dataQtyImage; $i++) {
+            if ($request->file('image' . $i)) {
+                $resourceImage = $request->file('image' . $i);
+                $nameImage = time() + $i;
+                $file_extImage = $request->file('image' . $i)->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+
+                $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+
+                $resourceImage->move($basepath . $img_path, $img_name);
+
+                $dataImageName[] = $nameImage . "." . $file_extImage;
+            } else {
+                $responseImage = 'Image tidak di dukung';
+                break;
+            }
+        }
+
+        if ($responseImage != '') {
+            return response()->json([
+                'message' => $responseImage,
+            ]);
+        }
+        //set data
+        $data = array(
+            'lock_id' =>$dataForm->lock_id,
+            'code' => $dataForm->code,
+            'type' => $dataForm->type,
+            'memo' => $dataForm->memo,
+            'image' => str_replace("\/", "/", json_encode($dataImageName)),            
+        );
+
+        try {
+            $ticket = LockAction::create($data);                  
+
+            return response()->json([
+                'message' => 'Success',
+            ]);
+
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => $ex,
+            ]);
+        }
+    }
+
+    public function lockStaffDestroy($lockaction_id, $staff_id)
+    {
+        try{
+            $action = Lock::findOrFail($lockaction_id);
+
+            if ($action) {
+                $cek = $action->staff()->detach($staff_id);
+    
+                if ($cek) {
+                    $action = Lock::where('id', $lockaction_id)->with('staff')->first();
+    
+                    $cekAllStatus = false;
+                  
+                    $dateNow = date('Y-m-d H:i:s');
+    
+                    $action->update();
+                }
+    
+            }
+            return response()->json([
+                'message' => 'Success',
+            ]);
+            
+        }catch (QueryException $ex) {
+            return response()->json([
+                'message' => $ex,
+            ]);
+        }
+    }
+
+    public function lockactionsdestroy($lockaction_id)
+    {
+        try {
+            $lock =LockAction::find($lockaction_id);
+                $lock->delete();
+                return response()->json([
+                    'message' => 'Data Berhasil Di Hapus',
+                    'data' => $lock,
+                ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'message' => 'Data Masih Terkait dengan data yang lain',
+                'data' => $e,
+            ]);
+        }
+    }
+       
 }
