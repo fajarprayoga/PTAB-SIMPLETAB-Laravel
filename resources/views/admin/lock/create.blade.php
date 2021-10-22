@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('content')
 
-<div class="card">
+<div class="card">        
     @if($errors->any())
     <!-- <h4>{{$errors->first()}}</h4> -->
         <?php 
@@ -26,7 +26,7 @@
             </div>
             <div class="form-group {{ $errors->has('customer') ? 'has-error' : '' }}">
                 <label for="customer">{{ trans('global.lock.customer') }}*</label>
-                <input required type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer_id', isset($lock) ? $lock->customer_id : '') }}">
+                <input readonly type="text" id="customer" name="customer_id" class="form-control" value="{{ old('customer_id', isset($lock) ? $lock->customer_id : $customer_id) }}">
                 @if($errors->has('customer'))
                     <em class="invalid-feedback">
                         {{ $errors->first('customer') }}

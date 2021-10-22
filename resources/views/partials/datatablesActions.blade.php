@@ -32,6 +32,14 @@
     @endcan
 @endif
 
+@if (isset($viewSegelGate))
+    @can($viewSegelGate)
+        <a class="btn btn-xs btn-primary" href="{{ route('admin.segelmeter.show', $row->customer_id) }}">
+            {{ trans('global.view') }}
+        </a>
+    @endcan
+@endif
+
 <!-- @if (isset($print) && $print)
         <a class="btn btn-xs btn-primary" href="{{ route('admin.' . $crudRoutePart . '.print', $row->id) }}">
             Print
@@ -47,7 +55,7 @@
 
 
 @if (isset($lockGate) && $lockGate == 1)
-    <a class="btn btn-xs btn-info" href="{{ route('admin.lock.create') }}">
+    <a class="btn btn-xs btn-info" href="{{ route('admin.lock.create',['id'=>$row->nomorrekening]) }}">
       Teruskan
     </a>
 @endif

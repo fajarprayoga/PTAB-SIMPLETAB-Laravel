@@ -18,6 +18,7 @@ use App\Subdapertement;
 use App\Ticket;
 use DB;
 use Illuminate\Database\QueryException;
+use App\Lock;
 
 trait TraitModel
 {
@@ -404,6 +405,21 @@ trait TraitModel
 
     public function get_last_code($type, $arr = [])
     {
+        if ($type == "scb-lock") {
+            //get departement alias
+            $prefix = "/SCB/" . $arr['month'] . "/" . $arr['year'];
+            $action = Lock::where('subdapertement_id', $arr['subdapertement_id'])
+                ->whereYear('created_at', '=', $arr['year'])
+                ->whereMonth('created_at', '=', $arr['month'])
+                ->orderBy('id', 'desc')
+                ->first();
+            if ($action && strlen($action->code) == 21) {
+                $code = $action->code;
+            } else {
+                $code = acc_codedef_generate($prefix, 16, 'Y');
+            }
+        }
+        
         if ($type == "spk-ticket") {
             //get departement alias
             $dapertement = Dapertement::where('id', $arr['dapertement_id'])->first();

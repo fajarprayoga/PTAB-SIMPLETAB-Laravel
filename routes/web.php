@@ -107,6 +107,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     //test
     Route::resource('test-customers', 'TestController');
+    Route::get('test-get', 'TestController@getTest');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 

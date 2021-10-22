@@ -16,6 +16,16 @@ class TestController extends Controller
 {
     use TraitModel;
 
+    public function getTest()
+    {
+        $arr['subdapertement_id'] = 32;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_scb = $this->get_last_code('scb-lock', $arr);        
+        $scb = acc_code_generate($last_scb, 16, 12, 'Y');
+        return $scb;
+    }
+
     public function index(Request $request)
     {
         abort_unless(\Gate::allows('customer_access'), 403);

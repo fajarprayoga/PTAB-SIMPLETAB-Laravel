@@ -47,6 +47,7 @@ class LockController extends Controller
                 $deleteGate = 'lock_delete';
                 $staffGate = 'lock_access';
                 $actionLockGate = 'lock_access';
+                $viewSegelGate = 'lock_access';
                 $crudRoutePart = 'lock';
                 return view('partials.datatablesActions', compact(
                     'viewGate',
@@ -54,6 +55,7 @@ class LockController extends Controller
                     'deleteGate',
                     'staffGate',
                     'actionLockGate',
+                    'viewSegelGate',
                     'crudRoutePart',
                     'row'
                 ));
@@ -102,11 +104,12 @@ class LockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
         abort_unless(\Gate::allows('lock_create'), 403);
         $dapertements = Dapertement::all();
-        return view('admin.lock.create', compact('dapertements'));
+        $customer_id = $request->id;
+        return view('admin.lock.create', compact('dapertements','customer_id'));
     }
 
     /**

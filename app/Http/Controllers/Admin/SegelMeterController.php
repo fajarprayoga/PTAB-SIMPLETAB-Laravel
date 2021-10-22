@@ -57,16 +57,18 @@ class SegelMeterController extends Controller
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
 
+
             $table->editColumn('actions', function ($row) {
-                $viewGate = true;
+                $viewGate = 'segel_show';
                 $editGate = '';
                 $deleteGate = '';
                 $crudRoutePart = 'segelmeter';
-
+                $lockGate = $row->statusnunggak;
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'editGate',
                     'deleteGate',
+                    'lockGate',
                     'crudRoutePart',
                     'row'
                 ));
