@@ -7,23 +7,23 @@ use App\ActionStaff;
 use App\CtmGambarmetersms;
 use App\CtmPbk;
 use App\CtmPelanggan;
+use App\CtmPembayaran;
+use App\CtmStatussmPelanggan;
 use App\CtmWilayah;
-use App\CustomerApi;
 use App\Customer;
+use App\CustomerApi;
 use App\Http\Controllers\Controller;
+use App\Lock;
+use App\LockAction;
 use App\StaffApi;
 use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
-use App\Lock;
-use App\LockAction;
-use App\CtmPembayaran;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
-use App\CtmStatussmPelanggan;
 
 class ActionsApiController extends Controller
 {
@@ -70,7 +70,7 @@ class ActionsApiController extends Controller
     {
         $status = CtmStatussmPelanggan::selectRaw('CASE
         WHEN tblstatuswm.NamaStatus = "-" THEN "Terbaca" ELSE tblstatuswm.NamaStatus END AS namastatus, COUNT(tblstatussmpelanggan.nomorrekening) jumlahstatus')
-            ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')            
+            ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
             ->FilterMonth($request->month)
             ->FilterYear($request->year)
             ->groupBy('tblstatuswm.id')
@@ -89,7 +89,7 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-    
+
     public function getCtmkubikasi(Request $request)
     {
         $mapping = CtmGambarmetersms::selectRaw('tbljenispelanggan.jenispelanggan, count(gambarmetersms.nomorrekening) lembar, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12)) kubikasi, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12))/count(gambarmetersms.nomorrekening) avg')
@@ -1267,22 +1267,31 @@ class ActionsApiController extends Controller
         }
     }
 
-   
-
     public function locklist(Request $request)
     {
-        try {
-            if($request->status != ''){
-            $lock= Lock::FilterStatus($request->status)
-                    ->with('subdapertement')
-                    ->with('lockaction')
-                    ->with('customer')
-                    ->paginate(10, ['*'], 'page', $request->page);
-            }else{$lock = Lock::with('subdapertement')
-                    ->with('lockaction')
-                    ->with('customer')
-                    ->paginate(10, ['*'], 'page', $request->page);
+        //sub dapertement
+        $subdepartment = '';
+        if (isset($request->userid) && $request->userid != '') {
+            $admin = User::with('roles')->find($request->userid);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $subdepartment = $admin->subdapertement_id;
             }
+        }
+        //status
+        $status = '';
+        if ($request->status != '') {
+            $status = $request->status;
+        }
+        try {
+            $lock = Lock::FilterStatus($status)
+                ->FilterSubDepartment($subdepartment)
+                ->with('subdapertement')
+                ->with('lockaction')
+                ->with('customer')
+                ->paginate(10, ['*'], 'page', $request->page);
             return response()->json([
                 'message' => 'success',
                 'data' => $lock,
@@ -1297,12 +1306,11 @@ class ActionsApiController extends Controller
         }
     }
 
-
     public function lockDestroy($lockaction_id)
     {
-        
+
         try {
-            $lock =Lock::find($lockaction_id);
+            $lock = Lock::find($lockaction_id);
             $lockaction = LockAction::where('lock_id', '=', $lock->id)->first();
             if ($lockaction === null) {
                 $lock->delete();
@@ -1328,9 +1336,9 @@ class ActionsApiController extends Controller
     {
 
         try {
-         
-            $lock = Lock::where('id',$lockaction_id)->with('staff')->first();
-            
+
+            $lock = Lock::where('id', $lockaction_id)->with('staff')->first();
+
             return response()->json([
                 'message' => 'sucssess',
                 'data' => $lock,
@@ -1344,7 +1352,6 @@ class ActionsApiController extends Controller
         }
 
     }
-
 
     public function lockStaffList($lockaction_id)
     {
@@ -1421,12 +1428,13 @@ class ActionsApiController extends Controller
 
     }
 
-    function actionlocklist(Request $request) {
+    public function actionlocklist(Request $request)
+    {
         try {
             $actions = LockAction::with('subdapertement')
-            ->with('lock')
-            ->where('lock_id', $request->lockaction_id)
-            ->get();
+                ->with('lock')
+                ->where('lock_id', $request->lockaction_id)
+                ->get();
             return response()->json([
                 'message' => 'Success',
                 'data' => $actions,
@@ -1439,8 +1447,9 @@ class ActionsApiController extends Controller
         }
 
     }
-    public function lockactionscreate(Request $request){
-        
+    public function lockactionscreate(Request $request)
+    {
+
         $img_path = "/pdf";
         $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         $dataForm = json_decode($request->form);
@@ -1471,15 +1480,15 @@ class ActionsApiController extends Controller
         }
         //set data
         $data = array(
-            'lock_id' =>$dataForm->lock_id,
+            'lock_id' => $dataForm->lock_id,
             'code' => $dataForm->code,
             'type' => $dataForm->type,
             'memo' => $dataForm->memo,
-            'image' => str_replace("\/", "/", json_encode($dataImageName)),            
+            'image' => str_replace("\/", "/", json_encode($dataImageName)),
         );
 
         try {
-            $ticket = LockAction::create($data);                  
+            $ticket = LockAction::create($data);
 
             return response()->json([
                 'message' => 'Success',
@@ -1494,28 +1503,28 @@ class ActionsApiController extends Controller
 
     public function lockStaffDestroy($lockaction_id, $staff_id)
     {
-        try{
+        try {
             $action = Lock::findOrFail($lockaction_id);
 
             if ($action) {
                 $cek = $action->staff()->detach($staff_id);
-    
+
                 if ($cek) {
                     $action = Lock::where('id', $lockaction_id)->with('staff')->first();
-    
+
                     $cekAllStatus = false;
-                  
+
                     $dateNow = date('Y-m-d H:i:s');
-    
+
                     $action->update();
                 }
-    
+
             }
             return response()->json([
                 'message' => 'Success',
             ]);
-            
-        }catch (QueryException $ex) {
+
+        } catch (QueryException $ex) {
             return response()->json([
                 'message' => $ex,
             ]);
@@ -1525,12 +1534,12 @@ class ActionsApiController extends Controller
     public function lockactionsdestroy($lockaction_id)
     {
         try {
-            $lock =LockAction::find($lockaction_id);
-                $lock->delete();
-                return response()->json([
-                    'message' => 'Data Berhasil Di Hapus',
-                    'data' => $lock,
-                ]);
+            $lock = LockAction::find($lockaction_id);
+            $lock->delete();
+            return response()->json([
+                'message' => 'Data Berhasil Di Hapus',
+                'data' => $lock,
+            ]);
         } catch (QueryException $e) {
             return response()->json([
                 'message' => 'Data Masih Terkait dengan data yang lain',
@@ -1539,12 +1548,13 @@ class ActionsApiController extends Controller
         }
     }
 
-    public function lockshow($lock_id){
-        try{
-            
+    public function lockshow($lock_id)
+    {
+        try {
+
             $lock_obj = Lock::where('id', $lock_id)->first();
             $customer = Customer::where('nomorrekening', $lock_obj->customer_id)
-            ->first();
+                ->first();
             $customer->year = date('Y');
             $date_now = date("Y-m-d");
             $date_comp = date("Y-m") . "-20";
@@ -1552,48 +1562,46 @@ class ActionsApiController extends Controller
             $month_now = ($month_next - 1);
             $tunggakan = 0;
             $tagihan = 0;
-            $denda = 0;  
-            $total = 0;     
-            $ctm_lock =0;
+            $denda = 0;
+            $total = 0;
+            $ctm_lock = 0;
             if ($date_now > $date_comp) {
-                $ctm_lock_old=0;
+                $ctm_lock_old = 0;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->where('tblpembayaran.nomorrekening', $lock_id)
+                    ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
                     ->where('tblpembayaran.tahunrekening', date('Y'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)     
+                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
                     ->get();
             } else {
-                $ctm_lock_old=1;
+                $ctm_lock_old = 1;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->where('tblpembayaran.nomorrekening', $lockaction_id)
+                    ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
                     ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)                    
+                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             }
-    
-            
+
             foreach ($ctm as $key => $item) {
                 $m3 = $item->bulanini - $item->bulanlalu;
                 $sisa = $item->wajibdibayar - $item->sudahdibayar;
-                $tagihan =$tagihan + $sisa;
-    
-    
-                if($month_now==$item->bulanrekening && $ctm_lock_old==1){
+                $tagihan = $tagihan + $sisa;
+
+                if ($month_now == $item->bulanrekening && $ctm_lock_old == 1) {
                     $ctm_lock = 1;
                 }
-    
-                if($sisa>0 && $ctm_lock==0){
-                    $tunggakan =$tunggakan + 1;
+
+                if ($sisa > 0 && $ctm_lock == 0) {
+                    $tunggakan = $tunggakan + 1;
                 }
-    
+
                 $dataPembayaran[$key] = [
                     // 'no' => $key +1,
                     'norekening' => $item->nomorrekening,
-                    'periode'=> $item->tahunrekening . '-' . $item->bulanrekening,
+                    'periode' => $item->tahunrekening . '-' . $item->bulanrekening,
                     'tanggal' => $item->tglbayarterakhir,
                     'm3' => $m3,
                     'wajibdibayar' => $item->wajibdibayar,
@@ -1602,31 +1610,31 @@ class ActionsApiController extends Controller
                     'sisa' => $sisa,
                 ];
             }
-    
-            if($tunggakan>0 && $tunggakan<2){
+
+            if ($tunggakan > 0 && $tunggakan < 2) {
                 $denda = 10000;
-                $total = $tagihan +$denda;
+                $total = $tagihan + $denda;
                 $denda = $denda;
             }
-            if($tunggakan>1 && $tunggakan<4){
+            if ($tunggakan > 1 && $tunggakan < 4) {
                 $denda = 50000;
                 $total = $tagihan + $denda;
                 $denda = $denda;
             }
-            if($tunggakan>3){
+            if ($tunggakan > 3) {
                 $denda = 'SSB (Sanksi Denda Setara Sambungan Baru)';
                 $total = $tagihan;
             }
-    
+
             $recap = [
                 'tagihan' => $tagihan,
-                'denda'=> $denda,
-                'total'=> $total,
-                'tunggakan'=> $tunggakan
+                'denda' => $denda,
+                'total' => $total,
+                'tunggakan' => $tunggakan,
             ];
 
             return response()->json([
-                'data' => $customer,$dataPembayaran,$recap,
+                'data' => $customer, $dataPembayaran, $recap,
                 'message' => 'Success',
             ]);
         } catch (QueryException $e) {
@@ -1637,5 +1645,5 @@ class ActionsApiController extends Controller
         }
 
     }
-       
+
 }
