@@ -1539,10 +1539,11 @@ class ActionsApiController extends Controller
         }
     }
 
-    public function lockshow($lockaction_id){
+    public function lockshow($lock_id){
         try{
             
-            $customer = Customer::where('nomorrekening', $lockaction_id)
+            $lock_obj = Lock::where('id', $lock_id)->first();
+            $customer = Customer::where('nomorrekening', $lock_obj->customer_id)
             ->first();
             $customer->year = date('Y');
             $date_now = date("Y-m-d");
@@ -1558,7 +1559,7 @@ class ActionsApiController extends Controller
                 $ctm_lock_old=0;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->where('tblpembayaran.nomorrekening', $lockaction_id)
+                    ->where('tblpembayaran.nomorrekening', $lock_id)
                     ->where('tblpembayaran.tahunrekening', date('Y'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->where('tblpembayaran.bulanrekening', '<', $month_next)     
