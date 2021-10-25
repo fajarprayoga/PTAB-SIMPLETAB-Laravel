@@ -49,11 +49,11 @@ class LockController extends Controller
             $table->addColumn('staff', '&nbsp;');
 
             $table->editColumn('staff', function ($row) {
-                $viewGate = 'lock_access';
+                $viewGate = 'lock_show';
                 $editGate = '';
                 $deleteGate = 'lock_delete';
                 $staffGate = 'lock_access';
-                $actionLockGate = 'lock_access';
+                $actionLockGate = 'lock_action_access';
                 // $viewSegelGate = 'lock_access';
                 $crudRoutePart = 'lock';
                 return view('partials.datatablesActions', compact(
@@ -164,6 +164,7 @@ class LockController extends Controller
      */
     public function show(Lock $lock)
     {
+        abort_unless(\Gate::allows('lock_show'), 403);
         $id=$lock->customer_id;
         $code=$lock->code;
         $customer = Customer::where('nomorrekening', $id)
@@ -463,7 +464,7 @@ class LockController extends Controller
     }
 
     function list($lockaction_id) {
-        abort_unless(\Gate::allows('action_access'), 403);
+        abort_unless(\Gate::allows('lock_action_access'), 403);
             $actions = LockAction::with('subdapertement')
                 ->with('lock')
                 ->where('lock_id', $lockaction_id)
@@ -473,7 +474,7 @@ class LockController extends Controller
 
     public function actioncreate($lock_id)
     {
-        abort_unless(\Gate::allows('action_create'), 403);
+        abort_unless(\Gate::allows('lock_action_create'), 403);
         $lock = Lock::findOrFail($lock_id);
         $dapertements = Dapertement::where('id', $lock->dapertement_id)->get();
 
@@ -483,7 +484,7 @@ class LockController extends Controller
 
     public function lockstore(Request $request)
     {
-        abort_unless(\Gate::allows('action_create'), 403);
+        abort_unless(\Gate::allows('lock_action_create'), 403);
         $dateNow = date('Y-m-d H:i:s');
        
         if ($request->file('image')) {
@@ -514,7 +515,7 @@ class LockController extends Controller
    
     public function lockactionDestroy(Request $request, LockAction $action)
     {
-        abort_unless(\Gate::allows('action_delete'), 403);
+        abort_unless(\Gate::allows('lock_action_delete'), 403);
 
         $action->delete();
 
@@ -523,7 +524,7 @@ class LockController extends Controller
 
     public function LockView($lock_id)
     {
-        abort_unless(\Gate::allows('action_staff_edit'), 403);
+        abort_unless(\Gate::allows('lock_action_show'), 403);
 
         $lock = LockAction::findOrFail($lock_id);
         return view('admin.lock.lockView', compact('lock'));
