@@ -1645,5 +1645,21 @@ class ActionsApiController extends Controller
         }
 
     }
+    public function typeshow($lockaction_id){
+        try {
+            $lock = Lock::with('lockaction')->find($lockaction_id);
+            return response()->json([
+                'message' => 'Success',
+                'data' => $lock,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    
 
 }
