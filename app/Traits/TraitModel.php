@@ -413,7 +413,7 @@ trait TraitModel
                 ->whereMonth('created_at', '=', $arr['month'])
                 ->orderBy('id', 'desc')
                 ->first();
-            if ($action && strlen($action->code) == 21) {
+            if ($action && strlen($action->code) == 16) {
                 $code = $action->code;
             } else {
                 $code = acc_codedef_generate($prefix, 16, 'Y');

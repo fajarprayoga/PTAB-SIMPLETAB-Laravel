@@ -17,9 +17,13 @@ use App\User;
 use Illuminate\Database\QueryException;
 use App\Customer;
 use App\CtmPembayaran;
+use App\Traits\TraitModel;
+use App\Subdapertement;
 
 class LockController extends Controller
 {
+    use TraitModel;
+    
     /**
      * Display a listing of the resource.
      *
@@ -110,9 +114,20 @@ class LockController extends Controller
     public function create(Request $request)
     {
         abort_unless(\Gate::allows('lock_create'), 403);
-        $dapertements = Dapertement::all();
+        //code gnr
+        $subdapertement_id=10;
+        $arr['subdapertement_id'] = $subdapertement_id;
+        $arr['month'] = date("m");
+        $arr['year'] = date("Y");
+        $last_scb = $this->get_last_code('scb-lock', $arr);        
+        $scb = acc_code_generate($last_scb, 16, 12, 'Y');
+        //
+        $subdapertement = Subdapertement::where('id',$subdapertement_id)->first();        
+        $subdapertements = Subdapertement::where('dapertement_id',$subdapertement->dapertement_id)->get();
+        $dapertement_id=$subdapertement->dapertement_id;
+        $dapertements = Dapertement::where('id',$subdapertement->dapertement_id)->get();
         $customer_id = $request->id;
-        return view('admin.lock.create', compact('dapertements','customer_id'));
+        return view('admin.lock.create', compact('dapertements','subdapertements','dapertement_id','subdapertement_id','customer_id','scb'));
     }
 
     /**

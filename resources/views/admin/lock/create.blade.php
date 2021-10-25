@@ -17,7 +17,7 @@
             @csrf
             <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.lock.code') }}*</label>
-                <input required type="text" id="code" name="code" class="form-control" value="{{ old('code', isset($lock) ? $lock->code : '') }}">
+                <input required type="text" id="code" name="code" class="form-control" value="{{ old('code', isset($lock) ? $lock->code : $scb) }}">
                 @if($errors->has('code'))
                     <em class="invalid-feedback">
                         {{ $errors->first('code') }}
@@ -38,7 +38,7 @@
                 <select required id="dapertement_id" name="dapertement_id" class="form-control" value="{{ old('dapertement_id', isset($lock) ? $lock->dapertement_id : '') }}">
                     <option value="">--Pilih Dapertement--</option>
                     @foreach ($dapertements as $key=>$dapertement )
-                        <option value="{{$dapertement->id}}">{{$dapertement->name}}</option>
+                        <option value="{{$dapertement->id}}" {{$dapertement->id == $dapertement_id ? 'selected' : ''}}>{{$dapertement->name}}</option>
                     @endforeach
                 </select>
                 @if($errors->has('dapertement_id'))
@@ -51,7 +51,10 @@
             <div class="form-group {{ $errors->has('subdapertement_id') ? 'has-error' : '' }}">
                 <label for="subdapertement_id">{{ trans('global.lock.subdapertement') }}*</label>
                 <select required id="subdapertement_id" name="subdapertement_id" class="form-control" value="{{ old('subdapertement_id', isset($lock) ? $lock->subdapertement_id : '') }}">
-                    <option value="0">--Pilih Sub Depertement--</option>                    
+                    <option value="0">--Pilih Sub Depertement--</option> 
+                    @foreach ($subdapertements as $key=>$subdapertement )
+                        <option value="{{$subdapertement->id}}" {{$subdapertement->id == $subdapertement_id ? 'selected' : ''}} >{{$subdapertement->name}}</option>
+                    @endforeach                   
                 </select>
                 @if($errors->has('subdapertement_id'))
                     <em class="invalid-feedback">

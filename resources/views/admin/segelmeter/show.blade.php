@@ -103,9 +103,9 @@
         </div>
 
         @if ( is_int($recap['denda']) && $recap['denda'] >0 || $item['denda'] =='SSB (Sanksi Denda Setara Sambungan Baru)')
-            <div class="mt-2">
+            <!-- <div class="mt-2">
                 <a href="{{ route('admin.segelmeter.sppprint', $customer->nomorrekening) }}" class="btn btn-primary">Print SPP</a >
-            </div>
+            </div> -->
             
         @endif
     </div>
