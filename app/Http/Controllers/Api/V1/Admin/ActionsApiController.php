@@ -1744,8 +1744,9 @@ class ActionsApiController extends Controller
         }
 
     }
-    public function typeshow($lockaction_id)
-    {
+
+    public function typeshow($lockaction_id){
+
         try {
             $lock = Lock::with('lockaction')->find($lockaction_id);
             return response()->json([

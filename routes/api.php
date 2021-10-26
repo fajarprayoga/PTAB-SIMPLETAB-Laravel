@@ -118,9 +118,11 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('lockStaffStore', 'ActionsApiController@lockStaffStore');
     Route::delete('lockStaffDestroy/{action}/{staff}', 'ActionsApiController@lockStaffDestroy');
     //LockAction
+    Route::get('typeshow/{lockaction_id}', 'ActionsApiController@typeshow');
     Route::post('actionlocklists', 'ActionsApiController@actionlocklist');
     Route::post('lockactionscreate', 'ActionsApiController@lockactionscreate');
     Route::delete('lockactionsdestroy/{lockaction_id}', 'ActionsApiController@lockactionsDestroy');
+    
 });
 
 
