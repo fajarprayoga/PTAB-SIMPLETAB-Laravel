@@ -1291,6 +1291,7 @@ class ActionsApiController extends Controller
                 ->with('subdapertement')
                 ->with('lockaction')
                 ->with('customer')
+                ->orderBy('created_at', 'DESC')
                 ->paginate(10, ['*'], 'page', $request->page);
             return response()->json([
                 'message' => 'success',
@@ -1408,11 +1409,61 @@ class ActionsApiController extends Controller
             }
 
             $action = Lock::findOrFail($request->lockaction_id);
+            $staff = StaffApi::find($request->staff_id);
 
             if ($action) {
                 $cek = $action->staff()->attach($request->staff_id);
 
             }
+
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Admin: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to departement terkait
+            $subdapertement_obj = Subdapertement::where('id', $action->subdapertement_id)->first();
+            $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
+                ->where('subdapertement_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Bagian: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to sub departement terkait
+            $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Sub Bagian: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
 
             return response()->json([
                 'message' => 'staff Berhasil di tambahkan ',
@@ -1489,7 +1540,55 @@ class ActionsApiController extends Controller
 
         try {
             $ticket = LockAction::create($data);
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Admin: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
 
+            //send notif to sub departement terkait
+            $lock_obj = Lock::where('id', $dataForm->lock_id)->first();
+            $subdapertement_obj = Subdapertement::where('id', $lock_obj->subdapertement_id)->first();
+            $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
+                ->where('subdapertement_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Bagian: PTindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to sub departement terkait
+            $admin_arr = User::where('subdapertement_id', $lock_obj->subdapertement_id)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Sub Bagian: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
             return response()->json([
                 'message' => 'Success',
             ]);
@@ -1645,7 +1744,9 @@ class ActionsApiController extends Controller
         }
 
     }
+
     public function typeshow($lockaction_id){
+
         try {
             $lock = Lock::with('lockaction')->find($lockaction_id);
             return response()->json([
@@ -1659,7 +1760,5 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-    
-    
 
 }

@@ -2,38 +2,36 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreActionRequest;
+use App\CtmPembayaran;
+use App\Customer;
 use App\Dapertement;
+use App\Http\Controllers\Controller;
 use App\Lock;
 use App\LockAction;
-use App\Action;
 use App\Staff;
-use DB;
-use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Support\Facades\Auth;
-use App\User;
-use Illuminate\Database\QueryException;
-use App\Customer;
-use App\CtmPembayaran;
-use App\Traits\TraitModel;
 use App\Subdapertement;
+use App\Traits\TraitModel;
+use DB;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
+use OneSignal;
+use App\User;
 
 class LockController extends Controller
 {
     use TraitModel;
-    
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {   
+    {
         abort_unless(\Gate::allows('lock_access'), 403);
         $qry = Lock::with('customer')->with('subdapertement');
-        if(request()->input('status') != ''){
+        if (request()->input('status') != '') {
             $qry = Lock::FilterStatus(request()->input('status'))
                 ->with('customer')
                 ->with('subdapertement')
@@ -41,8 +39,6 @@ class LockController extends Controller
                 ->get();
         }
 
-     
-      
         if ($request->ajax()) {
             $table = Datatables::of($qry);
             $table->addColumn('placeholder', '&nbsp;');
@@ -91,18 +87,16 @@ class LockController extends Controller
             $table->editColumn('end', function ($row) {
                 return $row->end ? $row->end : "";
             });
-       
+
             $table->rawColumns(['staff', 'placeholder']);
-         
 
             $table->addIndexColumn();
-            
+
             return $table->make(true);
         }
-     
+
         return view('admin.lock.index');
         // return $subdepartementlist;
-    
 
     }
 
@@ -115,19 +109,19 @@ class LockController extends Controller
     {
         abort_unless(\Gate::allows('lock_create'), 403);
         //code gnr
-        $subdapertement_id=10;
+        $subdapertement_id = 10;
         $arr['subdapertement_id'] = $subdapertement_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
-        $last_scb = $this->get_last_code('scb-lock', $arr);        
+        $last_scb = $this->get_last_code('scb-lock', $arr);
         $scb = acc_code_generate($last_scb, 16, 12, 'Y');
         //
-        $subdapertement = Subdapertement::where('id',$subdapertement_id)->first();        
-        $subdapertements = Subdapertement::where('dapertement_id',$subdapertement->dapertement_id)->get();
-        $dapertement_id=$subdapertement->dapertement_id;
-        $dapertements = Dapertement::where('id',$subdapertement->dapertement_id)->get();
+        $subdapertement = Subdapertement::where('id', $subdapertement_id)->first();
+        $subdapertements = Subdapertement::where('dapertement_id', $subdapertement->dapertement_id)->get();
+        $dapertement_id = $subdapertement->dapertement_id;
+        $dapertements = Dapertement::where('id', $subdapertement->dapertement_id)->get();
         $customer_id = $request->id;
-        return view('admin.lock.create', compact('dapertements','subdapertements','dapertement_id','subdapertement_id','customer_id','scb'));
+        return view('admin.lock.create', compact('dapertements', 'subdapertements', 'dapertement_id', 'subdapertement_id', 'customer_id', 'scb'));
     }
 
     /**
@@ -146,10 +140,57 @@ class LockController extends Controller
             'description' => 'required',
         ]);
 
-        
         try {
-
             $lock = Lock::create($request->all());
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+                    
+            //send notif to sub departement terkait
+            $subdapertement_obj = Subdapertement::where('id', $request->subdapertement_id)->first();
+            $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
+                ->where('subdapertement_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+
+            //send notif to sub departement terkait
+            $admin_arr = User::where('subdapertement_id', $request->subdapertement_id)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Sub Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+            //redirect
             return redirect()->route('admin.lock.index');
         } catch (\Throwable $th) {
             return back()->withErrors($th);
@@ -165,63 +206,60 @@ class LockController extends Controller
     public function show(Lock $lock)
     {
         abort_unless(\Gate::allows('lock_show'), 403);
-        $id=$lock->customer_id;
-        $code=$lock->code;
+        $id = $lock->customer_id;
+        $code = $lock->code;
         $customer = Customer::where('nomorrekening', $id)
-        ->first();
+            ->first();
         $customer->year = date('Y');
         // dd($ctm);
 
-
-        // ctm pay 
+        // ctm pay
         $date_now = date("Y-m-d");
         $date_comp = date("Y-m") . "-20";
         $month_next = date('n', strtotime('+1 month'));
         $month_now = ($month_next - 1);
         $tunggakan = 0;
         $tagihan = 0;
-        $denda = 0;  
-        $total = 0;     
-        $ctm_lock =0;
+        $denda = 0;
+        $total = 0;
+        $ctm_lock = 0;
         if ($date_now > $date_comp) {
-            $ctm_lock_old=0;
+            $ctm_lock_old = 0;
             $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                 ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                 ->where('tblpembayaran.nomorrekening', $id)
                 ->where('tblpembayaran.tahunrekening', date('Y'))
                 ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                ->where('tblpembayaran.bulanrekening', '<', $month_next)     
+                ->where('tblpembayaran.bulanrekening', '<', $month_next)
                 ->get();
         } else {
-            $ctm_lock_old=1;
+            $ctm_lock_old = 1;
             $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                 ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                 ->where('tblpembayaran.nomorrekening', $id)
                 ->where('tblpembayaran.tahunrekening', date('Y'))
-                ->where('tblpembayaran.bulanrekening', '<', $month_next)                    
+                ->where('tblpembayaran.bulanrekening', '<', $month_next)
                 ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                 ->get();
         }
 
-        
         foreach ($ctm as $key => $item) {
             $m3 = $item->bulanini - $item->bulanlalu;
             $sisa = $item->wajibdibayar - $item->sudahdibayar;
-            $tagihan =$tagihan + $sisa;
+            $tagihan = $tagihan + $sisa;
 
-
-            if($month_now==$item->bulanrekening && $ctm_lock_old==1){
+            if ($month_now == $item->bulanrekening && $ctm_lock_old == 1) {
                 $ctm_lock = 1;
             }
 
-            if($sisa>0 && $ctm_lock==0){
-                $tunggakan =$tunggakan + 1;
+            if ($sisa > 0 && $ctm_lock == 0) {
+                $tunggakan = $tunggakan + 1;
             }
 
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
                 'norekening' => $item->nomorrekening,
-                'periode'=> $item->tahunrekening . '-' . $item->bulanrekening,
+                'periode' => $item->tahunrekening . '-' . $item->bulanrekening,
                 'tanggal' => $item->tglbayarterakhir,
                 'm3' => $m3,
                 'wajibdibayar' => $item->wajibdibayar,
@@ -231,26 +269,26 @@ class LockController extends Controller
             ];
         }
 
-        if($tunggakan>0 && $tunggakan<2){
+        if ($tunggakan > 0 && $tunggakan < 2) {
             $denda = 10000;
-            $total = $tagihan +$denda;
+            $total = $tagihan + $denda;
             $denda = $denda;
         }
-        if($tunggakan>1 && $tunggakan<4){
+        if ($tunggakan > 1 && $tunggakan < 4) {
             $denda = 50000;
             $total = $tagihan + $denda;
             $denda = $denda;
         }
-        if($tunggakan>3){
+        if ($tunggakan > 3) {
             $denda = 'SSB (Sanksi Denda Setara Sambungan Baru)';
             $total = $tagihan;
         }
 
         $recap = [
             'tagihan' => $tagihan,
-            'denda'=> $denda,
-            'total'=> $total,
-            'tunggakan'=> $tunggakan
+            'denda' => $denda,
+            'total' => $total,
+            'tunggakan' => $tunggakan,
         ];
 
         return view('admin.lock.show', compact('customer', 'dataPembayaran', 'recap', 'lock'));
@@ -259,65 +297,62 @@ class LockController extends Controller
     public function sppPrint($lock_id)
     {
         $lock = Lock::findOrFail($lock_id);
-        $id=$lock->customer_id;
-        $code=$lock->code;
+        $id = $lock->customer_id;
+        $code = $lock->code;
         $customer = Customer::where('nomorrekening', $id)
-        ->first();
+            ->first();
         $customer->year = date('Y');
         // dd($ctm);
 
-
-        // ctm pay 
+        // ctm pay
         $date_now = date("Y-m-d");
         $date_comp = date("Y-m") . "-20";
         $month_next = date('n', strtotime('+1 month'));
         $month_now = ($month_next - 1);
         $tunggakan = 0;
         $tagihan = 0;
-        $denda = 0;  
-        $total = 0;     
-        $ctm_lock =0;
+        $denda = 0;
+        $total = 0;
+        $ctm_lock = 0;
         if ($date_now > $date_comp) {
-            $ctm_lock_old=0;
+            $ctm_lock_old = 0;
             $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                 ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                 ->where('tblpembayaran.nomorrekening', $id)
                 ->where('tblpembayaran.tahunrekening', date('Y'))
-                ->where('tblpembayaran.statuslunas', '=' , 0)
-                ->where('tblpembayaran.bulanrekening', '<', $month_next)  
+                ->where('tblpembayaran.statuslunas', '=', 0)
+                ->where('tblpembayaran.bulanrekening', '<', $month_next)
                 ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                 ->get();
         } else {
-            $ctm_lock_old=1;
+            $ctm_lock_old = 1;
             $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                 ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                 ->where('tblpembayaran.nomorrekening', $id)
                 ->where('tblpembayaran.tahunrekening', date('Y'))
-                ->where('tblpembayaran.bulanrekening', '<', $month_next)   
-                ->where('tblpembayaran.statuslunas','=' , 0)                 
+                ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                ->where('tblpembayaran.statuslunas', '=', 0)
                 ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                 ->get();
         }
 
-        
         foreach ($ctm as $key => $item) {
             $m3 = $item->bulanini - $item->bulanlalu;
             $sisa = $item->wajibdibayar - $item->sudahdibayar;
-            $tagihan =$tagihan + $sisa;
+            $tagihan = $tagihan + $sisa;
 
-
-            if($month_now==$item->bulanrekening && $ctm_lock_old==1){
+            if ($month_now == $item->bulanrekening && $ctm_lock_old == 1) {
                 $ctm_lock = 1;
             }
 
-            if($sisa>0 && $ctm_lock==0){
-                $tunggakan =$tunggakan + 1;
+            if ($sisa > 0 && $ctm_lock == 0) {
+                $tunggakan = $tunggakan + 1;
             }
 
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
                 'norekening' => $item->nomorrekening,
-                'periode'=> $item->tahunrekening . '-' . $item->bulanrekening,
+                'periode' => $item->tahunrekening . '-' . $item->bulanrekening,
                 'tanggal' => $item->tglbayarterakhir,
                 'm3' => $m3,
                 'wajibdibayar' => $item->wajibdibayar,
@@ -327,27 +362,26 @@ class LockController extends Controller
             ];
         }
 
-        if($tunggakan>0 && $tunggakan<2){
+        if ($tunggakan > 0 && $tunggakan < 2) {
             $denda = 10000;
-            $total = $tagihan +$denda;
+            $total = $tagihan + $denda;
             $denda = $denda;
         }
-        if($tunggakan>1 && $tunggakan<4){
+        if ($tunggakan > 1 && $tunggakan < 4) {
             $denda = 50000;
             $total = $tagihan + $denda;
             $denda = $denda;
         }
-        if($tunggakan>3){
+        if ($tunggakan > 3) {
             $denda = 'SSB (Sanksi Denda Setara Sambungan Baru)';
             $total = $tagihan;
         }
-        
 
         $recap = [
             'tagihan' => $tagihan,
-            'denda'=> $denda,
-            'total'=> $total,
-            'tunggakan'=> $tunggakan
+            'denda' => $denda,
+            'total' => $total,
+            'tunggakan' => $tunggakan,
         ];
 
         return view('admin.lock.spp', compact('customer', 'dataPembayaran', 'recap', 'lock'));
@@ -390,7 +424,7 @@ class LockController extends Controller
             return back();
 
         } catch (QueryException $e) {
-            
+
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
         }
 
@@ -406,7 +440,7 @@ class LockController extends Controller
 
     public function lockactionStaffCreate($lockaction_id)
     {
-        
+
         abort_unless(\Gate::allows('lock_staff_create'), 403);
 
         $action = Lock::findOrFail($lockaction_id);
@@ -418,7 +452,7 @@ class LockController extends Controller
         $action_staffs_list = DB::table('staffs')
             ->join('lock_staff', function ($join) {
                 $join->on('lock_staff.staff_id', '=', 'staffs.id');
-                  
+
             })
             ->get();
 
@@ -452,7 +486,7 @@ class LockController extends Controller
                 $action = Lock::where('id', $lockaction_id)->with('staff')->first();
 
                 $cekAllStatus = false;
-              
+
                 $dateNow = date('Y-m-d H:i:s');
 
                 $action->update();
@@ -465,10 +499,10 @@ class LockController extends Controller
 
     function list($lockaction_id) {
         abort_unless(\Gate::allows('lock_action_access'), 403);
-            $actions = LockAction::with('subdapertement')
-                ->with('lock')
-                ->where('lock_id', $lockaction_id)
-                ->get();
+        $actions = LockAction::with('subdapertement')
+            ->with('lock')
+            ->where('lock_id', $lockaction_id)
+            ->get();
         return view('admin.lock.list', compact('lockaction_id', 'actions'));
     }
 
@@ -486,19 +520,19 @@ class LockController extends Controller
     {
         abort_unless(\Gate::allows('lock_action_create'), 403);
         $dateNow = date('Y-m-d H:i:s');
-       
+
         if ($request->file('image')) {
             $img_path = "/pdf";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
             foreach ($request->file('image') as $key => $image) {
-            $resourceImage = $image;
-            $nameImage = time() + $key;
-            $file_extImage = $image->extension();
-            $nameImage = str_replace(" ", "-", $nameImage);
-            $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
-    
-            $resourceImage->move($basepath . $img_path, $img_name);
-            $dataImageName[] = $nameImage . "." . $file_extImage;
+                $resourceImage = $image;
+                $nameImage = time() + $key;
+                $file_extImage = $image->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+
+                $resourceImage->move($basepath . $img_path, $img_name);
+                $dataImageName[] = $nameImage . "." . $file_extImage;
             }
         }
         $data = array(
@@ -508,11 +542,11 @@ class LockController extends Controller
             'memo' => $request->memo,
             'lock_id' => $request->lock_id,
         );
-        
+
         $action = LockAction::create($data);
         return redirect()->route('admin.lock.list', $request->lock_id);
     }
-   
+
     public function lockactionDestroy(Request $request, LockAction $action)
     {
         abort_unless(\Gate::allows('lock_action_delete'), 403);
@@ -528,7 +562,7 @@ class LockController extends Controller
 
         $lock = LockAction::findOrFail($lock_id);
         return view('admin.lock.lockView', compact('lock'));
-        
+
     }
 
 }
