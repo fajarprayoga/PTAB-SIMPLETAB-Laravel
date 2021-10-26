@@ -69,8 +69,9 @@ class ActionsApiController extends Controller
     public function getCtmStatussm(Request $request)
     {
         $status = CtmStatussmPelanggan::selectRaw('CASE
-        WHEN tblstatuswm.NamaStatus = "-" THEN "Terbaca" ELSE tblstatuswm.NamaStatus END AS namastatus, COUNT(tblstatussmpelanggan.nomorrekening) jumlahstatus')
-            ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
+        WHEN tblstatuswm.NamaStatus != "-" AND tblstatuswm.NamaStatus != "" AND tblstatuswm.NamaStatus IS NOT NULL THEN tblstatuswm.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus')
+            ->rightJoin('tblpelanggan', 'tblstatussmpelanggan.nomorrekening', '=', 'tblpelanggan.nomorrekening')    
+            ->leftjoin('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
             ->FilterMonth($request->month)
             ->FilterYear($request->year)
             ->groupBy('tblstatuswm.id')
@@ -92,7 +93,7 @@ class ActionsApiController extends Controller
 
     public function getCtmkubikasi(Request $request)
     {
-        $mapping = CtmGambarmetersms::selectRaw('tbljenispelanggan.jenispelanggan, count(gambarmetersms.nomorrekening) lembar, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12)) kubikasi, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12))/count(gambarmetersms.nomorrekening) avg')
+        $mapping = CtmGambarmetersms::selectRaw('tbljenispelanggan.jenispelanggan,tbljenispelanggan.id as jenispelanggan_code, count(gambarmetersms.nomorrekening) lembar, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12)) kubikasi, sum(Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12))/count(gambarmetersms.nomorrekening) avg')
             ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
             ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
             ->join('tbljenispelanggan', 'tblpelanggan.idgol', '=', 'tbljenispelanggan.id')
@@ -164,6 +165,9 @@ class ActionsApiController extends Controller
 
     public function getCtmmapping(Request $request)
     {
+        if(isset($request->operator)){
+        $operator =$request->operator;
+        }
         $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening,tblopp.operator, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
             ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
             ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
@@ -171,7 +175,7 @@ class ActionsApiController extends Controller
             ->join('tblopp', 'tblopp.nomorrekening', '=', 'gambarmetersms.nomorrekening')
             ->FilterMonth($request->month)
             ->FilterYear($request->year)
-            ->FilterOperator($request->operator)
+            ->FilterOperator($operator)
             ->FilterSbg($request->nomorrekening)
             ->where('tblopp.status', '1')
             ->get();
@@ -1532,7 +1536,6 @@ class ActionsApiController extends Controller
         //set data
         $data = array(
             'lock_id' => $dataForm->lock_id,
-            'code' => $dataForm->code,
             'type' => $dataForm->type,
             'memo' => $dataForm->memo,
             'image' => str_replace("\/", "/", json_encode($dataImageName)),
