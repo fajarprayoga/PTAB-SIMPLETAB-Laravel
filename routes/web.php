@@ -132,8 +132,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('segel-meter/sppprint/{id}', 'SegelMeterController@sppPrint')->name('segelmeter.sppprint');
 
     Route::get('file-upload', 'PdfUploadController@fileUpload')->name('file.upload');
-    
+
+    Route::get('file-uploadCreate', 'PdfUploadController@fileUploadCreate')->name('file.create');
+
     Route::post('file-upload', 'PdfUploadController@fileUploadPost')->name('file.upload.post');
+
+    Route::delete('file-upload/delete/{audited}', 'PdfUploadController@fileUploadDestroy')->name('file.upload.destroy');
 
     Route::resource('lock', 'LockController');
 

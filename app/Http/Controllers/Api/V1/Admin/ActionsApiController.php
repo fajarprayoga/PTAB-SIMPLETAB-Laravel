@@ -20,6 +20,7 @@ use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
+use App\Audited;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -256,6 +257,23 @@ class ActionsApiController extends Controller
         }
     }
 
+    public function getAudited(Request $request)
+    {
+        $data = Audited::FilterYear($request->year)->get();
+        try {
+            if (!empty($data)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $data,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
     public function actionStatusUpdate(Request $request)
     {
         try {

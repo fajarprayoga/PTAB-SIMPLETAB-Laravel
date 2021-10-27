@@ -508,6 +508,15 @@ return [
         'end' => 'End',
         'dapertement' => 'Dapertemen',
         'type' => 'Type'
+    ],
+    'audited' => [
+        'title' => 'Laporan Keuangan Audited',
+        'title_singular' => 'Audited',
+        'fields' => [
+            'name' => 'Nama',
+            'periode' => 'Periode',
+            'file' => 'PDF',
+        ]
     ]
 ];
 

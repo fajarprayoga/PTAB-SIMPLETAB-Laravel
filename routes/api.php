@@ -107,6 +107,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('ctm-kubikasi', 'ActionsApiController@getCtmkubikasi');
     Route::post('ctm-statussm', 'ActionsApiController@getCtmStatussm');
     Route::post('ctm-hasilbaca', 'ActionsApiController@getCtmHasilbaca');
+    Route::post('audited', 'ActionsApiController@getAudited');
 
     //Lock
     Route::post('lock/list','ActionsApiController@locklist');
