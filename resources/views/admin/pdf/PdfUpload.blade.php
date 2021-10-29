@@ -37,9 +37,16 @@
                     </em>
                 @endif
             </div>
+
+            <?php $years = range(2000, strftime("%Y", time())); ?>
             <div class="form-group {{ $errors->has('periode') ? 'has-error' : '' }}">
                 <label for="periode">{{ trans('global.audited.fields.periode') }}*</label>
-                <input required type="text" id="periode" name="periode" class="form-control" >
+                <select id="periode" name="periode" class="form-control">
+                    <option>-- Pilih Periode --</option>
+                    @foreach ($years as $year)
+                        <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                    @endforeach
+                </select>
                 @if($errors->has('periode'))
                     <em class="invalid-feedback">
                         {{ $errors->first('periode') }}

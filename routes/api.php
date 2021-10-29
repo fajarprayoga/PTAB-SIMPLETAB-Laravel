@@ -109,10 +109,17 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('ctm-hasilbaca', 'ActionsApiController@getCtmHasilbaca');
     Route::post('audited', 'ActionsApiController@getAudited');
 
+    //Segel
+    Route::post('segel/list','ActionsApiController@segellist');
+    Route::post('segel/store','ActionsApiController@lockStore');
+
     //Lock
     Route::post('lock/list','ActionsApiController@locklist');
     Route::delete('lockdestroy/{lockaction_id}', 'ActionsApiController@lockDestroy');
     Route::get('lockshow/{lock_id}', 'ActionsApiController@lockShow');
+    Route::get('lockcreate/{lock_id}', 'ActionsApiController@scb');
+    Route::get('SubDapertementlist', 'ActionsApiController@SubDapertementlist');
+    
      //LockStaff
     Route::get('lockStaffs/{lockaction_id}', 'ActionsApiController@lockStaffs');
     Route::get('lockStaffList/{lockaction_id}', 'ActionsApiController@lockStaffList');
