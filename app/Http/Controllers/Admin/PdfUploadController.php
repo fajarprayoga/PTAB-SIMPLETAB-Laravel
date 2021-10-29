@@ -3,12 +3,20 @@
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use DB;
+use Illuminate\Database\QueryException;
+use App\Audited;
 
 class PdfUploadController extends Controller
 {
 
     public function fileUpload()
     {
+        $audited = Audited::all();
+        return view('admin.pdf.index',compact('audited'));
+
+    }
+    public function fileUploadCreate(){
         return view('admin.pdf.PdfUpload');
     }
 
@@ -33,14 +41,27 @@ class PdfUploadController extends Controller
         
         $success='Upload File Berhasil';
         $pdf='https://simpletabadmin.ptab-vps.com/pdf/'.$nameImage.".".$file_extImage;
-
-        return back()
-            ->with(compact('success','pdf'));//);
-        }else{
-            return back()
-            ->with('failed');
+        
         }
-   
+        $data = array(
+            'name' => $request->name,
+            'periode' => $request->periode,
+            'file' => $nameImage.".".$file_extImage,
+        );
+
+     
+        $success='Upload File Berhasil';
+        $audited = Audited::create($data);
+        return redirect()->route('admin.file.upload');
+    }
+
+    public function fileUploadDestroy(Audited $audited){
+        abort_unless(\Gate::allows('lock_action_delete'), 403);
+
+        $audited->delete();
+
+        return redirect()->route('admin.file.upload');
+
     }
    
 }
