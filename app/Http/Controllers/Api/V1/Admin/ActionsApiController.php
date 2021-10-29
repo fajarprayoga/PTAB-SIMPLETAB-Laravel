@@ -68,19 +68,49 @@ class ActionsApiController extends Controller
 
     public function getCtmStatussm(Request $request)
     {
-        $status = CtmStatussmPelanggan::selectRaw('CASE
-        WHEN tblstatuswm.NamaStatus != "-" AND tblstatuswm.NamaStatus != "" AND tblstatuswm.NamaStatus IS NOT NULL THEN tblstatuswm.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus')
-            ->rightJoin('tblpelanggan', 'tblstatussmpelanggan.nomorrekening', '=', 'tblpelanggan.nomorrekening')    
-            ->leftjoin('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
-            ->FilterMonth($request->month)
-            ->FilterYear($request->year)
-            ->groupBy('tblstatuswm.id')
+        $month = $request->month;
+        $year = $request->year;
+        $status = CtmPelanggan::selectRaw('CASE
+        WHEN tblstatussmpelanggan.NamaStatus != "-" AND tblstatussmpelanggan.NamaStatus != "" AND tblstatussmpelanggan.NamaStatus IS NOT NULL THEN tblstatussmpelanggan.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus,tblstatussmpelanggan.statusid')
+            ->leftJoinSub(CtmStatussmPelanggan::selectRaw('tblstatussmpelanggan.statussm,tblstatussmpelanggan.nomorrekening,tblstatuswm.NamaStatus AS NamaStatus,tblstatuswm.id AS statusid')
+                    ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
+                    ->FilterMonth($request->month)
+                    ->FilterYear($request->year),
+                'tblstatussmpelanggan',
+                function ($join) {
+                    $join->on('tblstatussmpelanggan.nomorrekening', '=', 'tblpelanggan.nomorrekening');
+                }
+            )
+            ->where('tblpelanggan.status', 1)
+            ->groupBy('tblstatussmpelanggan.statusid')
             ->get();
+        $status_obj = array();
+
+        $namastatus_first = 'Terbaca';
+        $jumlahstatus_first = 0;
+        $statusid_first = '-';
+        $key_index=0;
+        foreach ($status as $key => $value) {
+            if ($value->namastatus == 'Terbaca') {
+                $jumlahstatus_first +=$value->jumlahstatus;
+            }
+        }
+        $status_obj[$key_index]['namastatus'] = $namastatus_first;
+        $status_obj[$key_index]['jumlahstatus'] = $jumlahstatus_first;
+        $status_obj[$key_index]['statusid'] = $statusid_first;
+        foreach ($status as $key => $value) {
+            if ($value->namastatus != 'Terbaca') {
+            $key_index++;
+            $status_obj[$key_index]['namastatus'] = $value->namastatus;
+            $status_obj[$key_index]['jumlahstatus'] = $value->jumlahstatus;
+            $status_obj[$key_index]['statusid'] = $value->statusid;
+            }
+        }
         try {
             if (!empty($status)) {
                 return response()->json([
                     'message' => 'Sukses',
-                    'data' => $status,
+                    'data' => $status_obj,
                 ]);
             }
         } catch (QueryException $ex) {
@@ -165,8 +195,8 @@ class ActionsApiController extends Controller
 
     public function getCtmmapping(Request $request)
     {
-        if(isset($request->operator)){
-        $operator =$request->operator;
+        if (isset($request->operator)) {
+            $operator = $request->operator;
         }
         $mapping = CtmGambarmetersms::selectRaw('gambarmetersms.nomorrekening, gambarmetersms.tanggal, gambarmeter.filegambar,gambarmeter.infowaktu, tblpelanggan.nomorrekening,tblpelanggan.namapelanggan,tblpelanggan.namapelanggan,tblpelanggan.idgol,tblpelanggan.idareal, gambarmetersms.nomorrekening,gambarmetersms.bulanrekening,gambarmetersms.tahunrekening,tblopp.operator, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pencatatanmeter1, tblpemakaianair.pencatatanmeter2, tblpemakaianair.pencatatanmeter3, tblpemakaianair.pencatatanmeter4, tblpemakaianair.pencatatanmeter5, tblpemakaianair.pencatatanmeter6, tblpemakaianair.pencatatanmeter7, tblpemakaianair.pencatatanmeter8, tblpemakaianair.pencatatanmeter9, tblpemakaianair.pencatatanmeter10, tblpemakaianair.pencatatanmeter11, tblpemakaianair.pencatatanmeter12) pencatatanmeter, Elt(gambarmetersms.bulanrekening, tblpemakaianair.pemakaianair1, tblpemakaianair.pemakaianair2, tblpemakaianair.pemakaianair3, tblpemakaianair.pemakaianair4, tblpemakaianair.pemakaianair5, tblpemakaianair.pemakaianair6, tblpemakaianair.pemakaianair7, tblpemakaianair.pemakaianair8, tblpemakaianair.pemakaianair9, tblpemakaianair.pemakaianair10, tblpemakaianair.pemakaianair11, tblpemakaianair.pemakaianair12) pemakaianair')
             ->join('tblpemakaianair', 'tblpemakaianair.nomorrekening', '=', 'gambarmetersms.nomorrekening')
@@ -1748,7 +1778,8 @@ class ActionsApiController extends Controller
 
     }
 
-    public function typeshow($lockaction_id){
+    public function typeshow($lockaction_id)
+    {
 
         try {
             $lock = Lock::with('lockaction')->find($lockaction_id);
