@@ -39,7 +39,7 @@ class Lock extends Model
     
     public function scopeFilterSubDepartment($query, $subdepartment)
     {
-        if($subdepartment !=''){
+        if($subdepartment !='' && $subdepartment>0){
         $query->where('subdapertement_id', $subdepartment);        
         }
         return $query;

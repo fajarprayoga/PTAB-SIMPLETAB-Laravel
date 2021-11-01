@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\v1\admin;
 
 use App\ActionApi;
 use App\ActionStaff;
+use App\Audited;
 use App\CtmGambarmetersms;
 use App\CtmPbk;
 use App\CtmPelanggan;
@@ -21,7 +22,6 @@ use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
-use App\Audited;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -91,10 +91,10 @@ class ActionsApiController extends Controller
         $namastatus_first = 'Terbaca';
         $jumlahstatus_first = 0;
         $statusid_first = '-';
-        $key_index=0;
+        $key_index = 0;
         foreach ($status as $key => $value) {
             if ($value->namastatus == 'Terbaca') {
-                $jumlahstatus_first +=$value->jumlahstatus;
+                $jumlahstatus_first += $value->jumlahstatus;
             }
         }
         $status_obj[$key_index]['namastatus'] = $namastatus_first;
@@ -102,10 +102,10 @@ class ActionsApiController extends Controller
         $status_obj[$key_index]['statusid'] = $statusid_first;
         foreach ($status as $key => $value) {
             if ($value->namastatus != 'Terbaca') {
-            $key_index++;
-            $status_obj[$key_index]['namastatus'] = $value->namastatus;
-            $status_obj[$key_index]['jumlahstatus'] = $value->jumlahstatus;
-            $status_obj[$key_index]['statusid'] = $value->statusid;
+                $key_index++;
+                $status_obj[$key_index]['namastatus'] = $value->namastatus;
+                $status_obj[$key_index]['jumlahstatus'] = $value->jumlahstatus;
+                $status_obj[$key_index]['statusid'] = $value->statusid;
             }
         }
         try {
@@ -1816,68 +1816,115 @@ class ActionsApiController extends Controller
 
     public function segellist(Request $request)
     {
-       
+        $group_unit = 0;
+        if (isset($request->userid) && $request->userid != '') {
+            $admin = User::with('roles')->find($request->userid);
+            $role = $admin->roles[0];
+            $role->load('permissions');
+            $permission = json_decode($role->permissions->pluck('title'));
+            if (!in_array("ticket_all_access", $permission)) {
+                $department_id = $admin->dapertement_id;
+                $department = Dapertement::find($department_id);
+                $group_unit = $department->group_unit;
+            }
+        }
+
         $date_now = date('Y-m-d');
         $date_comp = date('Y-m') . '-20';
         $month_next = date('n', strtotime('+1 month'));
 
         try {
-            if($date_now >= $date_comp){
-             
-                if(isset($request->status)){
-                    if($request->status == 1){
+            if ($date_now >= $date_comp) {
+
+                if (isset($request->status)) {
+                    if ($request->status == 1) {
+                        if ($group_unit > 0) {
+                            $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                                ->join('tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+                                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                                ->where('tblwilayah.group_unit', $group_unit)
+                                ->where('tblpembayaran.tahunrekening', date('Y'))
+                                ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                                ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 >?', [$request->status])
+                                ->groupBy('tblpembayaran.nomorrekening')
+                                ->paginate(10, ['*'], 'page', $request->page);
+                        } else {
+                            $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                                ->where('tblpembayaran.tahunrekening', date('Y'))
+                                ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                                ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 >?', [$request->status])
+                                ->groupBy('tblpembayaran.nomorrekening')
+                                ->paginate(10, ['*'], 'page', $request->page);
+                        }
+                    } else if ($request->status == 0) {
+                        if ($group_unit > 0) {
+                            $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                                ->join('tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+                                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                                ->where('tblwilayah.group_unit', $group_unit)
+                                ->where('tblpembayaran.tahunrekening', date('Y'))
+                                ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                                ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 <=?', [1])
+                                ->groupBy('tblpembayaran.nomorrekening')
+                                ->paginate(10, ['*'], 'page', $request->page);
+                        } else {
+                            $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                                ->where('tblpembayaran.tahunrekening', date('Y'))
+                                ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                                ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 <=?', [1])
+                                ->groupBy('tblpembayaran.nomorrekening')
+                                ->paginate(10, ['*'], 'page', $request->page);
+                        }
+                    }
+                } else {
+                    if ($group_unit > 0) {
                         $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpembayaran.tahunrekening', date('Y'))
-                        ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                        ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 >?',[$request->status])
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                    }else if($request->status == 0){
+                            ->join('tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+                            ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                            ->where('tblwilayah.group_unit', $group_unit)
+                            ->where('tblpembayaran.tahunrekening', date('Y'))
+                            ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                            ->groupBy('tblpembayaran.nomorrekening')
+                            ->paginate(10, ['*'], 'page', $request->page);
+                    } else {
                         $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpembayaran.tahunrekening', date('Y'))
-                        ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                        ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 <=?',[1])
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                }
-                }else{
-                    $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                    ->groupBy('tblpembayaran.nomorrekening')
-                    ->paginate(10, ['*'], 'page', $request->page);
+                            ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                            ->where('tblpembayaran.tahunrekening', date('Y'))
+                            ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                            ->groupBy('tblpembayaran.nomorrekening')
+                            ->paginate(10, ['*'], 'page', $request->page);
+                    }
                 }
 
-            }else{
-    
-                if(isset($request->status)){
-                    if($request->status == 1 ){
+            } else {
+
+                if (isset($request->status)) {
+                    if ($request->status == 1) {
                         $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpembayaran.tahunrekening', date('Y'))
-                        ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                        ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 >?',[$request->status])
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                    }else if($request->status == 0 ){
+                            ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                            ->where('tblpembayaran.tahunrekening', date('Y'))
+                            ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                            ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 >?', [$request->status])
+                            ->groupBy('tblpembayaran.nomorrekening')
+                            ->paginate(10, ['*'], 'page', $request->page);
+                    } else if ($request->status == 0) {
                         $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpembayaran.tahunrekening', date('Y'))
-                        ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                        ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 <=?',[1])
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
+                            ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                            ->where('tblpembayaran.tahunrekening', date('Y'))
+                            ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                            ->havingRaw('((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2 <=?', [1])
+                            ->groupBy('tblpembayaran.nomorrekening')
+                            ->paginate(10, ['*'], 'page', $request->page);
                     }
-                }else{
+                } else {
                     $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening','<' ,$month_next)
-                    ->groupBy('tblpembayaran.nomorrekening')
-                    ->paginate(10, ['*'], 'page', $request->page);
+                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                        ->where('tblpembayaran.tahunrekening', date('Y'))
+                        ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                        ->groupBy('tblpembayaran.nomorrekening')
+                        ->paginate(10, ['*'], 'page', $request->page);
                 }
             }
             return response()->json([
@@ -1885,6 +1932,7 @@ class ActionsApiController extends Controller
                 'data' => $qry,
                 'search' => $request->search,
                 'page' => $request->page,
+                'userid' => $request->userid,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
@@ -1894,17 +1942,18 @@ class ActionsApiController extends Controller
         }
     }
 
-    public function lockStore(Request $request){
+    public function lockStore(Request $request)
+    {
         $data = array(
             'code' => $request->code,
-            'customer_id' =>$request->customer_id,
+            'customer_id' => $request->customer_id,
             'subdapertement_id' => $request->subdapertement_id,
-            'description' => $request->description
+            'description' => $request->description,
         );
 
         try {
-        $lock = Lock::create($data);
-        
+            $lock = Lock::create($data);
+
             return response()->json([
                 'message' => 'success',
             ]);
@@ -1915,14 +1964,15 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-    public function scb(Request $request){
+    public function scb(Request $request)
+    {
         $subdapertement_id = 10;
         $arr['subdapertement_id'] = $subdapertement_id;
         $arr['month'] = date("m");
         $arr['year'] = date("Y");
         $last_scb = $this->get_last_code('scb-lock', $arr);
         $scb = acc_code_generate($last_scb, 16, 12, 'Y');
-        try{
+        try {
             return response()->json([
                 'message' => 'success',
                 'data' => $scb,
@@ -1935,16 +1985,17 @@ class ActionsApiController extends Controller
         }
     }
 
-    public function SubDapertementlist(Request $request){
+    public function SubDapertementlist(Request $request)
+    {
         $subdapertement_id = 10;
         $subdapertement = Subdapertement::where('id', $subdapertement_id)->first();
         $subdapertements = Subdapertement::where('dapertement_id', $subdapertement->dapertement_id)->get();
         $dapertement_id = $subdapertement->dapertement_id;
         $dapertements = Dapertement::where('id', $subdapertement->dapertement_id)->get();
-        try{
+        try {
             return response()->json([
                 'message' => 'success',
-                'data' => $dapertements,$subdapertements
+                'data' => $dapertements, $subdapertements,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
