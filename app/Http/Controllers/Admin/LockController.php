@@ -68,6 +68,10 @@ class LockController extends Controller
                 return $row->code ? $row->code : "";
             });
 
+            $table->editColumn('register', function ($row) {
+                return $row->created_at ? $row->created_at : "";
+            });
+
             $table->editColumn('customer', function ($row) {
                 return $row->customer ? $row->customer->name : "";
             });
@@ -82,10 +86,10 @@ class LockController extends Controller
                 return $row->subdapertement ? $row->subdapertement->name : "";
             });
             $table->editColumn('start', function ($row) {
-                return $row->start ? $row->start : "";
+                return $row->created_at ? $row->created_at : "";
             });
             $table->editColumn('end', function ($row) {
-                return $row->end ? $row->end : "";
+                return $row->updated_at ? $row->updated_at : "";
             });
 
             $table->rawColumns(['staff', 'placeholder']);
@@ -296,7 +300,7 @@ class LockController extends Controller
 
     public function sppPrint($lock_id)
     {
-        $lock = Lock::findOrFail($lock_id);
+        $lock = Lock::with('staff')->findOrFail($lock_id);
         $id = $lock->customer_id;
         $code = $lock->code;
         $customer = Customer::where('nomorrekening', $id)
@@ -384,6 +388,7 @@ class LockController extends Controller
             'tunggakan' => $tunggakan,
         ];
 
+        // return $lock;
         return view('admin.lock.spp', compact('customer', 'dataPembayaran', 'recap', 'lock'));
     }
 

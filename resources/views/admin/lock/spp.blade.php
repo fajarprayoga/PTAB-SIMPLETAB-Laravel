@@ -10,12 +10,12 @@
 <body>
     <div class="container">
         <div class="headertitle">
-            <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER99</div>
+            <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER</div>
             <div>NOMOR : {{ $lock->code }}</div>
         </div>
         <div class="section">
             <div style="width: 750px;">
-                Kepada : Petugas Meter Segel
+                Kepada : @foreach ($lock->staff as $index => $staff_row)<p>{{$index+1}}. {{$staff_row->name}}</p>@endforeach
                 <div>
                     Agar dilaksanakan Penyegelan/Pencabutan Water Meter :
                 </div>

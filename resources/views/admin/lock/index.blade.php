@@ -42,6 +42,9 @@
                             {{ trans('global.lock.code') }}
                         </th>
                         <th>
+                            Register
+                        </th>
+                        <th>
                             {{ trans('global.lock.customer') }}
                         </th>
                         <th>
@@ -131,14 +134,15 @@
             },
             columns: [
                 { data: 'placeholder', name: 'placeholder' },
-                { data: 'DT_RowIndex', name: 'no' },
+                { data: 'DT_RowIndex', name: 'no', searchable: false },
                 { data: 'code', name: 'code' },
-                { data: 'customer', name: 'customer' },
+                { data: 'register', name: 'register', searchable: false },
+                { data: 'customer', name: 'customer', searchable: false },
                 { data: 'description', name: 'description' },
-                { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>':dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
-                { data: 'subdapertement', name: 'subdapertement' },
-                { data: 'start', name: 'start' },
-                { data: 'end', name: 'end' },
+                { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>Pending</button>':dataField === 'lock_resist' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Hambatan Segel</button>':dataField === 'lock' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Segel</button>':dataField === 'unplug_resist' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Hambatan Cabut</button>':dataField === 'unplug' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Cabut</button>':'<button type="button" class="btn btn-success btn-sm" disabled>Selesai</button>'; } },
+                { data: 'subdapertement', name: 'subdapertement', searchable: false },
+                { data: 'start', name: 'start', searchable: false },
+                { data: 'end', name: 'end', searchable: false },
                 { data: 'staff', name: '{{ trans('global.staff.title') }}' }
             ],
             // order: [[ 2, 'asc' ]],

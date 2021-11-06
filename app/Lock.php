@@ -36,6 +36,14 @@ class Lock extends Model
         return $query;
     }
 
+    public function scopeFilterDepartment($query, $department)
+    {
+        if($department !='' && $department>0){
+        $query->where('dapertements.id', $department);        
+        }
+        return $query;
+    }
+
     
     public function scopeFilterSubDepartment($query, $subdepartment)
     {

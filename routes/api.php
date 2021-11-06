@@ -119,6 +119,7 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::get('lockshow/{lock_id}', 'ActionsApiController@lockShow');
     Route::get('lockcreate/{lock_id}', 'ActionsApiController@scb');
     Route::post('SubDapertementlist', 'ActionsApiController@SubDapertementlist');
+    Route::get('alarm-locks', 'ActionsApiController@alarmLocks');
     
      //LockStaff
     Route::get('lockStaffs/{lockaction_id}', 'ActionsApiController@lockStaffs');
