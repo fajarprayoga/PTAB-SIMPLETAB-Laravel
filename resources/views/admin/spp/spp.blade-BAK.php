@@ -8,18 +8,15 @@
     <link rel="stylesheet" href="{{ asset('css/printSpp.css') }}"/>
 </head>
 <body>
-@foreach ($lock_list as $lock_list_row)   
-
-<div style="width: 794px; height: 300px; ">
-
+@foreach ($lock_list as $lock_list_row)    
 <div class="container">
         <div class="headertitle">
             <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER</div>
-            <div>NOMOR : {{ $lock_list_row['lock']->code }}</div>
+            <div>NOMOR : {{ $lock->code }}</div>
         </div>
         <div class="section">
             <div style="width: 750px;">
-                Kepada : @foreach ($lock_list_row['lock']->staff as $index => $staff_row)<p>{{$index+1}}. {{$staff_row->name}}</p>@endforeach
+                Kepada : @foreach ($lock->staff as $index => $staff_row)<p>{{$index+1}}. {{$staff_row->name}}</p>@endforeach
                 <div>
                     Agar dilaksanakan Penyegelan/Pencabutan Water Meter :
                 </div>
@@ -31,7 +28,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->namapelanggan }}
+                            #{{ $customer->namapelanggan }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -42,7 +39,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->alamat }}
+                            #{{ $customer->alamat }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -53,7 +50,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->nomorrekening }}
+                            #{{ $customer->nomorrekening }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -64,17 +61,17 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->idareal }}
+                            #{{ $customer->idareal }}
                         </span>
                     </div>
                 <div>
                     {{-- Penyegelan dilakukan karena tidak melakukan pembayaran tagihan air periode : 
                     MEI 2021 = Rp.177.072, JUN-2021 = Rp.127.045  --}}
                     Penyegelan dilakukan karena tidak melakukan pembayaran tagihan air periode : 
-                    @foreach ($lock_list_row['dataPembayaran'] as $key=>$item )
+                    @foreach ($dataPembayaran as $key=>$item )
                         {{Bulan( (new DateTime($item['periode']))->format('m')).'-'. (new DateTime($item['periode']))->format('Y') .' = '. Rupiah($item['wajibdibayar'] - $item['sudahbayar']) }}
                     @endforeach
-                    dengan Total {{ is_int($lock_list_row['recap']['denda']) ? Rupiah($lock_list_row['recap']['denda']) : $lock_list_row['recap']['denda'] }} (belum termasuk denda)
+                    dengan Total {{ is_int($recap['denda']) ? Rupiah($recap['denda']) : $recap['denda'] }} (belum termasuk denda)
                 </div>
                 <div>
                     PERHATIAN : 1. Bila dalam 2 bulan dari tanggal SPK ini tunggakan tidak dilunasi, maka sambungan air minum akan dicabut.
@@ -101,14 +98,12 @@
                 </div>
                 <br>
                 <br>
-
-                <div style="display: flex; position: relative; top: 5px; " >
-
+                <div style="display: flex; position: relative; top: 5px;">
                     <div class="box">
                         ____________________
                     </div>
                     <div class="box">
-                       {{ $lock_list_row['customer']->namapelanggan }}
+                       {{ $customer->namapelanggan }}
                     </div>
                     <div class="box1">
                         Ida Bagus Marjaya Wirata, Se.,MM,
@@ -116,16 +111,13 @@
                 </div>
             </div>
         </div>
-    </div> 
-
-</div>
+    </div>   
     @endforeach 
 </body>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script type="text/javascript">
+<!-- <script type="text/javascript">
     $(document).ready(()=>{
         window.print()
     })
-</script>
-
+</script> -->
 </html>
