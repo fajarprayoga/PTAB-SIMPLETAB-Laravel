@@ -9,6 +9,9 @@
 </head>
 <body>
 @foreach ($lock_list as $lock_list_row)   
+
+<div style="width: 794px; height: 300px; ">
+
 <div class="container">
         <div class="headertitle">
             <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER</div>
@@ -98,7 +101,9 @@
                 </div>
                 <br>
                 <br>
-                <div style="display: flex; position: relative; top: 5px;">
+
+                <div style="display: flex; position: relative; top: 5px; " >
+
                     <div class="box">
                         ____________________
                     </div>
@@ -112,12 +117,15 @@
             </div>
         </div>
     </div> 
+
+</div>
     @endforeach 
 </body>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<!-- <script type="text/javascript">
+<script type="text/javascript">
     $(document).ready(()=>{
         window.print()
     })
-</script> -->
+</script>
+
 </html>
