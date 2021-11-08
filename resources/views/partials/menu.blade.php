@@ -106,6 +106,12 @@
                         </a>
                     </li>
                     @endcan
+                    <li class="nav-item">
+                        <a href="{{ route('admin.spp.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-file "></i>
+                            Print SPP
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li class="nav-item">

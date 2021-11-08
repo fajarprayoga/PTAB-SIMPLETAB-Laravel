@@ -160,4 +160,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('lock/action/{action}/view', 'LockController@lockView')->name('lock.LockView');
 
     Route::get('lock/sppprint/{id}', 'LockController@sppPrint')->name('lock.sppprint');
+
+    Route::get('spp/Sppall','SppController@index')->name('spp.index');
+
+    Route::get('spp/sppprintall', 'SppController@sppPrintAll')->name('spp.sppprintall');
+  
+
 });
