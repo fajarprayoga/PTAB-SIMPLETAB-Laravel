@@ -18,8 +18,10 @@
                         <select id="status" name="status" class="form-control">
                             <option value="">== Semua Status ==</option>
                             <option value="pending">Pending</option>
-                            <option value="active">Active</option>
-                            <option value="close">Close</option>
+                            <option value="lock_resist">Hambatan Segel</option>
+                            <option value="lock">Segel</option>
+                            <option value="unplug_resist">Hambatan Cabut</option>
+                            <option value="unplug">Cabut</option>
                         </select>
                         <span class="input-group-btn">
                             &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">

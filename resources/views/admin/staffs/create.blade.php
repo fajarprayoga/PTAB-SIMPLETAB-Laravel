@@ -62,7 +62,22 @@
                     </em>
                 @endif
             </div>
-
+            <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
+                <label for="area">{{ trans('global.staff.fields.area') }}*</label>
+                <select name="area[]" id="area" class="form-control select2" multiple="multiple">
+                    @foreach($area as $id => $area)
+                        <option value="{{ $area->code }}">
+                            {{ $area->code}}-{{ $area->NamaWilayah}}
+                        </option>
+                    @endforeach
+                </select>
+                @if($errors->has('area'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('area') }}
+                    </em>
+                @endif
+               
+            </div>
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

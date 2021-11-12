@@ -396,6 +396,7 @@ return [
             'phone' => 'No Ponsel',
             'dapertement' => "Dapertemen",
             'subdapertement' => "Sub Dapertemen",
+            'area' => "Area",
         ]
     ],
     'ticket' => [

@@ -30,7 +30,10 @@ class Staff extends Model
                 'status'
             ]);
     }
-
+    public function area()
+    {
+        return $this->belongsToMany(CtmWilayah::class, 'ptabroot_simpletab.area_staff','staff_id', 'area_id');
+    }
     public function scopeFilterDapertement($query, $dapertement)
     {
         if($dapertement !=''){
