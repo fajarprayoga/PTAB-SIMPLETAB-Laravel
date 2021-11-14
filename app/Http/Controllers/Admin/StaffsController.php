@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use App\Staff;
+use App\CtmWilayah;
 use App\Subdapertement;
 use App\Traits\TraitModel;
 use App\User;
@@ -121,6 +122,8 @@ class StaffsController extends Controller
 
         abort_unless(\Gate::allows('staff_create'), 403);
         //user role
+        $area = CtmWilayah::select('id as code','NamaWilayah')->get();
+   
         $user_id = Auth::check() ? Auth::user()->id : null;
         $department = '';
         $subdepartment = 0;
@@ -142,13 +145,16 @@ class StaffsController extends Controller
             $dapertements = Dapertement::all();
         }
 
-        return view('admin.staffs.create', compact('dapertements', 'code'));
+        return view('admin.staffs.create', compact('dapertements', 'code','area'));
     }
 
     public function store(StoreStaffRequest $request)
     {
         $staff = Staff::create($request->all());
-
+        $areas = $request->input('area',[]);
+        for($area=0; $area < count($areas); $area++){
+            $staff->area()->attach($areas[$area]);
+        }
         return redirect()->route('admin.staffs.index');
     }
 
@@ -160,8 +166,9 @@ class StaffsController extends Controller
     public function edit($id)
     {
         abort_unless(\Gate::allows('staff_edit'), 403);
-
-        $staff = Staff::findOrFail($id);
+        $area = CtmWilayah::select('id as code','NamaWilayah')->get();
+        // $staff = Staff::findOrFail($id);
+        $staff = Staff::where('id', $id)->with('area')->first();
 
         //user role
         $user_id = Auth::check() ? Auth::user()->id : null;
@@ -182,17 +189,20 @@ class StaffsController extends Controller
         } else {
             $dapertements = Dapertement::all();
         }
+       
         $subdapertements = Subdapertement::where('dapertement_id', $staff->dapertement_id)->get();
-
-        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements'));
+        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements','area'));
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)
     {
         abort_unless(\Gate::allows('staff_edit'), 403);
-
         $staff->update($request->all());
-
+        $areas = $request->input('area',[]);
+        $staff->area()->detach();
+        for($area=0; $area < count($areas); $area++){
+            $staff->area()->attach($areas[$area]);
+        }
         return redirect()->route('admin.staffs.index');
     }
 
@@ -201,7 +211,7 @@ class StaffsController extends Controller
         abort_unless(\Gate::allows('staff_delete'), 403);
 
         try {
-
+            $staff->area()->detach();
             $staff->delete();
         } catch (QueryException $e) {
             return back()->withErrors(['Pegawai masih terdaftar dalam data Tiket']);

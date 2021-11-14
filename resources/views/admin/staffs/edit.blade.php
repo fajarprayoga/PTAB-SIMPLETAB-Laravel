@@ -51,7 +51,6 @@
                     </em>
                 @endif
             </div>
-
             <div class="form-group {{ $errors->has('subdapertement_id') ? 'has-error' : '' }}">
                 <label for="subdapertement_id">{{ trans('global.staff.fields.subdapertement') }}*</label>
                 <select id="subdapertement_id" name="subdapertement_id" class="form-control" value="{{ old('subdapertement_id', isset($customer) ? $customer->subdapertement : '') }}">
@@ -66,7 +65,23 @@
                     </em>
                 @endif
             </div>
-
+            <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
+                <label for="area">{{ trans('global.staff.fields.area') }}*</label>
+                <select name="area[]" id="area" class="form-control select2" multiple="multiple">
+                    @foreach($area as $id => $are)
+                        <option value="{{ $are->code }}"   @foreach($staff->area as $i => $ares)  {{$are->code == $ares->pivot->area_id ? 'selected' : ''}}  @endforeach  >
+                            {{ $are->code}}-{{ $are->NamaWilayah}}
+                        </option>
+                    @endforeach
+                </select>
+              
+                @if($errors->has('area'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('area') }}
+                    </em>
+                @endif
+            </div>
+                
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>
