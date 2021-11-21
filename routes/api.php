@@ -131,6 +131,10 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('actionlocklists', 'ActionsApiController@actionlocklist');
     Route::post('lockactionscreate', 'ActionsApiController@lockactionscreate');
     Route::delete('lockactionsdestroy/{lockaction_id}', 'ActionsApiController@lockactionsDestroy');
+
+    // payment
+    // Route::resource('payments', 'PaymentApiController');
+    Route::put('payments/edit', 'PaymentApiController@updatePay');
     
 });
 
@@ -140,6 +144,8 @@ Route::group(['prefix' => 'open/admin', 'namespace' => 'Api\V1\Admin'], function
     //test
     Route::get('test/{id}', 'TicketsApiController@test');
     Route::post('login-js',  'AdminApiController@loginJs' );
+
+    Route::post('login-api',  'AdminApiController@loginApi' );
 });
 
 Route::group(['prefix' => 'close/dapertement', 'namespace' => 'Api\V1\Dapertement'], function () {

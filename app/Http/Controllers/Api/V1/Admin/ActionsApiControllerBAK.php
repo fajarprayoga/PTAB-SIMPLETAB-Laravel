@@ -197,7 +197,6 @@ class ActionsApiController extends Controller
 
     public function getCtmmapping(Request $request)
     {
-        $operator = '';
         if (isset($request->operator)) {
             $operator = $request->operator;
         }

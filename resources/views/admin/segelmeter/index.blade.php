@@ -13,6 +13,12 @@
     </div>
     <div class="card-body">
     <div class="form-group">
+        <div class="mt-2">
+                <a href="{{ route('admin.segelmeter.deligate') }}" class="btn btn-primary">Teruskan Serentak</a >
+        </div>
+        <div class="mt-2">
+            &nbsp;
+        </div>
         <div class="col-md-6">
              <form action="" id="filtersForm">
                 <div class="input-group">

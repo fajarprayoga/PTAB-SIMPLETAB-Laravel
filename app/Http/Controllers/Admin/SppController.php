@@ -15,8 +15,22 @@ class SppController extends Controller
 
     public function index()
     {
-        $lock = Lock::all();
-        return view('admin.spp.index', compact('lock'));
+        $lock = Lock::where('status','pending');
+        $lock_num = $lock->count();
+        $lock_groups=array();
+        $per_group=10;
+        $i_max=ceil($lock_num/$per_group);
+        for($i=0;$i<$i_max;$i++){
+            $group=$i*$per_group;
+            $lock_group_arr=array();
+            $lock_group=Lock::select('id')->where('status','pending')->skip($group)->take($per_group)->get();
+            foreach ($lock_group as $lock_group_row) {
+                array_push($lock_group_arr,$lock_group_row->id);
+            }
+            $lock_groups[$i]=$lock_group_arr;
+        }
+        // return $lock_groups;
+        return view('admin.spp.index', compact('lock_groups'));
 
     }
 
