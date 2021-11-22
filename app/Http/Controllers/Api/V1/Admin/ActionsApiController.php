@@ -1288,7 +1288,11 @@ class ActionsApiController extends Controller
 
                     // dd($action->staff[0]->pivot->status);
                     $cekAllStatus = false;
-                    $statusAction = 'close';
+                    if(count($action->staff)>0){
+                        $statusAction = 'close';
+                    }else{
+                        $statusAction = $action->status;
+                    }                    
                     for ($status = 0; $status < count($action->staff); $status++) {
                         // dd($action->staff[$status]->pivot->status);
                         if ($action->staff[$status]->pivot->status == 'pending') {

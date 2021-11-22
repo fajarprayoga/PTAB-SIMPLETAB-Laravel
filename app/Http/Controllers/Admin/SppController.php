@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Lock;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
+use App\CtmWilayah;
 
 class SppController extends Controller
 {
@@ -15,22 +16,42 @@ class SppController extends Controller
 
     public function index()
     {
-        $lock = Lock::where('status','pending');
-        $lock_num = $lock->count();
         $lock_groups=array();
-        $per_group=10;
-        $i_max=ceil($lock_num/$per_group);
-        for($i=0;$i<$i_max;$i++){
-            $group=$i*$per_group;
+        //loop tblwilayah
+        $wilayah = CtmWilayah::select('id as code')->orderBy('tblwilayah.group_unit', 'ASC')->orderBy('tblwilayah.id', 'ASC')->get();
+        foreach ($wilayah as $i => $wilayah_row) {
             $lock_group_arr=array();
-            $lock_group=Lock::select('id')->where('status','pending')->skip($group)->take($per_group)->get();
-            foreach ($lock_group as $lock_group_row) {
+            $lock_group=Lock::select('locks.id')
+            ->join('ptabroot_ctm_test.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+            ->join('ptabroot_ctm_test.tblwilayah as tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+            ->where('locks.status','pending')
+            ->where('tblpelanggan.idareal',$wilayah_row->code)
+            ->get();
+                foreach ($lock_group as $lock_group_row) {
                 array_push($lock_group_arr,$lock_group_row->id);
             }
-            $lock_groups[$i]=$lock_group_arr;
+            $lock_groups[$i]['data']=$lock_group_arr;
+            $lock_groups[$i]['title']=$wilayah_row->code;
         }
         // return $lock_groups;
         return view('admin.spp.index', compact('lock_groups'));
+        
+        // $lock = Lock::where('status','pending');
+        // $lock_num = $lock->count();
+        // $lock_groups=array();
+        // $per_group=10;
+        // $i_max=ceil($lock_num/$per_group);
+        // for($i=0;$i<$i_max;$i++){
+        //     $group=$i*$per_group;
+        //     $lock_group_arr=array();
+        //     $lock_group=Lock::select('id')->where('status','pending')->skip($group)->take($per_group)->get();
+        //     foreach ($lock_group as $lock_group_row) {
+        //         array_push($lock_group_arr,$lock_group_row->id);
+        //     }
+        //     $lock_groups[$i]=$lock_group_arr;
+        // }
+        // // return $lock_groups;
+        // return view('admin.spp.index', compact('lock_groups'));
 
     }
 

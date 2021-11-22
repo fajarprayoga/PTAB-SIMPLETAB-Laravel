@@ -488,7 +488,7 @@ return [
         ]
     ],
     'segelmeter' => [
-        'title' => 'Info tunggakan',
+        'title' => 'Info Tunggakan',
         'norekening' => 'No Rekening',
         'name' => 'Nama ',
         'address' => 'Alamat',

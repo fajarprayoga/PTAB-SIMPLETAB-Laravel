@@ -12,12 +12,12 @@
             {{ $first_group=$key*$per_page; $last_group=($key*$per_page)+$per_page; }}
             @endphp    
             <div class="col-md-3 mt-5 mr-4 ml-4 text-center" style="background-color: #333;">
-                    <a href="{{ route('admin.spp.sppprintall',['locks' => $lock_group]) }}" class="nav-link ">
+                    <a href="{{ route('admin.spp.sppprintall',['locks' => $lock_group['data']]) }}" class="nav-link ">
                         <div style="height:95px">
                             <div class="mt-3 mb-3">
                                 <i class="nav-icon fas fa-print fa-3x" ></i>
                                 <hr>
-                                <p>Print SPP {{$first_group}}-{{$last_group}}<p>
+                                <p>Print SPP Area: {{$lock_group['title']}}<p>
                             </div> 
                         </div>
                     </a>

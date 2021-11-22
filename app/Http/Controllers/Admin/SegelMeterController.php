@@ -45,6 +45,7 @@ class SegelMeterController extends Controller
                 ->groupBy('tblpembayaran.nomorrekening')
                 ->get();
         }
+        $staff_arr=array();
         foreach ($qry as $index => $qry_row) {
             //get sub departement
             if($qry_row->group_unit==2){
@@ -75,9 +76,74 @@ class SegelMeterController extends Controller
             $lock = Lock::create(['code'=>$scb,'customer_id'=>$qry_row->nomorrekening,'subdapertement_id'=>$subdapertement_id,'description'=>'']);
             if($staff_id>0){
                 $lock->staff()->attach($staff_id);
+                array_push($staff_arr,$staff_id);
                 }
-            }                 
-        }    
+            }                   
+        }
+        //loop for notif
+        $staff_arr=array_unique($staff_arr);
+        foreach ($staff_arr as $key => $staff_id) {
+            //send notif to staff
+            $admin_arr = User::where('dapertement_id', 0)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}} 
+            //send notif to admin
+            $admin_arr = User::where('dapertement_id', 0)->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}                    
+            //send notif to departement terkait
+            $subdapertement_obj = Subdapertement::where('id', $request->subdapertement_id)->first();
+            $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
+                ->where('subdapertement_id', 0)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+            //send notif to sub departement terkait
+            $admin_arr = User::where('subdapertement_id', $request->subdapertement_id)
+                ->get();
+            foreach ($admin_arr as $key => $admin) {
+                $id_onesignal = $admin->_id_onesignal;
+                $message = 'Sub Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                if (!empty($id_onesignal)) {
+                    OneSignal::sendNotificationToUser(
+                        $message,
+                        $id_onesignal,
+                        $url = null,
+                        $data = null,
+                        $buttons = null,
+                        $schedule = null
+                    );}}
+        }
         return back()->withErrors(['Teruskan Serentak Telah Selesai Diproses.']);    
     }
 
