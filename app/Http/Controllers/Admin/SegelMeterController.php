@@ -12,6 +12,8 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Lock;
 use App\Traits\TraitModel;
 use App\AreaStaff;
+use App\User;
+use OneSignal;
 
 class SegelMeterController extends Controller
 {
@@ -83,11 +85,13 @@ class SegelMeterController extends Controller
         //loop for notif
         $staff_arr=array_unique($staff_arr);
         foreach ($staff_arr as $key => $staff_id) {
+            //staff
+            $staff_row = User::where('staff_id', $staff_id)->first();
             //send notif to staff
-            $admin_arr = User::where('dapertement_id', 0)->get();
+            $admin_arr = User::where('staff_id', $staff_id)->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                $message = 'Staff: Perintah Penyegelan Baru Diteruskan : ';
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -101,7 +105,7 @@ class SegelMeterController extends Controller
             $admin_arr = User::where('dapertement_id', 0)->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                $message = 'Admin: Perintah Penyegelan Baru Diteruskan : ';
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -112,13 +116,12 @@ class SegelMeterController extends Controller
                         $schedule = null
                     );}}                    
             //send notif to departement terkait
-            $subdapertement_obj = Subdapertement::where('id', $request->subdapertement_id)->first();
-            $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
+            $admin_arr = User::where('dapertement_id', $staff_row->dapertement_id)
                 ->where('subdapertement_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                $message = 'Bagian: Perintah Penyegelan Baru Diteruskan : ';
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -129,11 +132,11 @@ class SegelMeterController extends Controller
                         $schedule = null
                     );}}
             //send notif to sub departement terkait
-            $admin_arr = User::where('subdapertement_id', $request->subdapertement_id)
+            $admin_arr = User::where('subdapertement_id', $staff_row->subdapertement_id)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
-                $message = 'Sub Bagian: Perintah Penyegelan Baru Diteruskan : ' . $request->description;
+                $message = 'Sub Bagian: Perintah Penyegelan Baru Diteruskan : ';
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
