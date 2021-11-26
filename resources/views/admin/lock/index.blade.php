@@ -137,7 +137,7 @@
             columns: [
                 { data: 'placeholder', name: 'placeholder' },
                 { data: 'DT_RowIndex', name: 'no', searchable: false },
-                { data: 'code', name: 'code' },
+                { data: 'code', name: 'customer_id' },
                 { data: 'register', name: 'register', searchable: false },
                 { data: 'customer', name: 'customer', searchable: false },
                 { data: 'description', name: 'description' },

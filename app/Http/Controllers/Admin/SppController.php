@@ -9,6 +9,7 @@ use App\Lock;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use App\CtmWilayah;
+use DB;
 
 class SppController extends Controller
 {
@@ -84,9 +85,8 @@ class SppController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
                     ->where('tblpembayaran.statuslunas', '=', 0)
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             } else {
@@ -94,8 +94,7 @@ class SppController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                     ->where('tblpembayaran.statuslunas', '=', 0)
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
@@ -113,11 +112,17 @@ class SppController extends Controller
                 if ($sisa > 0 && $ctm_lock == 0) {
                     $tunggakan = $tunggakan + 1;
                 }
+                //if not paid
+                if($sisa>0){
+                    $item->tglbayarterakhir="";
+                }
+                //set to prev
+                $periode=date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
 
                 $dataPembayaran[$key] = [
                     // 'no' => $key +1,
                     'norekening' => $item->nomorrekening,
-                    'periode' => $item->tahunrekening . '-' . $item->bulanrekening,
+                    'periode' => $periode,
                     'tanggal' => $item->tglbayarterakhir,
                     'm3' => $m3,
                     'wajibdibayar' => $item->wajibdibayar,

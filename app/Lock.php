@@ -35,6 +35,14 @@ class Lock extends Model
         }
         return $query;
     }
+    
+    public function scopeFilterKeyword($query, $customer_id)
+    {
+        if($customer_id !=''){
+        $query->where('customer_id', $customer_id);        
+        }
+        return $query;
+    }
 
     public function scopeFilterDepartment($query, $department)
     {

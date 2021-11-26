@@ -84,9 +84,14 @@ class SegelMeterController extends Controller
         }
         //loop for notif
         $staff_arr=array_unique($staff_arr);
+        // return $staff_arr;
+        //*
         foreach ($staff_arr as $key => $staff_id) {
             //staff
+            // echo $staff_id;
             $staff_row = User::where('staff_id', $staff_id)->first();
+            if($staff_row != null && !(empty($staff_row))){
+            // print_r($staff_row);
             //send notif to staff
             $admin_arr = User::where('staff_id', $staff_id)->get();
             foreach ($admin_arr as $key => $admin) {
@@ -146,7 +151,8 @@ class SegelMeterController extends Controller
                         $buttons = null,
                         $schedule = null
                     );}}
-        }
+            }
+        }//*/
         return back()->withErrors(['Teruskan Serentak Telah Selesai Diproses.']);    
     }
 
@@ -249,16 +255,15 @@ class SegelMeterController extends Controller
                     ->where('tblpelanggan.status', 1)
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                    ->having('jumlahtunggakan', 2)
                     ->groupBy('tblpembayaran.nomorrekening');
 
-                if (request()->input('status') != '') {
+                if ($request->status != '') {
                     $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                         ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                         ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->having('jumlahtunggakan', 2)
+                        ->having('jumlahtunggakan', $request->status)
                         ->groupBy('tblpembayaran.nomorrekening');
                 }
             } else {
@@ -267,16 +272,15 @@ class SegelMeterController extends Controller
                     ->where('tblpelanggan.status', 1)
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                    ->having('jumlahtunggakan', 2)
                     ->groupBy('tblpembayaran.nomorrekening');
 
-                if (request()->input('status') != '') {
+                if ($request->status != '') {
                     $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                         ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                         ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->having('jumlahtunggakan', 2)
+                        ->having('jumlahtunggakan', $request->status)
                         ->groupBy('tblpembayaran.nomorrekening');
                 }
             }
@@ -389,10 +393,17 @@ class SegelMeterController extends Controller
                 $tunggakan = $tunggakan + 1;
             }
 
+            //if not paid
+            if($sisa>0){
+                $item->tglbayarterakhir="";
+            }
+            //set to prev
+            $periode=date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
                 'norekening' => $item->nomorrekening,
-                'periode' => $item->tahunrekening . '-' . $item->bulanrekening,
+                'periode' => $periode,
                 'tanggal' => $item->tglbayarterakhir,
                 'm3' => $m3,
                 'wajibdibayar' => $item->wajibdibayar,

@@ -10,6 +10,7 @@ use App\Customer;
 use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
+use DB;
 
 class CtmApiController extends Controller
 {
@@ -80,7 +81,7 @@ class CtmApiController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             } else {
@@ -88,10 +89,19 @@ class CtmApiController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)                    
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))                    
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
+            }
+            foreach ($ctm as $key => $item) {
+                $sisa = $item->wajibdibayar - $item->sudahdibayar;
+                //if not paid
+                if($sisa>0){
+                    $ctm[$key]->tglbayarterakhir="";
+                }
+                //set to prev
+                $ctm[$key]->tahunrekening=date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+                $ctm[$key]->bulanrekening=date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
             }
             return response()->json([
                 'message' => 'Data CTM',

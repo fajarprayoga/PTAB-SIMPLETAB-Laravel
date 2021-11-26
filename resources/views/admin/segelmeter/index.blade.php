@@ -24,8 +24,11 @@
                 <div class="input-group">
                     <select id="status_tunggakan" name="status_tunggakan" class="form-control">
                         <option value="">== Status Tunggaakan ==</option>
-                        <option value="0" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==0 ?'selected' : '' }} >Sudah Lunas</option>
-                        <option value="1" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Belum Lunas</option>
+                        <option value="0" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==0 ?'selected' : '' }} >Lunas</option>
+                        <option value="1" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Perhatian</option>
+                        <option value="2" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Tunggak</option>
+                        <option value="3" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Segel</option>
+                        <option value="4" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Cabut</option>
                     </select>
                     <span class="input-group-btn">
                     &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
@@ -80,6 +83,12 @@
             }else{
                 $("#dapertement_id").val('');
             }
+            let status_tunggakan = searchParams.get('status_tunggakan')
+            if (status_tunggakan) {
+                $("#status_tunggakan").val(status_tunggakan);
+            }else{
+                $("#status_tunggakan").val('');
+            }
 
             // console.log('type : ', type);
 
@@ -131,12 +140,12 @@
     },
     columns: [
         { data: 'placeholder', name: 'placeholder'},
-        { data: 'DT_RowIndex', name: 'no' },
+        { data: 'DT_RowIndex', name: 'no', searchable: false },
         { data: 'nomorrekening', name: 'nomorrekening' },
         { data: 'namapelanggan', name: 'namapelanggan' },
         { data: 'alamat', name: 'alamat' },
-        { data: 'jumlahtunggakan', name: 'jumlahtunggakan' },
-        { data: 'statusnunggak', name: 'statusnunggak' },
+        { data: 'jumlahtunggakan', name: 'jumlahtunggakan', searchable: false },
+        { data: 'statusnunggak', name: 'statusnunggak', searchable: false },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     order: [[ 2, 'asc' ]],

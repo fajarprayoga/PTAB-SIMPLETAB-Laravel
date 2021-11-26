@@ -1352,10 +1352,16 @@ class ActionsApiController extends Controller
         if ($request->status != '') {
             $status = $request->status;
         }
+        //keyword
+        $searchfilter = '';
+        if ($request->searchfilter != '') {
+            $searchfilter = $request->searchfilter;
+        }
         try {
             if ($if_department) {
                 $lock = Lock::selectRaw("locks.*")
                     ->FilterStatus($status)
+                    ->FilterKeyword($searchfilter)
                     ->join('subdapertements', 'subdapertements.id', '=', 'locks.subdapertement_id')
                     ->join('dapertements', 'dapertements.id', '=', 'subdapertements.dapertement_id')
                     ->FilterDepartment($department)
@@ -1367,6 +1373,7 @@ class ActionsApiController extends Controller
             } else {
                 $lock = Lock::selectRaw("locks.*")
                     ->FilterStatus($status)
+                    ->FilterKeyword($searchfilter)
                     ->FilterSubDepartment($subdepartment)
                     ->with('subdapertement')
                     ->with('lockaction')

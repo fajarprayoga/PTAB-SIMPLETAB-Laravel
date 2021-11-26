@@ -9,16 +9,13 @@
 </head>
 <body>
 @foreach ($lock_list as $lock_list_row)   
-
-<div style="width: 794px; height: 300px; ">
-
 <div class="container">
         <div class="headertitle">
             <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER</div>
             <div>NOMOR : {{ $lock_list_row['lock']->code }}</div>
         </div>
         <div class="section">
-            <div style="width: 750px;">
+            <div style="height: 8 cm; width: 24.13cm;">
                 Kepada : @foreach ($lock_list_row['lock']->staff as $index => $staff_row)<p>{{$index+1}}. {{$staff_row->name}}</p>@endforeach
                 <div>
                     Agar dilaksanakan Penyegelan/Pencabutan Water Meter :
@@ -31,7 +28,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->namapelanggan }}
+                            {{ $lock_list_row['customer']->namapelanggan }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -42,7 +39,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->alamat }}
+                            {{ $lock_list_row['customer']->alamat }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -53,7 +50,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->nomorrekening }}
+                            {{ $lock_list_row['customer']->nomorrekening }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -64,7 +61,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $lock_list_row['customer']->idareal }}
+                            {{ $lock_list_row['customer']->idareal }}
                         </span>
                     </div>
                 <div>
@@ -74,12 +71,12 @@
                     @foreach ($lock_list_row['dataPembayaran'] as $key=>$item )
                         {{Bulan( (new DateTime($item['periode']))->format('m')).'-'. (new DateTime($item['periode']))->format('Y') .' = '. Rupiah($item['wajibdibayar'] - $item['sudahbayar']) }}
                     @endforeach
-                    dengan Total {{ is_int($lock_list_row['recap']['denda']) ? Rupiah($lock_list_row['recap']['denda']) : $lock_list_row['recap']['denda'] }} (belum termasuk denda)
+                    dengan Total {{ is_int($lock_list_row['recap']['total']) ? Rupiah($lock_list_row['recap']['total']) : $lock_list_row['recap']['total'] }} (belum termasuk denda)
                 </div>
                 <div>
                     PERHATIAN : 1. Bila dalam 2 bulan dari tanggal SPK ini tunggakan tidak dilunasi, maka sambungan air minum akan dicabut.
                 </div>
-                <div style="margin-left: 92px;">
+                <div style="margin-left: 98px;">
                     2. Penyambungan kembali dilaksanakan sesuai ketentuan yang berlaku. Abaikan surat ini bila tunggakan sudah
                 </div>
                 <div style="margin-left: 105px;">
@@ -97,28 +94,28 @@
                        <div>An. Direktur Perusahaan Umum Daerah Air Minum</div>
                        <div>Tirta Amertha Buana Kabupaten Tabanan</div>
                        <div>Ka. Bag Hubungan Langganan</div>
+                       <p class="image"></p>
                     </div>
                 </div>
                 <br>
                 <br>
 
-                <div style="display: flex; position: relative; top: 5px; " >
+                <div style="display: flex; position: relative; top: -30px; " >
 
                     <div class="box">
-                        ____________________
+                    @foreach ($lock_list_row['lock']->staff as $index => $staff_row){{$index+1}}. {{$staff_row->name}}@endforeach
+                    
                     </div>
                     <div class="box">
-                       {{ $lock_list_row['customer']->namapelanggan }}
+                    ____________________
                     </div>
                     <div class="box1">
-                        Ida Bagus Marjaya Wirata, Se.,MM,
+                        Ida Bagus Marjaya Wirata, SE.,MM,
                     </div>
                 </div>
             </div>
         </div>
     </div> 
-
-</div>
     @endforeach 
 </body>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

@@ -24,5 +24,5 @@ class LockAction extends Model
     }
     public function lock() { 
         return $this->belongsTo(Lock::class, 'lock_id', 'id'); 
-    }
+    }    
 }
