@@ -14,7 +14,7 @@
             <div>NOMOR : 4/SCB/JUL/2021</div>
         </div>
         <div class="section">
-            <div style="width: 750px;">
+            <div style="height: 9.32cm ;">
                 Kepada : Petugas Meter Segel
                 <div>
                     Agar dilaksanakan Penyegelan/Pencabutan Water Meter :
@@ -27,7 +27,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $customer->namapelanggan }}
+                            {{ $customer->namapelanggan }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -38,7 +38,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $customer->alamat }}
+                            {{ $customer->alamat }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -49,7 +49,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $customer->nomorrekening }}
+                            {{ $customer->nomorrekening }}
                         </span>
                     </div>
                     <div class="boxdata">
@@ -60,7 +60,7 @@
                             :
                         </span>
                         <span class="data">
-                            #{{ $customer->idareal }}
+                            {{ $customer->idareal }}
                         </span>
                     </div>
                 <div>
@@ -75,7 +75,7 @@
                 <div>
                     PERHATIAN : 1. Bila dalam 2 bulan dari tanggal SPK ini tunggakan tidak dilunasi, maka sambungan air minum akan dicabut.
                 </div>
-                <div style="margin-left: 92px;">
+                <div style="margin-left: 98px;">
                     2. Penyambungan kembali dilaksanakan sesuai ketentuan yang berlaku. Abaikan surat ini bila tunggakan sudah
                 </div>
                 <div style="margin-left: 105px;">
@@ -97,14 +97,15 @@
                 </div>
                 <br>
                 <br>
-                <div style="display: flex; position: relative; top: 5px;">
+                <div style="display: flex; position: relative; top: 5 px;">
                     <div class="box">
-                        ____________________
+                    ____________________
                     </div>
                     <div class="box">
-                       {{ $customer->namapelanggan }}
+                    ____________________
                     </div>
                     <div class="box1">
+                      
                         Ida Bagus Marjaya Wirata, Se.,MM,
                     </div>
                 </div>

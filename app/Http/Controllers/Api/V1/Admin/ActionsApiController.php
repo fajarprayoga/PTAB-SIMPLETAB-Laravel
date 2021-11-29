@@ -22,6 +22,7 @@ use App\Subdapertement;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
+use App\Ticket;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -227,6 +228,41 @@ class ActionsApiController extends Controller
         }
     }
 
+    public function getPermintaan(Request $request){
+        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        try {
+            if (!empty($tickets)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $tickets,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+    
+    public function getComplaint(Request $request){
+        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        try {
+            if (!empty($tickets)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $tickets,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
+    
     public function getSrnew(Request $request)
     {
         $year = date('Y');
@@ -1352,10 +1388,16 @@ class ActionsApiController extends Controller
         if ($request->status != '') {
             $status = $request->status;
         }
+        //keyword
+        $searchfilter = '';
+        if ($request->searchfilter != '') {
+            $searchfilter = $request->searchfilter;
+        }
         try {
             if ($if_department) {
                 $lock = Lock::selectRaw("locks.*")
                     ->FilterStatus($status)
+                    ->FilterKeyword($searchfilter)
                     ->join('subdapertements', 'subdapertements.id', '=', 'locks.subdapertement_id')
                     ->join('dapertements', 'dapertements.id', '=', 'subdapertements.dapertement_id')
                     ->FilterDepartment($department)
@@ -1367,6 +1409,7 @@ class ActionsApiController extends Controller
             } else {
                 $lock = Lock::selectRaw("locks.*")
                     ->FilterStatus($status)
+                    ->FilterKeyword($searchfilter)
                     ->FilterSubDepartment($subdepartment)
                     ->with('subdapertement')
                     ->with('lockaction')
