@@ -249,7 +249,7 @@ class CtmApiController extends Controller
         try {
             $ticket = CtmRequest::create($data);
             return response()->json([
-                'message' => 'Keluhan Diterima',
+                'message' => 'Baca Meter Mandiri Terkirim',
             ]);
 
         } catch (QueryException $ex) {

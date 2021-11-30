@@ -181,7 +181,7 @@ class TicketsApiController extends Controller
                     );}}
 
             return response()->json([
-                'message' => 'Keluhan Diterima',
+                'message' => 'Keluhan Terkirim',
             ]);
 
         } catch (QueryException $ex) {
