@@ -23,8 +23,8 @@ class SppController extends Controller
         foreach ($wilayah as $i => $wilayah_row) {
             $lock_group_arr=array();
             $lock_group=Lock::select('locks.id')
-            ->join('ptabroot_ctm_test.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
-            ->join('ptabroot_ctm_test.tblwilayah as tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
+            ->join('ptabroot_ctm.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+            ->join('ptabroot_ctm.tblwilayah as tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
             ->where('locks.status','pending')
             ->where('tblpelanggan.idareal',$wilayah_row->code)
             ->get();
