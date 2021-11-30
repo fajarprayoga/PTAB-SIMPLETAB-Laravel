@@ -1,65 +1,72 @@
 @page { 
-    size: A4 ;
-    size:portrait;
-    margin-right: 0cm;
-    margin-left: 0cm;
-    margin-top: 0.5cm;
-    margin-bottom: 0.5cm;
-}
-@media print {
-* {
-  -webkit-print-color-adjust: exact; 
+    margin:0cm;
   }
-}
-*{
-    font-size: 14px;
-    line-height: 0.9;
-    letter-spacing: 0.3px;
-}
-.headertitle{
-    text-align: center;
-    padding-bottom: 5px;
-
-}
-.container{
-    width: 794px;
-    height: 300px;
-    margin-top:13px ;
-    /* background-color: red; */
-}
-.section{
-    display: flex; 
-    justify-content: center;
-}
-.boxdata{
-    position:relative; 
-    display:inline-block; 
-    width:650px;
-    text-indent: 17px;
-}
-.title{
-    width:100px; 
-    display: inline-block;
-}
-.titik{
-    width:5px; 
-    display: inline-block;
-}
-.data{
-    width:500px; 
-    display: inline-block;
-}
-.text-center{
-   text-align: center;
-}
-.box{
-    position: relative;
-    display: inline-block;
-    width: 290px;
-}
-.box1{
-    position: relative;
-    display: inline-block;
-    width: 400px;
-}
-
+  @media print {
+  * {
+    -webkit-print-color-adjust: exact; 
+    }
+  }
+  *{
+      font-size: 14px;
+      line-height: 1.08;
+      letter-spacing: 0.8px;
+  }
+  .headertitle{
+      text-align: center;
+      padding-bottom: 5px;
+  
+  }
+  .container{
+      margin-right: 0.43cm;
+      margin-left: 1.50cm;
+      margin-top: 1cm;
+      margin-bottom: 0.43cm;
+      width: 24.13cm;
+      height: 9.32cm;
+      /* background-color: red; */
+  }
+  /* .container-fluid{
+    
+      background-color: blue;
+  } */
+  .section{
+      display: flex; 
+      justify-content: center;
+      /* background-color: gray; */
+  }
+  .boxdata{
+      position:relative; 
+      display:inline-block; 
+      width:24.13cm;
+      text-indent: 15px;
+      /* background-color: blue; */
+  }
+  .title{
+      width:100px; 
+      display: inline-block;
+      /* background-color: green; */
+  }
+  .titik{
+      width:5px; 
+      display: inline-block;
+  }
+  .data{
+      width:20.70cm;
+      display: inline-block;
+      /* background-color: hotpink; */
+  }
+  .text-center{
+     text-align: center;
+  }
+  .box{
+      position: relative;
+      display: inline-block;
+      width: 290px;
+  }
+  .box1{
+      position: relative;
+      display: inline-block;
+      width: 400px;
+  }
+  
+  

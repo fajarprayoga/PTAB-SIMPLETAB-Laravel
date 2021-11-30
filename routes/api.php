@@ -108,6 +108,8 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin','middlewa
     Route::post('ctm-statussm', 'ActionsApiController@getCtmStatussm');
     Route::post('ctm-hasilbaca', 'ActionsApiController@getCtmHasilbaca');
     Route::post('audited', 'ActionsApiController@getAudited');
+    Route::post('Permintaan', 'ActionsApiController@getPermintaan');
+    Route::post('Complaint', 'ActionsApiController@getComplaint');
 
     //Segel
     Route::post('segel/list','ActionsApiController@segellist');
