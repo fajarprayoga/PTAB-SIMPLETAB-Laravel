@@ -75,7 +75,11 @@ class CtmApiController extends Controller
         try {
             $date_now = date("Y-m-d");
             $date_comp = date("Y-m") . "-20";
-            $month_next = date('n', strtotime('+1 month'));
+            $month_now = date('n');
+            $month_next = date('n', strtotime('+1 month'))-1;
+            if($month_now>$month_next){
+                $month_next=$month_next+12;
+            }
             if ($date_now > $date_comp) {
                 $ctm_lock=0;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
@@ -89,7 +93,7 @@ class CtmApiController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))                    
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))                    
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             }

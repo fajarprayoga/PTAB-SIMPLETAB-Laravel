@@ -27,6 +27,7 @@ use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
+use App\CtmMapKunjungan;
 
 class ActionsApiController extends Controller
 {
@@ -73,6 +74,11 @@ class ActionsApiController extends Controller
     {
         $month = $request->month;
         $year = $request->year;
+        $map_kunjungan_num = CtmMapKunjungan::selectRaw('idkunjungan')
+        ->where('bulan', $month)
+        ->where('tahun', $year)
+        ->count();
+        // $map_kunjungan_num = count($map_kunjungan);
         $status = CtmPelanggan::selectRaw('CASE
         WHEN tblstatussmpelanggan.NamaStatus != "-" AND tblstatussmpelanggan.NamaStatus != "" AND tblstatussmpelanggan.NamaStatus IS NOT NULL THEN tblstatussmpelanggan.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus,tblstatussmpelanggan.statusid')
             ->leftJoinSub(CtmStatussmPelanggan::selectRaw('tblstatussmpelanggan.statussm,tblstatussmpelanggan.nomorrekening,tblstatuswm.NamaStatus AS NamaStatus,tblstatuswm.id AS statusid')
@@ -90,12 +96,12 @@ class ActionsApiController extends Controller
         $status_obj = array();
 
         $namastatus_first = 'Terbaca';
-        $jumlahstatus_first = 0;
+        $jumlahstatus_first = $map_kunjungan_num;//0
         $statusid_first = '-';
         $key_index = 0;
         foreach ($status as $key => $value) {
-            if ($value->namastatus == 'Terbaca') {
-                $jumlahstatus_first += $value->jumlahstatus;
+            if ($value->namastatus != 'Terbaca') {
+                $jumlahstatus_first -= $value->jumlahstatus;//+
             }
         }
         $status_obj[$key_index]['namastatus'] = $namastatus_first;
