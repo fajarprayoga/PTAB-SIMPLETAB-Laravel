@@ -204,8 +204,12 @@ class TicketsApiController extends Controller
         //get lat lng customer
         $customermaps = CustomerMaps::where('nomorrekening', $dataForm->customer_id)->first();
         if (!empty($customermaps)) {
+            if(!empty($customermaps->lat)){
             $dataForm->lat = $customermaps->lat;
-            $dataForm->lng = $customermaps->lng;
+            }
+            if(!empty($customermaps->lng)){
+                $dataForm->lng = $customermaps->lng;
+                }
         }
         //set data
         $data = array(
@@ -291,7 +295,7 @@ class TicketsApiController extends Controller
 
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                'message' => 'Gagal',
             ]);
         }
     }

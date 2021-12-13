@@ -6,6 +6,7 @@ use App\ActionApi;
 use App\ActionStaff;
 use App\Audited;
 use App\CtmGambarmetersms;
+use App\CtmMapKunjungan;
 use App\CtmPbk;
 use App\CtmPelanggan;
 use App\CtmPembayaran;
@@ -19,15 +20,14 @@ use App\Lock;
 use App\LockAction;
 use App\StaffApi;
 use App\Subdapertement;
+use App\Ticket;
 use App\TicketApi;
 use App\Traits\TraitModel;
 use App\User;
-use App\Ticket;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
-use App\CtmMapKunjungan;
 
 class ActionsApiController extends Controller
 {
@@ -75,9 +75,9 @@ class ActionsApiController extends Controller
         $month = $request->month;
         $year = $request->year;
         $map_kunjungan_num = CtmMapKunjungan::selectRaw('idkunjungan')
-        ->where('bulan', $month)
-        ->where('tahun', $year)
-        ->count();
+            ->where('bulan', $month)
+            ->where('tahun', $year)
+            ->count();
         // $map_kunjungan_num = count($map_kunjungan);
         $status = CtmPelanggan::selectRaw('CASE
         WHEN tblstatussmpelanggan.NamaStatus != "-" AND tblstatussmpelanggan.NamaStatus != "" AND tblstatussmpelanggan.NamaStatus IS NOT NULL THEN tblstatussmpelanggan.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus,tblstatussmpelanggan.statusid')
@@ -96,12 +96,12 @@ class ActionsApiController extends Controller
         $status_obj = array();
 
         $namastatus_first = 'Terbaca';
-        $jumlahstatus_first = $map_kunjungan_num;//0
+        $jumlahstatus_first = $map_kunjungan_num; //0
         $statusid_first = '-';
         $key_index = 0;
         foreach ($status as $key => $value) {
             if ($value->namastatus != 'Terbaca') {
-                $jumlahstatus_first -= $value->jumlahstatus;//+
+                $jumlahstatus_first -= $value->jumlahstatus; //+
             }
         }
         $status_obj[$key_index]['namastatus'] = $namastatus_first;
@@ -234,24 +234,8 @@ class ActionsApiController extends Controller
         }
     }
 
-    public function getPermintaan(Request $request){
-        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
-        try {
-            if (!empty($tickets)) {
-                return response()->json([
-                    'message' => 'Sukses',
-                    'data' => $tickets,
-                ]);
-            }
-        } catch (QueryException $ex) {
-            return response()->json([
-                'message' => 'Gagal',
-                'data' => $ex,
-            ]);
-        }
-    }
-    
-    public function getComplaint(Request $request){
+    public function getPermintaan(Request $request)
+    {
         $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
         try {
             if (!empty($tickets)) {
@@ -268,7 +252,24 @@ class ActionsApiController extends Controller
         }
     }
 
-    
+    public function getComplaint(Request $request)
+    {
+        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        try {
+            if (!empty($tickets)) {
+                return response()->json([
+                    'message' => 'Sukses',
+                    'data' => $tickets,
+                ]);
+            }
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal',
+                'data' => $ex,
+            ]);
+        }
+    }
+
     public function getSrnew(Request $request)
     {
         $year = date('Y');
@@ -1330,11 +1331,11 @@ class ActionsApiController extends Controller
 
                     // dd($action->staff[0]->pivot->status);
                     $cekAllStatus = false;
-                    if(count($action->staff)>0){
+                    if (count($action->staff) > 0) {
                         $statusAction = 'close';
-                    }else{
+                    } else {
                         $statusAction = $action->status;
-                    }                    
+                    }
                     for ($status = 0; $status < count($action->staff); $status++) {
                         // dd($action->staff[$status]->pivot->status);
                         if ($action->staff[$status]->pivot->status == 'pending') {
@@ -1802,20 +1803,34 @@ class ActionsApiController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
                     ->get();
+                // $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
+                //     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                //     ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
+                //     ->where('tblpembayaran.tahunrekening', date('Y'))
+                //     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
+                //     ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                //     ->get();
             } else {
                 $ctm_lock_old = 1;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
-                    ->where('tblpembayaran.tahunrekening', date('Y'))
-                    ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
+                // $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
+                //     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                //     ->where('tblpembayaran.nomorrekening', $lock_obj->customer_id)
+                //     ->where('tblpembayaran.tahunrekening', date('Y'))
+                //     ->where('tblpembayaran.bulanrekening', '<', $month_next)
+                //     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
+                //     ->get();
             }
+
+            $dataPembayaran = array();
 
             foreach ($ctm as $key => $item) {
                 $m3 = $item->bulanini - $item->bulanlalu;
@@ -1917,7 +1932,7 @@ class ActionsApiController extends Controller
         $date_now = date('Y-m-d');
         $date_comp = date('Y-m') . '-20';
         $month_next = date('n', strtotime('+1 month'));
-        $last_4_month = date("Y-n-d", strtotime ( '-4 month' , strtotime ( date('Y-m-01') ) )) ;
+        $last_4_month = date("Y-n-d", strtotime('-4 month', strtotime(date('Y-m-01'))));
 
         try {
             if ($date_now >= $date_comp) {

@@ -22,13 +22,11 @@ class SppController extends Controller
         $wilayah = CtmWilayah::select('id as code')->orderBy('tblwilayah.group_unit', 'ASC')->orderBy('tblwilayah.id', 'ASC')->get();
         foreach ($wilayah as $i => $wilayah_row) {
             $lock_group_arr=array();
-            $lock_group=Lock::selectRaw('locks.id as id')
+            $lock_group=Lock::select('locks.id')
             ->join('ptabroot_ctm.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
-            ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+            ->join('ptabroot_ctm.tblwilayah as tblwilayah', 'tblpelanggan.idareal', '=', 'tblwilayah.id')
             ->where('locks.status','pending')
             ->where('tblpelanggan.idareal',$wilayah_row->code)
-            ->orderBy('tblopp.operator', 'asc')
-            ->orderBy('tblpelanggan.idurut', 'asc')
             ->get();
                 foreach ($lock_group as $lock_group_row) {
                 array_push($lock_group_arr,$lock_group_row->id);
@@ -38,6 +36,23 @@ class SppController extends Controller
         }
         // return $lock_groups;
         return view('admin.spp.index', compact('lock_groups'));
+        
+        // $lock = Lock::where('status','pending');
+        // $lock_num = $lock->count();
+        // $lock_groups=array();
+        // $per_group=10;
+        // $i_max=ceil($lock_num/$per_group);
+        // for($i=0;$i<$i_max;$i++){
+        //     $group=$i*$per_group;
+        //     $lock_group_arr=array();
+        //     $lock_group=Lock::select('id')->where('status','pending')->skip($group)->take($per_group)->get();
+        //     foreach ($lock_group as $lock_group_row) {
+        //         array_push($lock_group_arr,$lock_group_row->id);
+        //     }
+        //     $lock_groups[$i]=$lock_group_arr;
+        // }
+        // // return $lock_groups;
+        // return view('admin.spp.index', compact('lock_groups'));
 
     }
 
@@ -85,7 +100,6 @@ class SppController extends Controller
                     ->get();
             }
 
-            $dataPembayaran=array();
             foreach ($ctm as $key => $item) {
                 $m3 = $item->bulanini - $item->bulanlalu;
                 $sisa = $item->wajibdibayar - $item->sudahdibayar;

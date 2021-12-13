@@ -50,6 +50,12 @@
                             {{ trans('global.lock.customer') }}
                         </th>
                         <th>
+                            Operator
+                        </th>
+                        <th>
+                            ID Urut
+                        </th>
+                        <th>
                             {{ trans('global.lock.description') }}
                         </th>
                         <th>
@@ -140,6 +146,8 @@
                 { data: 'code', name: 'customer_id' },
                 { data: 'register', name: 'register', searchable: false },
                 { data: 'customer', name: 'customer', searchable: false },
+                { data: 'operator', name: 'operator', searchable: false },
+                { data: 'idurut', name: 'idurut', searchable: false },
                 { data: 'description', name: 'description' },
                 { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>Pending</button>':dataField === 'lock_resist' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Hambatan Segel</button>':dataField === 'lock' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Segel</button>':dataField === 'unplug_resist' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Hambatan Cabut</button>':dataField === 'unplug' ?'<button type="button" class="btn btn-primary btn-sm" disabled>Cabut</button>':'<button type="button" class="btn btn-success btn-sm" disabled>Selesai</button>'; } },
                 { data: 'subdapertement', name: 'subdapertement', searchable: false },

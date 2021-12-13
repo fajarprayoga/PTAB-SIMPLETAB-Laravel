@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api\v1\admin;
 
+use App\CtmPelanggan;
 use App\CustomerApi;
 use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
@@ -43,7 +44,8 @@ class CustomersApiController extends Controller
         try {
             $search = $request->search;
             if ($search != '') {
-                $customer = CustomerApi::WhereMaps('name', "%$search%", 'LIKE')->paginate(10, ['*'], 'page', $request->page);
+                $customer = CtmPelanggan::where('nomorrekening', '=', $search)
+                    ->paginate(10, ['*'], 'page', $request->page);
             } else {
                 $customer = CustomerApi::paginate(10, ['*'], 'page', $request->page);
             }

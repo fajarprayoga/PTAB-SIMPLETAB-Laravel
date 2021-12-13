@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <div class="headertitle">
-            <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER</div>
+            <div>SURAT PERINTAH PENYEGELAN/PENCABUTAN WATER METER DUNIA</div>
             <div>NOMOR : {{ $lock->code }}</div>
         </div>
         <div class="section">

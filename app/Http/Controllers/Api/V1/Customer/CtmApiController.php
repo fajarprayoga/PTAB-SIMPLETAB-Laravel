@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use DB;
+use App\CtmPelanggan;
 
 class CtmApiController extends Controller
 {
@@ -54,7 +55,7 @@ class CtmApiController extends Controller
     public function ctmCustomer($id)
     {
         try {
-            $ctm = Customer::where('nomorrekening', $id)
+            $ctm = CtmPelanggan::where('nomorrekening', $id)
                 ->first();
             $ctm->year = date('Y');
             return response()->json([
@@ -86,6 +87,7 @@ class CtmApiController extends Controller
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                    ->orderBy('tblpembayaran.tahunrekening', 'ASC')
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             } else {
@@ -93,10 +95,12 @@ class CtmApiController extends Controller
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))                    
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01')) 
+                    ->orderBy('tblpembayaran.tahunrekening', 'ASC')                   
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             }
+            $ctm_num_row=count($ctm)-1;
             foreach ($ctm as $key => $item) {
                 $sisa = $item->wajibdibayar - $item->sudahdibayar;
                 //if not paid
@@ -106,6 +110,10 @@ class CtmApiController extends Controller
                 //set to prev
                 $ctm[$key]->tahunrekening=date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
                 $ctm[$key]->bulanrekening=date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+                //if status 0
+                if($ctm[$key]->status==0 && $key==$ctm_num_row){
+                    unset($ctm[$key]);
+                }
             }
             return response()->json([
                 'message' => 'Data CTM',

@@ -11,12 +11,12 @@ use App\LockAction;
 use App\Staff;
 use App\Subdapertement;
 use App\Traits\TraitModel;
+use App\User;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
 use OneSignal;
-use App\User;
+use Yajra\DataTables\Facades\DataTables;
 
 class LockController extends Controller
 {
@@ -30,12 +30,25 @@ class LockController extends Controller
     public function index(Request $request)
     {
         abort_unless(\Gate::allows('lock_access'), 403);
-        $qry = Lock::with('customer')->with('subdapertement');
-        if (request()->input('status') != '') {
-            $qry = Lock::FilterStatus(request()->input('status'))
+        $qry = Lock::selectRaw('locks.*,tblopp.operator as operator,tblpelanggan.idurut as idurut')
+                ->join('ptabroot_ctm.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+                ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
                 ->with('customer')
                 ->with('subdapertement')
                 ->orderBy('created_at', 'DESC')
+                ->orderBy('tblopp.operator', 'asc')
+                ->orderBy('tblpelanggan.idurut', 'asc')
+                ->get();
+        if (request()->input('status') != '') {
+            $qry = Lock::selectRaw('locks.*,tblopp.operator as operator,tblpelanggan.idurut as idurut')
+                ->FilterStatus(request()->input('status'))
+                ->join('ptabroot_ctm.tblpelanggan as tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+                ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+                ->with('customer')
+                ->with('subdapertement')
+                ->orderBy('created_at', 'DESC')
+                ->orderBy('tblopp.operator', 'asc')
+                ->orderBy('tblpelanggan.idurut', 'asc')
                 ->get();
         }
 
@@ -75,7 +88,12 @@ class LockController extends Controller
             $table->editColumn('customer', function ($row) {
                 return $row->customer ? $row->customer->name : "";
             });
-
+            $table->editColumn('operator', function ($row) {
+                return $row->operator ? $row->operator : "";
+            });
+            $table->editColumn('idurut', function ($row) {
+                return $row->idurut ? $row->idurut : "";
+            });
             $table->editColumn('description', function ($row) {
                 return $row->description ? $row->description : "";
             });
@@ -160,7 +178,7 @@ class LockController extends Controller
                         $buttons = null,
                         $schedule = null
                     );}}
-                    
+
             //send notif to sub departement terkait
             $subdapertement_obj = Subdapertement::where('id', $request->subdapertement_id)->first();
             $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
@@ -259,11 +277,11 @@ class LockController extends Controller
             }
 
             //if not paid
-            if($sisa>0){
-                $item->tglbayarterakhir="";
+            if ($sisa > 0) {
+                $item->tglbayarterakhir = "";
             }
             //set to prev
-            $periode=date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+            $periode = date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
 
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
@@ -357,11 +375,11 @@ class LockController extends Controller
             }
 
             //if not paid
-            if($sisa>0){
-                $item->tglbayarterakhir="";
+            if ($sisa > 0) {
+                $item->tglbayarterakhir = "";
             }
             //set to prev
-            $periode=date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+            $periode = date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
 
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
